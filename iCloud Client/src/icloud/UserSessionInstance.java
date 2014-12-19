@@ -28,10 +28,14 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.net.CacheResponse;
 import java.net.HttpURLConnection;
 import java.net.Proxy;
@@ -51,54 +55,36 @@ public class UserSessionInstance {
 	private String UUID;
 	private static final String clientBnum = "14H40";
 
-	public UserSessionInstance(String username, String password, boolean extended_login) throws Exception {
+	public UserSessionInstance(String username, String password,
+			boolean extended_login) throws Exception {
 
 		// TODO: Add ssl support
 		boolean debugenabled = true;
 
 		// Generate Required Strings
-		String authString = "{\"apple_id\":" + "\"" + username + "\"" + ",\"password\":" + "\"" + password + "\"" + ",\"extended_login\":" + extended_login + "}";
+		String authString = "{\"apple_id\":" + "\"" + username + "\""
+				+ ",\"password\":" + "\"" + password + "\""
+				+ ",\"extended_login\":" + extended_login + "}";
 
 		if (debugenabled) {
 			System.out.println("Authentication String: " + authString);
 			System.out.println("UUID: " + (UUID = CommonLogic.generateUUID()));
 			UUID = UUID.toUpperCase();
+			splitOut();
 		}
-		// Generate URI/URL
-		// URL httpurl = new URL("https", "setup.icloud.com",
-		// "/setup/ws/1/login?" + "clientBuildNumber=" + clientBnum + "&" +
-		// "clientId=" + UUID);
 
+		System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+		
 		URL httpurl;
 		HttpURLConnection httpconnection;
 		DataOutputStream dos;
 		DataInputStream dis;
 
-		httpurl = new URL("https://setup.icloud.com/setup/ws/1/login?" + "clientBuildNumber=" + clientBnum + "&" + "clientId=" + UUID);
-		httpconnection = (HttpURLConnection) httpurl.openConnection();
+		httpurl = new URL("https://setup.icloud.com:443/setup/ws/1/login?" + "clientBuildNumber=" + clientBnum + "&" + "clientId=" + UUID);
 
-		httpconnection.setDoInput(true);
-		httpconnection.setDoOutput(true);
-		httpconnection.setUseCaches(false);
+		//httpurl = new URL("https://setup.icloud.com:443/setup/ws/1/login");
 
-		httpconnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-
-		dos = new DataOutputStream(httpconnection.getOutputStream());
-
-		dos.writeBytes(authString);
-		dos.flush();
-		dos.close();
 		
-		System.out.println(httpconnection.getDoInput());
-		
-	    //dis = new DataInputStream(httpconnection.getInputStream()); 
-	    //String s = dis.readLine();
-	    //dis.close(); 
-	    //System.out.println(s);
-	    
-		System.out.println(httpconnection.getResponseMessage());
-		
-	    System.exit(0);
 		if (debugenabled) {
 			System.out.println("URL is: " + httpurl);
 			System.out.println("URL Details: {");
@@ -109,109 +95,74 @@ public class UserSessionInstance {
 			System.out.println("File: " + httpurl.getFile());
 			System.out.println("Query: " + httpurl.getQuery());
 			System.out.println("}");
+			splitOut();
 		}
 
-		System.out.println("Setting Request method to POST");
+		httpconnection = (HttpURLConnection) httpurl.openConnection();
+		
+		////httpconnection.setRequestProperty("Host", "setup.icloud.com");
+		//httpconnection.setRequestProperty("User-Agent", "Mozilla/5.0 Java_iCloud/1.0 LoginManager/1.0");
+		//httpconnection.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+		//httpconnection.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+		//httpconnection.setRequestProperty("Accept-Encoding", "gzip, deflate");
+		//httpconnection.setRequestProperty("Referer", "https://www.icloud.com/");
+		//httpconnection.setRequestProperty("Content-Type", "text/json; charset=UTF-8");
+		httpconnection.setRequestProperty("Origin", "https://www.icloud.com"); ////
+		System.out.println(httpconnection.getRequestProperty("Origin"));
+		////httpconnection.setRequestProperty("Connection", "keep-alive");
+		//httpconnection.setRequestProperty("Cache-Control", "no-cache"); // HTTP
+		//httpconnection.setRequestProperty("Pragma", "no-cache"); // HTTP 1.0.
+		
 		httpconnection.setRequestMethod("POST");
-		String contentLength = Integer.toString(authString.getBytes().length);
-
-		// TODO: remove magic header values
-		httpconnection.setRequestProperty("Host", "setup.icloud.com");
-		httpconnection.setRequestProperty("User-Agent", "Mozilla/5.0 Java_iCloud/1.0 LoginManager/1.0");
-		httpconnection.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-		httpconnection.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
-		// httpconnection.setRequestProperty("Accept-Encoding",
-		// "gzip, deflate");
-		httpconnection.setRequestProperty("Referer", "https://www.icloud.com/");
-		httpconnection.setRequestProperty("Content-Type", "text/plain; charset=UTF-8");
-		httpconnection.setRequestProperty("Origin", "https://www.icloud.com");
-		httpconnection.setRequestProperty("Connection", "keep-alive");
-		httpconnection.setRequestProperty("Content-Length", contentLength);
-		httpconnection.setRequestProperty("Cache-Control", "no-cache"); // HTTP
-		httpconnection.setRequestProperty("Pragma", "no-cache"); // HTTP 1.0.
-
-		System.out.println("Request Method Is Now: " + httpconnection.getRequestMethod());
-		Map<String, List<String>> head = httpconnection.getRequestProperties();
-		System.out.println("Request Headers are: " + head);
-
-		// httpconnection.setDoOutput(true);
+		
+		System.out.println(httpconnection.getRequestMethod());
+		System.out.println(httpconnection.getRequestProperties());
+		splitOut();
+		
+		
 		httpconnection.setDoInput(true);
+		httpconnection.setDoOutput(true);
+		httpconnection.setUseCaches(false);
 
-		System.out.println("Writing Request Body To Server");
-		System.out.println("Body is: " + authString);
-		System.out.println("Body Length Is: " + authString.getBytes().length);
+		dos = new DataOutputStream(httpconnection.getOutputStream());
 
-		/*
-		 * OutputStreamWriter httpout = new
-		 * OutputStreamWriter(httpconnection.getOutputStream());
-		 * httpout.write(authString); httpout.close();
-		 */
-		System.out.println("Returned Headers Are: " + httpconnection.getHeaderFields());
-		System.out.println(httpconnection.getResponseMessage());
+		dos.writeBytes(authString);
+		dos.flush();
+		dos.close();
+	
+		//dis = new DataInputStre
+		
+		InputStream is = httpconnection.getInputStream();
+		InputStreamReader isr = new InputStreamReader(is);
 
-		BufferedReader in = new BufferedReader(new InputStreamReader(httpconnection.getErrorStream()));
-		System.out.println(in.read());
+		int numCharsRead;
+		char[] charArray = new char[1024];
+		StringBuffer sb = new StringBuffer();
+		while ((numCharsRead = isr.read(charArray)) > 0) {
+			sb.append(charArray, 0, numCharsRead);
+		}
+		String result = sb.toString();
 
-		System.out.println(httpconnection.getContent());
-
-		// Below is not used
-		// httpuri.addParameter("clientBuildNumber", clientBnum);
-		// httpuri.addParameter("clientId", UUID);
-
-		// URI httprequest = httpuri.build();
-
-		// Construct the request
-		CloseableHttpClient httpclient = HttpClients.createDefault();
-
-		HttpPost httpmethod = new HttpPost();
-		// httpmethod.setURI(httprequest);
-		// httpmethod.setEntity(userLoginString);
-
-		// TODO: remove magic header values
-		httpmethod.addHeader("Host", "setup.icloud.com");
-		httpmethod.addHeader("User-Agent", "Mozilla/5.0 Java_iCloud/1.0 LoginManager/1.0");
-		httpmethod.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-		httpmethod.addHeader("Accept-Language", "en-US,en;q=0.5");
-		httpmethod.addHeader("Accept-Encoding", "gzip, deflate");
-		httpmethod.addHeader("Referer", "https://www.icloud.com/");
-		httpmethod.addHeader("Content-Type", "text/plain; charset=UTF-8");
-		httpmethod.addHeader("Origin", "https://www.icloud.com");
-		httpmethod.addHeader("Connection", "keep-alive");
-		// Saved-Code: httpmethod.addHeader("Pragma", "no-cache");
-		// Saved-Code: httpmethod.addHeader("Cache-Control", "no-cache");
-
-		// Prepare for request execution
-		ResponseHandler<String> responseHandler = new BasicResponseHandler();
-		// CloseableHttpResponse response = httpclient.execute(httpmethod);
-
-		// Save & Print returned content
-		// Header[] returnedHeaders = response.getAllHeaders();
-		// HttpEntity returnedEntity = response.getEntity();
-		// StatusLine responseCode = response.getStatusLine();
-
-		/*
-		 * if (debugenabled) { for (int index = 0; index <
-		 * returnedHeaders.length; index++) {
-		 * System.out.println(returnedHeaders[index]); }
-		 * System.out.println(returnedEntity); System.out.println(responseCode);
-		 * }
-		 */
-
-		/*
-		 * BROKEN TODO: Fix below code String abc = ""; Gson gson = new
-		 * GsonBuilder().setPrettyPrinting().create(); JsonParser jp = new
-		 * JsonParser(); JsonElement je = jp.parse(returnedEntity); String
-		 * prettyJsonString = gson.toJson(je);
-		 * System.out.println(prettyJsonString);
-		 */
-
-		// Read returned content into class variables
-
-		// Send cookie headers to cookie manager for safe keeping
-		// /* BasicClientCookie[] Cookies =
-		// */prepareCookies(response.getHeaders("Set-Cookie"));
-		// UserSessionCookieManager userCookieManager = new
-		// UserSessionCookieManager(Cookies);
+		 Gson gson = new GsonBuilder().setPrettyPrinting().create(); 
+		 JsonParser jp = new JsonParser();
+		 JsonElement je = jp.parse(result); 
+		 String result2 = gson.toJson(je);
+		 
+		
+		
+		
+		System.out.println("*** BEGIN ***");
+		System.out.println(result2);
+		System.out.println("*** END ***");
+		
+		splitOut();
+		
+		System.out.println("Input: " + httpconnection.getDoInput() + "\n" + "Output: " + httpconnection.getDoOutput());
+		System.out.println("URL: " + httpconnection.getURL() + "\n" + "Response Message: " + httpconnection.getResponseMessage() + "\n" + "Returned Headers: " + httpconnection.getHeaderFields());
+		System.out.println("Error Stream: " + convertStreamToString(httpconnection.getErrorStream()));
+		//System.out.println(httpconnection.getHeaderFields());
+		
+		System.exit(0);
 
 	}
 
@@ -258,8 +209,11 @@ public class UserSessionInstance {
 
 		// TODO: remove magic header values
 		httpmethod.addHeader("Host", "setup.icloud.com");
-		httpmethod.addHeader("User-Agent", "Mozilla/5.0 Java_iCloud/1.0 LoginManager/1.0");
-		httpmethod.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+		httpmethod.addHeader("User-Agent",
+				"Mozilla/5.0 Java_iCloud/1.0 LoginManager/1.0");
+		httpmethod
+				.addHeader("Accept",
+						"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
 		httpmethod.addHeader("Accept-Language", "en-US,en;q=0.5");
 		httpmethod.addHeader("Accept-Encoding", "gzip, deflate");
 		httpmethod.addHeader("Referer", "https://www.icloud.com/");
@@ -275,7 +229,8 @@ public class UserSessionInstance {
 
 			if (fa.matches()) {
 				System.out.println("Match!!");
-				System.out.println(Cookies[index].getName() + Cookies[index].getValue());
+				System.out.println(Cookies[index].getName()
+						+ Cookies[index].getValue());
 			}
 			System.out.println("No Match");
 		}
@@ -294,7 +249,10 @@ public class UserSessionInstance {
 		name[2] = "dsid";
 		value[2] = "8084583249";
 
-		connection.connect("POST", "https", "www.icloud.com", 443, "/setup/ws/1/logout", name, value, userLoginString, headerslist);
+		connection
+				.connect("POST", "https", "www.icloud.com", 443,
+						"/setup/ws/1/logout", name, value, userLoginString,
+						headerslist);
 
 		System.out.println(connection.getResponseCode());
 		// Parse returned content for user id. for now we cheat
@@ -329,4 +287,35 @@ public class UserSessionInstance {
 		}
 	}
 
+	public String convertStreamToString(InputStream is) throws IOException {
+		//
+		// To convert the InputStream to String we use the
+		// Reader.read(char[] buffer) method. We iterate until the
+		// Reader return -1 which means there's no more data to
+		// read. We use the StringWriter class to produce the string.
+		//
+		if (is != null) {
+			Writer writer = new StringWriter();
+
+			char[] buffer = new char[1024];
+			try {
+				Reader reader = new BufferedReader(new InputStreamReader(is,
+						"UTF-8"));
+				int n;
+				while ((n = reader.read(buffer)) != -1) {
+					writer.write(buffer, 0, n);
+				}
+			} finally {
+				is.close();
+			}
+			return writer.toString();
+		} else {
+			return "";
+		}
+	}
+
+	public void splitOut() {
+		System.out
+				.println("================================================================================");
+	}
 }
