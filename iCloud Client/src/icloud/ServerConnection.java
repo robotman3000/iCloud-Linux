@@ -1,10 +1,6 @@
 package icloud;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -33,6 +29,7 @@ public class ServerConnection {
 	private List<HttpCookie> responseCookies = null;
 	private int responseCode = -1;
 	private String responseData = null;
+	private String responseErrorStream = null;
 
 	private boolean debugenabled = false;
 
@@ -45,7 +42,7 @@ public class ServerConnection {
 	}
 
 	public int connect() throws Exception {
-		boolean checkPayload = false;
+		boolean usePayload = false;
 
 		System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
 
@@ -85,9 +82,15 @@ public class ServerConnection {
 		} else {
 			httpconnection.setRequestMethod(getRequestMethod());
 			httpconnection.setDoInput(true);
-			if (requestMethod == "POST") {
+			if (requestMethod == "POST" /*
+										 * Or anything else that requires the
+										 * post body
+										 */) {
 				httpconnection.setDoOutput(true);
-				checkPayload = true;
+				usePayload = true;
+			} else {
+				httpconnection.setDoOutput(false);
+				usePayload = false;
 			}
 			if (debugenabled) {
 				System.out.println(httpconnection.getRequestMethod());
@@ -108,9 +111,7 @@ public class ServerConnection {
 			}
 		}
 
-		if (requestCookies == null) {
-
-		} else {
+		if (requestCookies != null) {
 			Iterator<HttpCookie> iterator = requestCookies.iterator();
 			while (iterator.hasNext()) {
 				HttpCookie key = iterator.next();
@@ -118,15 +119,16 @@ public class ServerConnection {
 			}
 		}
 
-		if (checkPayload) {
+		if (usePayload) {
 			if (payload == null) {
+				System.err.println("Post Data can't be null" + "\n" + "Set with setPayload();");
 				return -1;
 			} else {
 				setPayload(payload);
 			}
 		}
 
-		if (requestMethod == "POST") {
+		if (httpconnection.getDoOutput()) {
 			OutputStream dos = new DataOutputStream(httpconnection.getOutputStream());
 			dos.write(getPayload().getBytes());
 			dos.flush();
@@ -136,14 +138,11 @@ public class ServerConnection {
 		}
 
 		if (debugenabled) {
-			// This code is missplaced
 			System.out.println("Input: " + httpconnection.getDoInput() + "\n" + "Output: " + httpconnection.getDoOutput());
 			System.out.println("URL: " + httpconnection.getURL() + "\n" + "Response Message: " + httpconnection.getResponseMessage() + "\n" + "Returned Headers: " + httpconnection.getHeaderFields());
 			System.out.println("Error Stream: " + CommonLogic.convertStreamToString(httpconnection.getErrorStream()));
 			CommonLogic.splitOut();
 		}
-
-		setResponseMessage(httpconnection.getResponseMessage());
 
 		InputStream is = httpconnection.getInputStream();
 		InputStreamReader isr = new InputStreamReader(is);
@@ -157,11 +156,14 @@ public class ServerConnection {
 
 		List<HttpCookie> cookies = cookieJar.getCookies();
 
+		setResponseMessage(httpconnection.getResponseMessage());
 		setResponseData(sb.toString());
 		setResponseHeaders(httpconnection.getHeaderFields());
 		setResponseCookies(cookies);
+		setResponseCode(httpconnection.getResponseCode());
+		setResponseErrorStream(CommonLogic.convertStreamToString(httpconnection.getErrorStream()));
 
-		return 0;
+		return getResponseCode();
 	}
 
 	public URL getServerUrl() {
@@ -250,6 +252,15 @@ public class ServerConnection {
 
 	private void setDebugenabled(boolean debugenabled) {
 		this.debugenabled = debugenabled;
+	}
+
+	
+	public String getResponseErrorStream() {
+		return responseErrorStream;
+	}
+
+	private void setResponseErrorStream(String responseErrorStream) {
+		this.responseErrorStream = responseErrorStream;
 	}
 
 }
