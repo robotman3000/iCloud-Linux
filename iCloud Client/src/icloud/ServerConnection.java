@@ -141,6 +141,9 @@ public class ServerConnection {
 			System.out.println("Input: " + httpconnection.getDoInput() + "\n" + "Output: " + httpconnection.getDoOutput());
 			System.out.println("URL: " + httpconnection.getURL() + "\n" + "Response Message: " + httpconnection.getResponseMessage() + "\n" + "Returned Headers: " + httpconnection.getHeaderFields());
 			System.out.println("Error Stream: " + CommonLogic.convertStreamToString(httpconnection.getErrorStream()));
+			for (HttpCookie cookie : cookieJar.getCookies()) {
+				System.out.println("CookieHandler retrieved cookie: " + cookie);
+			}
 			CommonLogic.splitOut();
 		}
 
@@ -254,7 +257,6 @@ public class ServerConnection {
 		this.debugenabled = debugenabled;
 	}
 
-	
 	public String getResponseErrorStream() {
 		return responseErrorStream;
 	}
