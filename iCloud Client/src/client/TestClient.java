@@ -17,6 +17,10 @@ public class TestClient {
 		}
 
 		UserSessionInstance user1 = new UserSessionInstance(username, password, false);
+		user1.connect();
+		System.out.println("Connected");
+		user1.disconnect();
+		System.out.println("Disconnected");
 		
 		if (debug) {
 			System.out.println("The current users ID is: " + user1.getUserID());

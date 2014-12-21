@@ -1,164 +1,255 @@
 package icloud;
 
-import java.net.URI;
-
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.methods.RequestBuilder;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.Header;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
+import java.net.CookieStore;
+import java.net.HttpCookie;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ServerConnection {
 
-	private String responseBody;
-	private Header[] headers;
-	private String responseCode;
-	private Header[] Cookies;
+	private URL serverUrl = null;
+	private Map<String, String> requestHeaders = null;
+	private String payload;
+	private String requestMethod = null;
+	private List<HttpCookie> requestCookies = null;
+
+	private String responseMessage = null;
+	private Map<String, List<String>> responseHeaders = null;
+	private List<HttpCookie> responseCookies = null;
+	private int responseCode = -1;
+	private String responseData = null;
+
+	private boolean debugenabled = false;
 
 	public ServerConnection() {
-		clearVars();
-	}
-
-	private void clearVars() {
-		setResponseBody("");
-		HttpUriRequest httpmethod = RequestBuilder.create("GET").build();
-		httpmethod.addHeader("Key", "value");
-		Header[] headerslist = httpmethod.getAllHeaders();
-		setHeaders(headerslist);
 
 	}
 
-	public Header[] getHeaders() {
-		return headers;
+	public ServerConnection(boolean enableDebugLogging) {
+		setDebugenabled(enableDebugLogging);
 	}
 
-	private void setHeaders(Header[] headers) {
-		this.headers = headers;
+	public int connect() throws Exception {
+		boolean checkPayload = false;
+
+		System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+
+		CookieManager manager = new CookieManager();
+		manager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
+		CookieHandler.setDefault(manager);
+		CookieStore cookieJar = manager.getCookieStore();
+
+		URL httpurl;
+		HttpURLConnection httpconnection;
+
+		if (serverUrl == null) {
+			System.err.println("Server URL can't be null" + "\n" + "Set with setServerUrl(URL url);");
+			return -1;
+		} else {
+			httpurl = getServerUrl();
+			httpconnection = (HttpURLConnection) httpurl.openConnection();
+
+			// Debug Output
+			if (debugenabled) {
+				System.out.println("URL is: " + httpurl);
+				System.out.println("URL Details: {");
+				System.out.println("Protocol: " + httpurl.getProtocol());
+				System.out.println("Host: " + httpurl.getHost());
+				System.out.println("Port: " + httpurl.getPort());
+				System.out.println("Path: " + httpurl.getPath());
+				System.out.println("File: " + httpurl.getFile());
+				System.out.println("Query: " + httpurl.getQuery());
+				System.out.println("}");
+				CommonLogic.splitOut();
+			}
+		}
+
+		if (requestMethod == null) {
+			System.err.println("Request Method can't be null" + "\n" + "Set with setRequestMethod(String requestMethod);");
+			return -1;
+		} else {
+			httpconnection.setRequestMethod(getRequestMethod());
+			httpconnection.setDoInput(true);
+			if (requestMethod == "POST") {
+				httpconnection.setDoOutput(true);
+				checkPayload = true;
+			}
+			if (debugenabled) {
+				System.out.println(httpconnection.getRequestMethod());
+				CommonLogic.splitOut();
+			}
+		}
+
+		if (requestHeaders != null) {
+			Set<String> headers = requestHeaders.keySet();
+			Iterator<String> iterator = headers.iterator();
+			while (iterator.hasNext()) {
+				String key = iterator.next();
+				httpconnection.setRequestProperty(key, requestHeaders.get(key));
+			}
+			if (debugenabled) {
+				System.out.println(httpconnection.getRequestProperties());
+				CommonLogic.splitOut();
+			}
+		}
+
+		if (requestCookies == null) {
+
+		} else {
+			Iterator<HttpCookie> iterator = requestCookies.iterator();
+			while (iterator.hasNext()) {
+				HttpCookie key = iterator.next();
+				cookieJar.add(httpurl.toURI(), key);
+			}
+		}
+
+		if (checkPayload) {
+			if (payload == null) {
+				return -1;
+			} else {
+				setPayload(payload);
+			}
+		}
+
+		if (requestMethod == "POST") {
+			OutputStream dos = new DataOutputStream(httpconnection.getOutputStream());
+			dos.write(getPayload().getBytes());
+			dos.flush();
+			dos.close();
+		} else {
+			httpconnection.connect();
+		}
+
+		if (debugenabled) {
+			// This code is missplaced
+			System.out.println("Input: " + httpconnection.getDoInput() + "\n" + "Output: " + httpconnection.getDoOutput());
+			System.out.println("URL: " + httpconnection.getURL() + "\n" + "Response Message: " + httpconnection.getResponseMessage() + "\n" + "Returned Headers: " + httpconnection.getHeaderFields());
+			System.out.println("Error Stream: " + CommonLogic.convertStreamToString(httpconnection.getErrorStream()));
+			CommonLogic.splitOut();
+		}
+
+		setResponseMessage(httpconnection.getResponseMessage());
+
+		InputStream is = httpconnection.getInputStream();
+		InputStreamReader isr = new InputStreamReader(is);
+
+		int numCharsRead;
+		char[] charArray = new char[1024];
+		StringBuffer sb = new StringBuffer();
+		while ((numCharsRead = isr.read(charArray)) > 0) {
+			sb.append(charArray, 0, numCharsRead);
+		}
+
+		List<HttpCookie> cookies = cookieJar.getCookies();
+
+		setResponseData(sb.toString());
+		setResponseHeaders(httpconnection.getHeaderFields());
+		setResponseCookies(cookies);
+
+		return 0;
 	}
 
-	public String getResponseBody() {
-		return responseBody;
+	public URL getServerUrl() {
+		return serverUrl;
 	}
 
-	private void setResponseBody(String responseBody) {
-		this.responseBody = responseBody;
+	public void setServerUrl(URL serverUrl) {
+		this.serverUrl = serverUrl;
 	}
 
-	public String getResponseCode() {
+	public Map<String, String> getRequestHeaders() {
+		return requestHeaders;
+	}
+
+	public void setRequestHeaders(Map<String, String> requestHeaders) {
+		this.requestHeaders = requestHeaders;
+	}
+
+	public String getPayload() {
+		return payload;
+	}
+
+	public void setPayload(String payload) {
+		this.payload = payload;
+	}
+
+	public String getRequestMethod() {
+		return requestMethod;
+	}
+
+	public void setRequestMethod(String requestMethod) {
+		this.requestMethod = requestMethod;
+	}
+
+	public List<HttpCookie> getRequestCookies() {
+		return requestCookies;
+	}
+
+	public void setRequestCookies(List<HttpCookie> requestCookies) {
+		this.requestCookies = requestCookies;
+	}
+
+	public String getResponseMessage() {
+		return responseMessage;
+	}
+
+	private void setResponseMessage(String responseMessage) {
+		this.responseMessage = responseMessage;
+	}
+
+	public Map<String, List<String>> getResponseHeaders() {
+		return responseHeaders;
+	}
+
+	private void setResponseHeaders(Map<String, List<String>> map) {
+		this.responseHeaders = map;
+	}
+
+	public List<HttpCookie> getResponseCookies() {
+		return responseCookies;
+	}
+
+	private void setResponseCookies(List<HttpCookie> responseCookies) {
+		this.responseCookies = responseCookies;
+	}
+
+	public int getResponseCode() {
 		return responseCode;
 	}
 
-	private void setResponseCode(String responseCode) {
+	private void setResponseCode(int responseCode) {
 		this.responseCode = responseCode;
 	}
 
-	public Header[] getCookies() {
-		return Cookies;
+	public String getResponseData() {
+		return responseData;
 	}
 
-	private void setCookies(Header[] cookies) {
-		Header[] fixedCookies = cookies;
-		for (int index = 0; index < cookies.length; index++) {
-			Header test = cookies[index];
-			fixedCookies[index] = fixCookie(test);
-		}
-		Cookies = fixedCookies;
+	private void setResponseData(String responseData) {
+		this.responseData = responseData;
 	}
 
-	private Header fixCookie(Header cookieToFix) {
-		HttpUriRequest cookieMaker = RequestBuilder.create("GET").build();
-		cookieMaker.addHeader("Cookie", cookieToFix.getValue());;
-		Header[] Cookies = cookieMaker.getAllHeaders();
-		return Cookies[0];
+	public boolean isDebugenabled() {
+		return debugenabled;
 	}
 
-	/*
-	 * public void connect(String requestMethod, String protocol, String server,
-	 * int port, StringEntity requestBody, Header[] headers) throws Exception {
-	 * 
-	 * // For avoiding conflicts clearVars();
-	 * 
-	 * CloseableHttpClient httpclient = HttpClients.createDefault(); URI uri =
-	 * new
-	 * URIBuilder().setScheme(protocol).setHost(server).setPort(port).build();
-	 * 
-	 * HttpUriRequest httpmethod =
-	 * RequestBuilder.create(requestMethod).setUri(uri
-	 * ).setEntity(requestBody).build();
-	 * 
-	 * for (int index = 0; index < headers.length; index++) {
-	 * httpmethod.addHeader(headers[index]); }
-	 * 
-	 * ResponseHandler<String> responseHandler = new BasicResponseHandler();
-	 * 
-	 * System.out.println("\n" +
-	 * "--------------------------------------------------------------------------------"
-	 * ); System.out.println("Pending Connection Details:");
-	 * System.out.println(httpmethod.toString()); for (int index = 0; index <
-	 * headers.length; index++) { System.out.println(headers[index]); }
-	 * System.out.println(
-	 * "--------------------------------------------------------------------------------"
-	 * + "\n"); CloseableHttpResponse response = httpclient.execute(httpmethod);
-	 * setResponseBody(responseHandler.handleResponse(response));
-	 * 
-	 * this.setHeaders(response.getAllHeaders());
-	 * 
-	 * }
-	 * 
-	 * /**
-	 * 
-	 * @param authKey
-	 * 
-	 * @param protocall
-	 * 
-	 * @param server
-	 * 
-	 * @param port
-	 * 
-	 * @param requestBody
-	 * 
-	 * @param headers
-	 * 
-	 * @param requestMethod
-	 * 
-	 * @param queryStrings
-	 * 
-	 * @throws Exception
-	 */
-	public void connect(String requestMethod, String protocol, String server, int port, String path, String[] queryStringNames, String[] queryStringValues, StringEntity requestBody, Header[] headers) throws Exception {
-
-		// For avoiding conflicts
-		clearVars();
-
-		CloseableHttpClient httpclient = HttpClients.createDefault();
-		URIBuilder uribuild = new URIBuilder().setScheme(protocol).setHost(server).setPort(port).setPath(path);
-
-		if (queryStringValues.length == queryStringNames.length) {
-			for (int index = 0; index < queryStringValues.length; index++) {
-				uribuild.setParameter(queryStringNames[index], queryStringValues[index]);
-			}
-		}
-		URI uri = uribuild.build();
-
-		HttpUriRequest httpmethod = RequestBuilder.create(requestMethod).setUri(uri).setEntity(requestBody).build();
-		for (int index = 0; index < headers.length; index++) {
-			httpmethod.addHeader(headers[index]);
-		}
-
-		for (int index = 0; index < headers.length; index++) {
-			httpmethod.addHeader(headers[index]);
-		}
-
-
-
-		this.setResponseCode(response.getStatusLine().toString());
-		this.setHeaders(response.getAllHeaders());
-		this.setCookies(response.getHeaders("Set-Cookie"));
+	private void setDebugenabled(boolean debugenabled) {
+		this.debugenabled = debugenabled;
 	}
 
 }
