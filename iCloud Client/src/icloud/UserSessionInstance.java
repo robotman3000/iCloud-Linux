@@ -5,6 +5,12 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
+import icloud.calendars.CalendarManager;
+import icloud.contacts.ContactManager;
+import icloud.mail.MailManager;
+import icloud.notes.NoteManager;
+import icloud.reminders.ReminderManager;
+
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -37,6 +43,12 @@ public class UserSessionInstance {
 	private String UUID;
 	private static final String clientBnum = "14H40";
 	private List<HttpCookie> cookies;
+	
+	private CalendarManager calendars;
+	private ContactManager contacts;
+	private MailManager mail;
+	private NoteManager notes;
+	private ReminderManager reminders;
 
 	public UserSessionInstance(String username, String password, boolean extended_login) {
 		this.username = username;
@@ -44,6 +56,7 @@ public class UserSessionInstance {
 		this.extended_login = extended_login;
 	}
 
+	// DO NOT USE ########################
 	public void connect(boolean test) throws Exception {
 		boolean debugenabled = true;
 
@@ -156,7 +169,8 @@ public class UserSessionInstance {
 		}
 
 	}
-
+	// ###################################
+	
 	public void connect() throws Exception {
 
 		Map<String, String> headersMap = new HashMap<String, String>();
@@ -228,7 +242,7 @@ public class UserSessionInstance {
 		
 		ServerConnection conn = new ServerConnection(true);
 
-		URL httpUrl = new URL("https://setup.icloud.com:443/setup/ws/1/logout?" + "clientBuildNumber=" + clientBnum + "&clientId=" + UUID + "&token=" + valCookie + "&dsid=" + "8084583249");
+		URL httpUrl = new URL("https://setup.icloud.com:443/setup/ws/1/logout?" + "clientBuildNumber=" + clientBnum + "&clientId=" + UUID + "&token=" + valCookie + "&dsid=" + "8084583249" + "&proxyDest=" + "p30-setup");
 		conn.setServerUrl(httpUrl);
 		conn.setRequestMethod("POST");
 		conn.setRequestHeaders(headersMap);
@@ -258,37 +272,46 @@ public class UserSessionInstance {
 		return userID;
 	}
 
-	// add other gets
-	// add private manager creators
-
 	public Map<String, BaseManager> getAllManagers() {
 
 		return null;
 	}
 
-	public BaseManager getContactManager() {
-
-		return null;
+	public ContactManager getContactManager() {
+		initContactManger();
+		return contacts;
 	}
 
-	public BaseManager getCalendarManager() {
+	private void initContactManger() {
+		
+	}
+	
+	public void abc123() throws Exception{
+		URL httpUrl = new URL("https://p30-contactsws.icloud.com/co/startup?" + "clientBuildNumber=" + clientBnum + "&" + "clientId=" + UUID + "&dsid=" + "8084583249" + "&locale=" + "en_US" + "&order=" + "last,first" + "&clientVersion" + "2.1");
 
-		return null;
+		Map<String, String> headersMap = new HashMap<String, String>();
+		headersMap.put("Origin", "https://www.icloud.com");
+
+		ServerConnection conn = new ServerConnection(true);
+		conn.setServerUrl(httpUrl);
+		conn.setRequestMethod("GET");
+		conn.setRequestHeaders(headersMap);
+		conn.setRequestCookies(cookies);
+		conn.connect();
+		
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		JsonParser jp = new JsonParser();
+		JsonElement je = jp.parse(conn.getResponseData());
+		String result2 = gson.toJson(je);
+
+		boolean debugenabled = true;
+		if (debugenabled ) {
+			System.out.println("*** BEGIN ***");
+			System.out.println(result2);
+			System.out.println("*** END ***");
+		}
+		
 	}
 
-	public BaseManager getMailManager() {
-
-		return null;
-	}
-
-	public BaseManager getNotesManager() {
-
-		return null;
-	}
-
-	public BaseManager getReminderManager() {
-
-		return null;
-	}
-
+	
 }
