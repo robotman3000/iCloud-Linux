@@ -44,6 +44,9 @@ public class ServerConnection {
 	public int connect() throws Exception {
 		boolean usePayload = false;
 
+		CommonLogic.splitOut();
+		System.out.println("Start connection details");
+		CommonLogic.splitOut();
 		System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
 
 		CookieManager manager = new CookieManager();
@@ -65,14 +68,13 @@ public class ServerConnection {
 			if (debugenabled) {
 				System.out.println("URL is: " + httpurl);
 				System.out.println("URL Details: {");
-				System.out.println("Protocol: " + httpurl.getProtocol());
-				System.out.println("Host: " + httpurl.getHost());
-				System.out.println("Port: " + httpurl.getPort());
-				System.out.println("Path: " + httpurl.getPath());
-				System.out.println("File: " + httpurl.getFile());
-				System.out.println("Query: " + httpurl.getQuery());
+				System.out.println("	Protocol: " + httpurl.getProtocol());
+				System.out.println("	Host: " + httpurl.getHost());
+				System.out.println("	Port: " + httpurl.getPort());
+				System.out.println("	Path: " + httpurl.getPath());
+				System.out.println("	File: " + httpurl.getFile());
+				System.out.println("	Query: " + httpurl.getQuery());
 				System.out.println("}");
-				CommonLogic.splitOut();
 			}
 		}
 
@@ -93,8 +95,7 @@ public class ServerConnection {
 				usePayload = false;
 			}
 			if (debugenabled) {
-				System.out.println(httpconnection.getRequestMethod());
-				CommonLogic.splitOut();
+				System.out.println("Request Method: " + httpconnection.getRequestMethod());
 			}
 		}
 
@@ -106,8 +107,7 @@ public class ServerConnection {
 				httpconnection.setRequestProperty(key, requestHeaders.get(key));
 			}
 			if (debugenabled) {
-				System.out.println(httpconnection.getRequestProperties());
-				CommonLogic.splitOut();
+				System.out.println("Headers: " + httpconnection.getRequestProperties());
 			}
 		}
 
@@ -116,7 +116,9 @@ public class ServerConnection {
 			while (iterator.hasNext()) {
 				HttpCookie key = iterator.next();
 				cookieJar.add(httpurl.toURI(), key);
+				System.out.println("Added connection cookie: " + key);
 			}
+			
 		}
 
 		if (usePayload) {
@@ -125,9 +127,10 @@ public class ServerConnection {
 				return -1;
 			} else {
 				setPayload(payload);
+				System.out.println();
 			}
 		}
-
+		
 		if (httpconnection.getDoOutput()) {
 			OutputStream dos = new DataOutputStream(httpconnection.getOutputStream());
 			dos.write(getPayload().getBytes());
@@ -138,12 +141,15 @@ public class ServerConnection {
 		}
 
 		if (debugenabled) {
+			System.out.println("Response Details:");
 			System.out.println("Input: " + httpconnection.getDoInput() + "\n" + "Output: " + httpconnection.getDoOutput());
 			System.out.println("URL: " + httpconnection.getURL() + "\n" + "Response Message: " + httpconnection.getResponseMessage() + "\n" + "Returned Headers: " + httpconnection.getHeaderFields());
 			System.out.println("Error Stream: " + CommonLogic.convertStreamToString(httpconnection.getErrorStream()));
 			for (HttpCookie cookie : cookieJar.getCookies()) {
 				System.out.println("CookieHandler retrieved cookie: " + cookie);
 			}
+			CommonLogic.splitOut();
+			System.out.println("End Connection Deails");
 			CommonLogic.splitOut();
 		}
 
