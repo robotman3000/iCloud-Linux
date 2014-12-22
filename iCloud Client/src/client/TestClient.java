@@ -10,24 +10,29 @@ public class TestClient {
 
 		String username = args[0];
 		String password = args[1];
-		
+
 		if (debugEnabled) {
 			System.out.println("Username: " + username + "\n" + "Password: " + password);
 		}
 
-		UserSessionInstance user1 = new UserSessionInstance(username, password, false);
+		UserSessionInstance user1 = new UserSessionInstance(username, password, false, debugEnabled);
 		user1.connect();
 		System.out.println("Connected");
-		//ContactManager user1Contacts = user1.getContactManager();
-		user1.abc123();
+		// ContactManager user1Contacts = user1.getContactManager();
+		// user1.abc123();
+		user1.getNoteManager();
 		
-
+		
 		if (debugEnabled) {
 			System.out.println("The current users ID is: " + user1.getUserID());
+			System.out.println("The current users Apple ID is: " + user1.getAppleID());
+			System.out.println("The current users First Name is: " + user1.getFirstName());
+			System.out.println("The current users Last Name is: " + user1.getLastName());
+			System.out.println("The current users Full Name is: " + user1.getFullName());
+			System.out.println("The current users Locale is: " + user1.getLocale());
 		}
 		user1.disconnect();
 		System.out.println("Disconnected");
-		user1.abc123();
+		// user1.abc123();
 	}
-
 }

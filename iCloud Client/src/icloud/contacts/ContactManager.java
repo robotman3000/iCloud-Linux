@@ -1,13 +1,19 @@
 package icloud.contacts;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.http.Header;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.entity.StringEntity;
 
-import javax.script.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 import icloud.BaseManager;
 import icloud.UserSessionInstance;
@@ -15,29 +21,54 @@ import icloud.ServerConnection;
 
 public class ContactManager extends BaseManager {
 
-	private static final String XML_GETCONTACTS = "\r\n<card:addressbook-query xmlns:d=\"DAV:\" xmlns:card=\"urn:ietf:params:xml:ns:carddav\">\r\n    <d:prop>\r\n        <d:getetag />\r\n        <card:address-data />\r\n    </d:prop>\r\n</card:addressbook-query>\r\n";
+	Map<String, AddressBook> addressBooks = new HashMap<String, AddressBook>();
+	
+	public ContactManager(UserSessionInstance user) throws Exception {
+		ServerConnection conn = new ServerConnection();
+		
+		URL httpUrl = new URL(user.getContactServer() + "/co/startup?" + "clientBuildNumber=" + clientBnum + "&" + "clientId=" + UUID + "&dsid=" + "8084583249" + "&locale=" + "en_US" + "&order=" + "last,first" + "&clientVersion" + "2.1");
 
-	private String contacturl;
-	private ServerConnection serverconnection = new ServerConnection();
+		Map<String, String> headersMap = new HashMap<String, String>();
+		headersMap.put("Origin", "https://www.icloud.com");
 
-	public ContactManager(UserSessionInstance login) throws Exception {
-		setContacturl("/" +login.getUserID() + getCarddavhome());
-		ServerConnection serverconnection = new ServerConnection();
+		conn.setServerUrl(httpUrl);
+		conn.setRequestMethod("GET");
+		conn.setRequestHeaders(headersMap);
+		conn.setRequestCookies(cookies);
+		conn.connect();
+		
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		JsonParser jp = new JsonParser();
+		JsonElement je = jp.parse(conn.getResponseData());
+		String result2 = gson.toJson(je);
 
-		Contact[] usercontacts = getAllContacts(login.getAuthKey());
-
-		// now sort usercontacts into address books and distory the vCards that are actually address books
-
+		boolean debugenabled = true;
+		if (debugenabled ) {
+			System.out.println("*** BEGIN ***");
+			System.out.println(result2);
+			System.out.println("*** END ***");
+		}
+		
+		
 	}
+	
+	public ContactManager(String serverUrl, String clientBuildNumber, String clientID, String dsid, String locale, String order, String clientVersion){
+		
+		ServerConnection conn = new ServerConnection();
+		
+		URL httpUrl = new URL(serverUrl + "/co/startup?" + "clientBuildNumber=" + clientBuildNumber + "&" + "clientId=" + clientID + "&dsid=" + dsid + "&locale=" + locale + "&order=" + order + "&clientVersion" + clientVersion);
 
-	private String getContacturl() {
-		return contacturl;
+		Map<String, String> headersMap = new HashMap<String, String>();
+		headersMap.put("Origin", "https://www.icloud.com");
+
+		conn.setServerUrl(httpUrl);
+		conn.setRequestMethod("GET");
+		conn.setRequestHeaders(headersMap);
+		conn.setRequestCookies(cookies);
+		conn.connect();
+		
 	}
-
-	private void setContacturl(String contacturl) {
-		this.contacturl = contacturl;
-	}
-
+	
 	private Contact[] getAllContacts(String authKey) throws Exception {
 
 		//StringEntity entity = new StringEntity(XML_GETCONTACTS);
@@ -85,11 +116,11 @@ public class ContactManager extends BaseManager {
 		return null;
 	}
 
-	public void moveContact(AddressBook addrbook, AddressBook newaddrbook) {
+	public void moveContact(AddressBook addrbook, AddressBook newaddrbook) { // will use delete and save
 
 	}
 
-	public Contact editContact(AddressBook addrbook, Contact editContact) {
+	public Contact editContact(AddressBook addrbook, Contact editContact) { // will use delete and save
 
 		return null;
 	}
@@ -102,6 +133,7 @@ public class ContactManager extends BaseManager {
 
 	}
 
+	
 	public AddressBook[] getAddressBooks() {
 
 		return null;
@@ -111,11 +143,7 @@ public class ContactManager extends BaseManager {
 
 	}
 
-	public void renameAddressBook(AddressBook addrbook) {
-
-	}
-
-	public void deleteAddressBook() {
+	public void deleteAddressBook(AddressBook addrbook) {
 
 	}
 }
