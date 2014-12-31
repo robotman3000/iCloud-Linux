@@ -127,7 +127,7 @@ public class ServerConnection {
 				return -1;
 			} else {
 				setPayload(payload);
-				System.out.println();
+				System.out.println("Payload: " + payload);
 			}
 		}
 		
