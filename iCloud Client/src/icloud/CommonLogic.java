@@ -1,6 +1,8 @@
 package icloud;
 
-import org.apache.commons.codec.binary.Base64;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,13 +16,16 @@ import java.util.Random;
 
 public class CommonLogic {
 
-	public static String generateAuthKey(String username, String password) {
-		// Generate Authentication String
-		String authString = username + ":" + password;
-		byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
-		String authStringEnc = new String(authEncBytes);
-		return authStringEnc;
+	public static final String LOCALHOST = "127.0.0.1";
+
+	public static JsonObject parseJsonData(String jsonData) {
+		JsonParser jsonParser = new JsonParser();
+		JsonElement jsonElement = jsonParser.parse(jsonData);
+		JsonObject jsonObject = jsonElement.getAsJsonObject();
+		return jsonObject;
 	}
+
+
 
 	public static String generateUUID() {
 		new UUID(new Random().nextLong(), new Random().nextLong());
