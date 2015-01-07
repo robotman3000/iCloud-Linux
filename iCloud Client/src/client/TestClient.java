@@ -154,6 +154,8 @@ public class TestClient {
 
 					System.out.println("Current Note ID: "
 							+ tempNote.getNoteID());
+					System.out.println("Current Note Key: "
+							+ tempNote.getUuid());
 					System.out.println("Current Note Folder: "
 							+ tempNote.getFolderName());
 					System.out.println("Current Note Date Modified: "

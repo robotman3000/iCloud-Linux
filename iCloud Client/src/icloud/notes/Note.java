@@ -15,6 +15,7 @@ public class Note {
 	private String size;
 	private String subject;
 	private String content;
+	private String uuid;
 
 	public Note(String dateModified, String noteID, String folderName, String size, String subject, String content) {
 		this.dateModified = dateModified;
@@ -35,6 +36,7 @@ public class Note {
 		this.size = UNDEF;
 		this.subject = UNDEF;
 		this.content = UNDEF;
+		this.uuid = UNDEF;
 
 		Set<String> keySet = noteInfoMap.keySet();
 		Iterator<String> iterator = keySet.iterator();
@@ -71,6 +73,10 @@ public class Note {
 
 				case "content":
 					this.content = value;
+					break;
+					
+				case "uuid":
+					this.uuid = value;
 					break;
 
 				default:
@@ -128,12 +134,23 @@ public class Note {
 		this.content = content;
 	}
 
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
+
 	public String toString() {
 		Document test = Jsoup.parse(getContent());
 		return "\n" + "Date Modified: " + getDateModified() + "\n"
-				+ "Note ID: " + getNoteID() + "\n" + "Note Folder: "
-				+ getFolderName() + "\n" + "Note Size: " + getSize() + "\n"
-				+ "Note Subject: " + getSubject() + "\n" + "Raw Note Content: "
-				+ getContent() + "\n" + "Clean Note Content: {" + "\n" + test.toString() + "}\n";
+				+ "Note ID: " + getNoteID() + "\n" 
+				+ "Note Access Token: " + getUuid() + "\n" 
+				+ "Note Folder: " + getFolderName() + "\n" 
+				+ "Note Size: " + getSize() + "\n"
+				+ "Note Subject: " + getSubject() + "\n" 
+				+ "Raw Note Content: " + getContent() + "\n" 
+				+ "Clean Note Content: {" + "\n" + test.toString() + "}\n";
 	}
 }

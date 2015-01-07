@@ -1,10 +1,8 @@
 package icloud.notes;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -172,7 +170,7 @@ public class NoteManager extends BaseManager {
 	private void parseNotes(JsonArray dataArray) {
 		String[] noteStrings = { "dateModified", "size", "noteId",
 				"folderName", "subject", "detail" };
-		
+
 		for (JsonElement noteElem : dataArray) {
 			JsonObject noteObj = noteElem.getAsJsonObject();
 			// System.out.println(noteObj.toString());
@@ -194,8 +192,12 @@ public class NoteManager extends BaseManager {
 					}
 				}
 			}
+			String tempUUID = CommonLogic.generateUUID();
+			map1.put("uuid", tempUUID);
 			Note newNote = new Note(map1);
-			userNotes.get(mainNotebook).addNote(Base64.encodeBase64String(newNote.getNoteID().getBytes()), newNote);
+
+			userNotes.get(mainNotebook).addNote(tempUUID,
+					newNote);
 			// System.out.println("Note Object: " +
 			// noteObj.toString());
 			// System.out.flush();
@@ -217,17 +219,30 @@ public class NoteManager extends BaseManager {
 				} else {
 					if (noteObj.has(currentString)) {
 						// delete note with matching id
-						String var = noteObj.get("noteId").toString();
-						
-						String encodedVar = Base64.encodeBase64String(var.getBytes());
-						
-						userNotes.get(mainNotebook).deleteNote(encodedVar);
 
-/*						NoteBook notesabc = userNotes.get(mainNotebook);
 						String var = noteObj.get("noteId").toString();
-						System.out.println(var);
-						notesabc.deleteNote(var);
-						userNotes.put(mainNotebook, notesabc);*/
+						Iterator<String> it = userNotes.get(mainNotebook)
+								.getNoteKeys().iterator();
+
+						while (it.hasNext()) {
+							String uKey = it.next();
+							Note note = userNotes.get(mainNotebook).getNote(uKey);
+							System.out.println("parseDeleted() pre print");
+							
+							String noteIDVar = "\"" +  note.getNoteID() + "\"";
+							
+							if (noteIDVar.equalsIgnoreCase(var)) {
+								userNotes.get(mainNotebook).deleteNote(uKey);
+								System.out.println("parseDeleted() print");
+							}
+						}
+
+						/*
+						 * NoteBook notesabc = userNotes.get(mainNotebook);
+						 * String var = noteObj.get("noteId").toString();
+						 * System.out.println(var); notesabc.deleteNote(var);
+						 * userNotes.put(mainNotebook, notesabc);
+						 */
 					}
 				}
 			}
@@ -311,7 +326,17 @@ public class NoteManager extends BaseManager {
 	public void deleteNote(String noteId) throws Exception {
 
 		JsonObject noteIdObject = new JsonObject();
-		noteIdObject.addProperty("noteId", noteId);
+		
+		Iterator<String> it = userNotes.get(mainNotebook).getNoteKeys().iterator();
+
+		while (it.hasNext()) {
+			String uKey = it.next();
+			Note note = userNotes.get(mainNotebook).getNote(uKey);
+			if (note.getUuid().equalsIgnoreCase(noteId)) {
+				noteIdObject.addProperty("noteId", note.getNoteID());
+				System.out.println("deleteNote() print");
+			}
+		}
 
 		JsonArray innerArray = new JsonArray();
 		innerArray.add(noteIdObject);
