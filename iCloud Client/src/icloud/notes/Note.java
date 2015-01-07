@@ -11,78 +11,73 @@ public class Note {
 
 	private String dateModified;
 	private String noteID;
-	private String folder;
+	private String folderName;
 	private String size;
 	private String subject;
 	private String content;
 
-	public Note(String dateModified, String noteID, String folder, String size, String subject, String content) {
+	public Note(String dateModified, String noteID, String folderName, String size, String subject, String content) {
 		this.dateModified = dateModified;
 		this.noteID = noteID;
-		this.folder = folder;
+		this.folderName = folderName;
 		this.size = size;
 		this.subject = subject;
 		this.content = content;
 	}
 
-	public Note(Map<String, String> map1) {
+	public Note(Map<String, String> noteInfoMap) {
 
 		String UNDEF = "Not Set";
+
 		this.dateModified = UNDEF;
 		this.noteID = UNDEF;
-		this.folder = UNDEF;
+		this.folderName = UNDEF;
 		this.size = UNDEF;
 		this.subject = UNDEF;
 		this.content = UNDEF;
 
-		Set<String> keySet = map1.keySet();
+		Set<String> keySet = noteInfoMap.keySet();
 		Iterator<String> iterator = keySet.iterator();
 		while (iterator.hasNext()) {
 			String key = iterator.next();
 
-			Switch: switch (key) {
-			case "dateModified":
-				if (map1.containsKey(key)) {
-					this.dateModified = map1.get(key);
-					break Switch;
-				}
+			if (noteInfoMap.containsKey(key)) {
+				String value = noteInfoMap.get(key);
+				value = (value == null ? UNDEF : value.trim() );
 
-			case "noteId":
-				if (map1.containsKey(key)) {
-					this.noteID = map1.get(key);
-					break Switch;
-				}
+				switch (key) {
+				case "dateModified":
+					this.dateModified = value;
+					break;
 
-			case "folderName":
-				if (map1.containsKey(key)) {
-					this.folder = map1.get(key);
-					break Switch;
-				}
+				case "noteId":
+					this.noteID = value;
+					break;
 
-			case "size":
-				if (map1.containsKey(key)) {
+				case "folderName":
+					this.folderName = value;
+					break;
+
+				case "size":
 					// TODO: Make size an int
-					this.size = map1.get(key);
-					break Switch;
+					// Integer.parseInt(value);
+					// (but don't forget to handle NumberFormatException ...)
+					this.size = value;
+					break;
+
+				case "subject":
+					this.subject = value;
+					break;
+
+				case "content":
+					this.content = value;
+					break;
+
+				default:
+					break;
 				}
-
-			case "subject":
-				if (map1.containsKey(key)) {
-					this.subject = map1.get(key);
-					break Switch;
-				}
-
-			case "content":
-				if (map1.containsKey(key)) {
-					this.content = map1.get(key);
-					break Switch;
-				}
-
-			default:
-
 			}
 		}
-
 	}
 
 	public String getDateModified() {
@@ -101,12 +96,12 @@ public class Note {
 		this.noteID = noteID;
 	}
 
-	public String getFolder() {
-		return folder;
+	public String getFolderName() {
+		return folderName;
 	}
 
-	public void setFolder(String folder) {
-		this.folder = folder;
+	public void setFolderName(String folderName) {
+		this.folderName = folderName;
 	}
 
 	public String getSize() {
@@ -137,7 +132,7 @@ public class Note {
 		Document test = Jsoup.parse(getContent());
 		return "\n" + "Date Modified: " + getDateModified() + "\n"
 				+ "Note ID: " + getNoteID() + "\n" + "Note Folder: "
-				+ getFolder() + "\n" + "Note Size: " + getSize() + "\n"
+				+ getFolderName() + "\n" + "Note Size: " + getSize() + "\n"
 				+ "Note Subject: " + getSubject() + "\n" + "Raw Note Content: "
 				+ getContent() + "\n" + "Clean Note Content: {" + "\n" + test.toString() + "}\n";
 	}

@@ -3,9 +3,12 @@ package icloud.notes;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.codec.binary.Base64;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -70,7 +73,8 @@ public class NoteManager extends BaseManager {
 		}
 
 		userTokens.updateUserTokens(conn.getResponseCookies(), user.UUID);
-		parseJson(conn.getResponseData());
+		String responseData = conn.getResponseData();
+		parseJson(responseData);
 
 		this.userTokens = userTokens;
 		this.user = user;
@@ -110,7 +114,8 @@ public class NoteManager extends BaseManager {
 
 		// JsonObject userData =
 		// CommonLogic.parseJsonData(conn.getResponseData());
-		parseJson(conn.getResponseData());
+		String responseData = conn.getResponseData();
+		parseJson(responseData);
 
 		userTokens.updateUserTokens(conn.getResponseCookies(), user.UUID);
 
@@ -167,7 +172,7 @@ public class NoteManager extends BaseManager {
 	private void parseNotes(JsonArray dataArray) {
 		String[] noteStrings = { "dateModified", "size", "noteId",
 				"folderName", "subject", "detail" };
-
+		
 		for (JsonElement noteElem : dataArray) {
 			JsonObject noteObj = noteElem.getAsJsonObject();
 			// System.out.println(noteObj.toString());
@@ -190,7 +195,7 @@ public class NoteManager extends BaseManager {
 				}
 			}
 			Note newNote = new Note(map1);
-			userNotes.get(mainNotebook).addNote(newNote.getNoteID(), newNote);
+			userNotes.get(mainNotebook).addNote(Base64.encodeBase64String(newNote.getNoteID().getBytes()), newNote);
 			// System.out.println("Note Object: " +
 			// noteObj.toString());
 			// System.out.flush();
@@ -212,11 +217,17 @@ public class NoteManager extends BaseManager {
 				} else {
 					if (noteObj.has(currentString)) {
 						// delete note with matching id
-						NoteBook notesabc = userNotes.get(mainNotebook);
+						String var = noteObj.get("noteId").toString();
+						
+						String encodedVar = Base64.encodeBase64String(var.getBytes());
+						
+						userNotes.get(mainNotebook).deleteNote(encodedVar);
+
+/*						NoteBook notesabc = userNotes.get(mainNotebook);
 						String var = noteObj.get("noteId").toString();
 						System.out.println(var);
 						notesabc.deleteNote(var);
-						userNotes.put(mainNotebook, notesabc);
+						userNotes.put(mainNotebook, notesabc);*/
 					}
 				}
 			}
@@ -224,6 +235,10 @@ public class NoteManager extends BaseManager {
 			// noteObj.toString());
 			// System.out.flush();
 		}
+	}
+
+	public void getChanges() throws Exception {
+		callChangeset();
 	}
 
 	private boolean validateID(idTypes id, String ID) {
@@ -242,7 +257,7 @@ public class NoteManager extends BaseManager {
 	public void createNote(Note newNote, String noteBookID) throws Exception {
 		JsonObject innerObject = new JsonObject();
 		innerObject.addProperty("dateModified", newNote.getDateModified());
-		innerObject.addProperty("folderName", newNote.getFolder());
+		innerObject.addProperty("folderName", newNote.getFolderName());
 		innerObject.addProperty("noteId", newNote.getNoteID());
 		innerObject.addProperty("subject", newNote.getSubject());
 
@@ -288,7 +303,8 @@ public class NoteManager extends BaseManager {
 
 		userTokens.updateUserTokens(conn.getResponseCookies(), user.UUID);
 
-		parseJson(conn.getResponseData());
+		String responseData = conn.getResponseData();
+		parseJson(responseData);
 		callChangeset();
 	}
 
@@ -334,7 +350,9 @@ public class NoteManager extends BaseManager {
 
 		userTokens.updateUserTokens(conn.getResponseCookies(), user.UUID);
 
-		parseJson(conn.getResponseData());
+		String responseData = conn.getResponseData();
+		parseJson(responseData);
+
 		callChangeset();
 	}
 
