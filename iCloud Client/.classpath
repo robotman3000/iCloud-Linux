@@ -17,5 +17,6 @@
 			<attribute name="javadoc_location" value="jar:file:/home/enims/git/iCloud-Linux/iCloud%20Client/libs/commons-codec-1.10/commons-codec-1.10-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.eclipse.swt"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

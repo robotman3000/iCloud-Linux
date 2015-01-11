@@ -48,11 +48,9 @@ public class GraphicTestClient extends TestClient{
 		frame = new JFrame();
 		frame.setBounds(100, 100, 450, 300);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setLayout(null);
 
 		JButton connectButton = new JButton();
-		connectButton.setSize(120, 30);
-		connectButton.setLocation(10, 10);
+		connectButton.setBounds(10, 10, 120, 30);
 		connectButton.setText("Connect");
 		connectButton.setToolTipText("Opens Connection To Server");
 
@@ -66,12 +64,12 @@ public class GraphicTestClient extends TestClient{
 				}
 			}
 		});
+		frame.getContentPane().setLayout(null);
 
-		frame.add(connectButton);
+		frame.getContentPane().add(connectButton);
 
 		JButton disconnectButton = new JButton();
-		disconnectButton.setSize(120, 30);
-		disconnectButton.setLocation(10, 50);
+		disconnectButton.setBounds(10, 50, 120, 30);
 		disconnectButton.setText("Disconnect");
 		disconnectButton.setToolTipText("Closes Connection To Server");
 
@@ -86,11 +84,10 @@ public class GraphicTestClient extends TestClient{
 			}
 		});
 		
-		frame.add(disconnectButton);
+		frame.getContentPane().add(disconnectButton);
 		
 		JButton printUserPropsButton = new JButton();
-		printUserPropsButton.setSize(120, 30);
-		printUserPropsButton.setLocation(10, 90);
+		printUserPropsButton.setBounds(10, 90, 120, 30);
 		printUserPropsButton.setText("Print Properties");
 		printUserPropsButton.setToolTipText("Gets User Properties");
 
@@ -100,11 +97,10 @@ public class GraphicTestClient extends TestClient{
 			}
 		});
 		
-		frame.add(printUserPropsButton);
+		frame.getContentPane().add(printUserPropsButton);
 		
 		JButton getNoteManButton = new JButton();
-		getNoteManButton.setSize(120, 30);
-		getNoteManButton.setLocation(140, 10);
+		getNoteManButton.setBounds(140, 10, 120, 30);
 		getNoteManButton.setText("Create Note Manager");
 		getNoteManButton.setToolTipText("Gets User Note Manager");
 
@@ -119,11 +115,10 @@ public class GraphicTestClient extends TestClient{
 			}
 		});
 		
-		frame.add(getNoteManButton);
+		frame.getContentPane().add(getNoteManButton);
 		
 		JButton printNotesButton = new JButton();
-		printNotesButton.setSize(120, 30);
-		printNotesButton.setLocation(140, 50);
+		printNotesButton.setBounds(140, 50, 120, 30);
 		printNotesButton.setText("Print Notes");
 		printNotesButton.setToolTipText("Prints User Notes");
 
@@ -138,11 +133,10 @@ public class GraphicTestClient extends TestClient{
 			}
 		});
 		
-		frame.add(printNotesButton);
+		frame.getContentPane().add(printNotesButton);
 		
 		JButton deleteNoteButton = new JButton();
-		deleteNoteButton.setSize(120, 30);
-		deleteNoteButton.setLocation(140, 90);
+		deleteNoteButton.setBounds(140, 90, 120, 30);
 		deleteNoteButton.setText("Delete Note");
 		deleteNoteButton.setToolTipText("Deletes a Note");
 
@@ -157,11 +151,10 @@ public class GraphicTestClient extends TestClient{
 			}
 		});
 		
-		frame.add(deleteNoteButton);
+		frame.getContentPane().add(deleteNoteButton);
 		
 		JButton noteChangesetButton = new JButton();
-		noteChangesetButton.setSize(120, 30);
-		noteChangesetButton.setLocation(140, 130);
+		noteChangesetButton.setBounds(140, 130, 120, 30);
 		noteChangesetButton.setText("Note Changeset");
 		noteChangesetButton.setToolTipText("");
 
@@ -176,7 +169,6 @@ public class GraphicTestClient extends TestClient{
 			}
 		});
 		
-		frame.add(noteChangesetButton);
+		frame.getContentPane().add(noteChangesetButton);
 	}
-
 }

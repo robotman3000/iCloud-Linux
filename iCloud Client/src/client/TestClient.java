@@ -106,6 +106,7 @@ public class TestClient {
 		System.out.println("The current users Locale is: " + user1.getLocale());
 	}
 
+	
 	protected void createNoteManager() throws Exception {
 		if (connected != true) {
 			return;
@@ -113,19 +114,6 @@ public class TestClient {
 		noteMgr = new NoteManager(user1, user1Tokens, true);
 		hasNoteMan = true;
 
-	}
-
-	protected void deleteNote() throws Exception {
-		if (connected == true && hasNoteMan == true) {
-			Scanner reader = new Scanner(System.in);
-			System.out.println("Enter the Note to delete");
-			// get user input for a
-			String a = reader.next();
-			System.out.println(a);
-			reader.close();
-
-			noteMgr.deleteNote(a);
-		}
 	}
 
 	protected void printNotes(NoteManager user1Notes) {
@@ -172,6 +160,19 @@ public class TestClient {
 			CommonLogic.splitOut();
 			System.out.println("End Note Echo");
 			CommonLogic.splitOut();
+		}
+	}
+
+	protected void deleteNote() throws Exception {
+		if (connected == true && hasNoteMan == true) {
+			Scanner reader = new Scanner(System.in);
+			System.out.println("Enter the Note to delete");
+			// get user input for a
+			String a = reader.next();
+			System.out.println(a);
+			reader.close();
+
+			noteMgr.deleteNote(a);
 		}
 	}
 }
