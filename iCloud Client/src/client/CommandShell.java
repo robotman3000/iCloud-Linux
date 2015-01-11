@@ -52,7 +52,6 @@ public class CommandShell {
 		
 		// copy pasted
 		String[] kvPairs = unreadCommand.split(";");
-		unreadCommand.
 		for(String kvPair: kvPairs) {
 			   String[] kv = kvPair.split("=");
 			   String key = kv[0];
