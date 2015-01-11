@@ -25,8 +25,6 @@ public class CommonLogic {
 		return jsonObject;
 	}
 
-
-
 	public static String generateUUID() {
 		new UUID(new Random().nextLong(), new Random().nextLong());
 		UUID generatedUUID = UUID.randomUUID();
@@ -65,4 +63,22 @@ public class CommonLogic {
 		}
 	}
 
+	public static boolean stringToBoolean(String string){
+		boolean result = false;
+		
+		if (string.equalsIgnoreCase("true")){
+			result = true;
+		} else if (string.equalsIgnoreCase("false")){
+			result = false;
+		}
+		return result;
+	}
+	
+	public static String booleanToString (boolean bool){
+		String result = "false";
+		if (bool){
+			result = "true";
+		}
+		return result;
+	}
 }
