@@ -219,8 +219,7 @@ public class NoteManager extends BaseManager {
 						// delete note with matching id
 
 						String var = noteObj.get("noteId").toString();
-						Iterator<String> it = userNotes.get(mainNotebook)
-								.getNoteKeys().iterator();
+						Iterator<String> it = userNotes.get(mainNotebook).getNoteKeys().iterator();
 
 						while (it.hasNext()) {
 							String uKey = it.next();
@@ -230,7 +229,8 @@ public class NoteManager extends BaseManager {
 							String noteIDVar = "\"" +  note.getNoteID() + "\"";
 							
 							if (noteIDVar.equalsIgnoreCase(var)) {
-								userNotes.get(mainNotebook).deleteNote(uKey);
+								//userNotes.get(mainNotebook).deleteNote(uKey); This causes a java.util.ConcurrentModificationException
+								it.remove();
 								System.out.println("parseDeleted() print");
 							}
 						}
