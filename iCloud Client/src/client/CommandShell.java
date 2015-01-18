@@ -28,6 +28,7 @@ public class CommandShell {
 				+ "Type \"help\" for a list of commands");
 
 		while (doExit != true) {
+			try {
 			HashMap<String, String> stateMap = new HashMap<String, String>();
 			stateMap.put("debugenabled", CommonLogic.booleanToString(debugEnabled));
 			stateMap.put("announceconnections", CommonLogic.booleanToString(announceConnections));
@@ -55,6 +56,10 @@ public class CommandShell {
 
 			if (command.equals(Commands.BaseCommandEnum.exit)) {
 				doExit = true;
+			}
+			
+			} catch (Exception e){
+				e.printStackTrace();
 			}
 		}
 	}
