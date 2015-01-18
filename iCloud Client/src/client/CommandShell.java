@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-import client.Commands.CommandEnum;
+import client.Commands.BaseCommandEnum;
 
 public class CommandShell {
 
@@ -28,39 +28,56 @@ public class CommandShell {
 				+ "Type \"help\" for a list of commands");
 
 		while (doExit != true) {
-			String unreadCommand = local.getCommand();
-			HashMap<String, String> commandArgs = local.parseCommandArgs(unreadCommand);
-
-			Commands.CommandEnum command = Commands.CommandEnum.valueOf(commandArgs.get("command"));
-			commandArgs.remove("command");
-
 			HashMap<String, String> stateMap = new HashMap<String, String>();
 			stateMap.put("debugenabled", CommonLogic.booleanToString(debugEnabled));
 			stateMap.put("announceconnections", CommonLogic.booleanToString(announceConnections));
-			
+
+			String unreadCommand = local.getCommand();
+			HashMap<String, String> commandArgs = null;
+			try {
+				commandArgs = local.parseCommandArgs(unreadCommand);
+			} finally {
+
+			}
+
+			Commands.BaseCommandEnum command = Commands.BaseCommandEnum.invalid;
+			try {
+				String commandStr = commandArgs.get("command");
+				command = Commands.BaseCommandEnum.valueOf(commandStr);
+			} catch (IllegalArgumentException | NullPointerException e) {
+				System.out.println("icsh: " + commandArgs.get("command") + ":" + " command not found...");
+				continue;
+			} finally {
+				commandArgs.remove("command");
+			}
+
 			command.run(commandArgs, stateMap);
-			
-			if (command.equals(Commands.CommandEnum.exit)) {
+
+			if (command.equals(Commands.BaseCommandEnum.exit)) {
 				doExit = true;
 			}
 		}
 	}
 
 	private HashMap<String, String> parseCommandArgs(String unreadCommand) {
-		
+
 		HashMap<String, String> commandArgs = new HashMap<String, String>();
-		
-		// copy pasted
-		String[] kvPairs = unreadCommand.split(";");
-		for(String kvPair: kvPairs) {
-			   String[] kv = kvPair.split("=");
-			   String key = kv[0];
-			   String value = kv[1];
-			   
-			   // my own
-			   commandArgs.put(key, value);
+
+		if (unreadCommand != null) {
+			// copy pasted
+			String[] kvPairs = unreadCommand.split(";");
+			for (String kvPair : kvPairs) {
+				String[] kv = kvPair.split("=");
+				if (kv.length >= 2) {
+					String key = kv[0].trim();
+					String value = kv[1].trim();
+
+					// my own
+					commandArgs.put(key, value);
+				}
+			}
 		}
-		
+
 		return commandArgs;
 	}
 
@@ -69,6 +86,18 @@ public class CommandShell {
 		System.out.print("> ");
 		System.out.flush();
 		String commandStr = in.nextLine();
+		//switch (commandStr) {
+/*		case "help":
+			Commands.BaseCommandEnum.help.run(commandArgs, stateMap);
+			break;
+
+		case "exit":
+
+			break;
+
+		default:
+			break;
+		}*/
 		return commandStr;
 	}
 

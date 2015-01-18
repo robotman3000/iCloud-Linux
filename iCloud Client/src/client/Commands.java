@@ -7,14 +7,10 @@ import java.util.Map;
 public class Commands{
 
 	static TestClient var = new TestClient();
-	public enum CommandEnum {
+	public enum BaseCommandEnum {
 
-		help {
+		invalid {
 			public void run(Map<String, String> args, Map<String, String> stateMap) {
-				for(CommandEnum enums : CommandEnum.values()){
-					System.out.println(enums.toString());
-				}
-				
 			}
 		},
 		
@@ -22,6 +18,13 @@ public class Commands{
 		connect {
 			public void run(Map<String, String> args, Map<String, String> stateMap) throws Exception {
 				var.openConnection(args.get("username"), args.get("password"), CommonLogic.stringToBoolean(args.get("extendedlogin")), CommonLogic.stringToBoolean(stateMap.get("debugenabled")), CommonLogic.stringToBoolean(stateMap.get("announceconnections")));
+			}
+		},
+		
+		validateprevious {
+			public void run(Map<String, String> args, Map<String, String> stateMap) throws Exception {
+				//var.openConnection(args.get("username"), args.get("password"), CommonLogic.stringToBoolean(args.get("extendedlogin")), CommonLogic.stringToBoolean(stateMap.get("debugenabled")), CommonLogic.stringToBoolean(stateMap.get("announceconnections")));
+				System.out.println("Unimplemented!!");
 			}
 		},
 		
@@ -37,24 +40,44 @@ public class Commands{
 			}
 		},
 		
-/*		listmodes {
-			public void run(Map<String, String> args) {
-				System.out.println("You ran listmodes");
+		callnotestartup {
+			public void run(Map<String, String> args, Map<String, String> stateMap) throws Exception {
+				var.createNoteManager();
 			}
 		},
 		
-		setmode {
-			public void run(Map<String, String> args) {
-				System.out.println("You ran setmode");
+		printnotes {
+			public void run(Map<String, String> args, Map<String, String> stateMap) throws Exception {
+				var.printNotes();
 			}
 		},
 		
-		getmode {
-			public void run(Map<String, String> args) {
-				System.out.println("You ran getmode");
+		deletenote {
+			public void run(Map<String, String> args, Map<String, String> stateMap) throws Exception {
+				var.deleteNote();
 			}
-		},*/
-
+		},
+		
+		createnote {
+			public void run(Map<String, String> args, Map<String, String> stateMap) throws Exception {
+				var.createNote();
+			}
+		},
+		
+		getnotechanges {
+			public void run(Map<String, String> args, Map<String, String> stateMap) throws Exception {
+				var.manualCallNoteChangeset();
+			}
+		},
+		
+		help {
+			public void run(Map<String, String> args, Map<String, String> stateMap) {
+				for(BaseCommandEnum enums : BaseCommandEnum.values()){
+					System.out.println(enums.toString());
+				}
+			}
+		},
+		
 		exit {
 			public void run(Map<String, String> args, Map<String, String> stateMap) {
 				System.out.println("Exiting current mode");	
@@ -62,5 +85,15 @@ public class Commands{
 		};
 
 		public abstract void run(Map<String, String> args, Map<String, String> stateMap) throws Exception;
+	}
+
+	public enum NoteCommandEnum {
+		
+		
+	}
+	
+	public enum UserCommandEnum {
+		
+		
 	}
 }

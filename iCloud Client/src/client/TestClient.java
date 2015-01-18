@@ -22,8 +22,7 @@ public class TestClient {
 	protected boolean hasNoteMan = false;
 
 	public static void main(String[] args) throws Exception {
-
-		TestClient var = new TestClient();
+/*		TestClient var = new TestClient();
 
 		boolean debugEnabled = true;
 		boolean announceConnections = true;
@@ -41,7 +40,7 @@ public class TestClient {
 
 		if (debugEnabled) {
 			var.printUserProps();
-		}
+		}*/
 
 		// NoteManager user1Notes = new NoteManager(user1, user1Tokens,
 		// debugEnabled);
@@ -116,10 +115,10 @@ public class TestClient {
 
 	}
 
-	protected void printNotes(NoteManager user1Notes) {
+	protected void printNotes() {
 		if (connected == true && hasNoteMan == true) {
 			// TODO Auto-generated method stub
-			Set<String> notebookList = user1Notes.getNotebookList();
+			Set<String> notebookList = noteMgr.getNotebookList();
 			Iterator<String> iterator = notebookList.iterator();
 
 			CommonLogic.splitOut();
@@ -127,16 +126,16 @@ public class TestClient {
 			CommonLogic.splitOut();
 			while (iterator.hasNext()) {
 				String nextNotebook = iterator.next();
-				Set<String> notesList = user1Notes.getNotesList(nextNotebook);
+				Set<String> notesList = noteMgr.getNotesList(nextNotebook);
 				Iterator<String> iter = notesList.iterator();
 
 				System.out.println("Note Manager \"toString\"" + "\n"
-						+ user1Notes.toString());
+						+ noteMgr.toString());
 
 				while (iter.hasNext()) {
 
 					String nextNote = iter.next();
-					Note tempNote = user1Notes.getNote(nextNote, nextNotebook);
+					Note tempNote = noteMgr.getNote(nextNote, nextNotebook);
 
 					Document noteContent = Jsoup.parse(tempNote.getContent());
 
@@ -174,5 +173,16 @@ public class TestClient {
 
 			noteMgr.deleteNote(a);
 		}
+	}
+
+	
+	protected void createNote() {
+		// TODO Auto-generated method stub
+		System.out.println("Unimplemented");
+		
+	}
+
+	protected void manualCallNoteChangeset() throws Exception{
+		noteMgr.getChanges();
 	}
 }
