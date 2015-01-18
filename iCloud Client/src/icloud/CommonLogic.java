@@ -64,17 +64,32 @@ public class CommonLogic {
 	}
 
 	public static boolean stringToBoolean(String string){
+		return Boolean.parseBoolean(string);
+	}
+
+	public static boolean stringToBoolean1(String string){
 		boolean result = false;
 		
-		if (string.equalsIgnoreCase("true")){
+		if ("true".equalsIgnoreCase(string)){
 			result = true;
-		} else if (string.equalsIgnoreCase("false")){
+		} else if ("false".equalsIgnoreCase(string)){
 			result = false;
 		}
 		return result;
 	}
 	
-	public static String booleanToString (boolean bool){
+	public static String booleanToString2(boolean bool){
+		String result = null;
+		if (bool) result = "true"; else result = "false";
+
+		return result;
+	}
+	
+	public static String booleanToString(boolean bool){
+		return (bool ? "true" : "false");
+	}
+	
+	public static String booleanToString1(boolean bool){
 		String result = "false";
 		if (bool){
 			result = "true";
