@@ -1,6 +1,9 @@
 package icloud.services.account;
 
-import java.net.URI;
+import icloud.services.BaseManager;
+import icloud.services.ManagerInterface;
+import icloud.user.UserSession;
+
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,14 +11,9 @@ import java.util.Map;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
 import common.CommonLogic;
 import common.ServerConnection;
 import common.URLBuilder;
-import icloud.services.BaseManager;
-import icloud.services.ManagerInterface;
-import icloud.services.ServerStrings;
-import icloud.user.UserSession;
 
 public class AccountManager extends BaseManager implements ManagerInterface {
 
@@ -37,29 +35,21 @@ public class AccountManager extends BaseManager implements ManagerInterface {
 		// TODO: Make all magic values be generated or read from a config file
 
 		Map<String, String> headersMap = new HashMap<String, String>();
-		// TODO: make this be handled by generateQuery()
-		String authString = "{\"apple_id\":" + "\"" + user.getUsername() + "\"" + ",\"password\":"
-				+ "\"" + user.getPassword() + "\"" + ",\"extended_login\":"
-				+ user.isExtendedLogin() + "}";
-
-		/*
-		 * URL httpUrl = new URL(initialURL +
-		 * ServerStrings.getConfig().getProperty("account.url.login") +
-		 * ServerStrings.getConfig().getProperty("query.arg.clientBN") + "=" +
-		 * user.getClientBuildNumber() + "&" +
-		 * ServerStrings.getConfig().getProperty("query.arg.clientId") + "="
-		 * +user.getUuid());
-		 */
 		URLBuilder newUrl = new URLBuilder();
-		newUrl.setPath(ServerStrings.getConfig().getProperty("account.url.login"));
-		newUrl.setPort(Integer.parseInt(ServerStrings.getConfig().getProperty(
-				"account.url.default.port")));
-		newUrl.setProtocol(ServerStrings.getConfig().getProperty("account.url.default.protocol"));
-		newUrl.setUrl(ServerStrings.getConfig().getProperty("account.url.default.host"));
-		newUrl.addQueryString(ServerStrings.getConfig().getProperty("query.arg.clientBN"),
+
+		newUrl.setPath(user.getSessionConfigOptValue("account.url.login"));
+
+		newUrl.setPort(Integer.parseInt(user.getSessionConfigOptValue("default.port")));
+
+		newUrl.setProtocol(user.getSessionConfigOptValue("default.protocol"));
+
+		newUrl.setUrl(user.getSessionConfigOptValue("account.url.default.host"));
+
+		newUrl.addQueryString(user.getSessionConfigOptValue("query.arg.clientBN"),
 				user.getClientBuildNumber());
-		newUrl.addQueryString(ServerStrings.getConfig().getProperty("query.arg.clientId"),
-				user.getUuid());
+
+		newUrl.addQueryString(user.getSessionConfigOptValue("query.arg.clientId"), user.getUuid());
+
 		URL httpUrl = newUrl.buildURL();
 
 		headersMap.put("Origin", "https://www.icloud.com");
@@ -67,25 +57,25 @@ public class AccountManager extends BaseManager implements ManagerInterface {
 
 		ServerConnection conn = new ServerConnection(debugEnabled);
 		conn.setServerUrl(httpUrl);
-		conn.setRequestMethod(ServerStrings.getConfig().getProperty(
-				"account.url.default.requestMethod"));
+		conn.setRequestMethod(user.getSessionConfigOptValue("default.requestMethod"));
 		conn.setRequestHeaders(headersMap);
-		conn.setPayload(authString);
+		conn.setPayload(generateQuery(user));
 		conn.connect();
 
-		parseResponse(user, conn.getResponseData());
+		String responseData = conn.getResponseDataAsString();
+		parseResponse(user, responseData);
 
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
 
 		// Debug Output
 		if (debugEnabled) {
-			System.out.println("Authentication String: " + authString);
+			System.out.println("Authentication String: " + generateQuery(user));
 			System.out.println("UUID: " + user.getUuid());
 			CommonLogic.splitOut();
 		}
 
 		if (debugEnabled) {
-			CommonLogic.printJson(conn.getResponseData());
+			CommonLogic.printJson(responseData);
 		}
 
 	}
@@ -104,12 +94,29 @@ public class AccountManager extends BaseManager implements ManagerInterface {
 
 		ServerConnection conn = new ServerConnection(debugEnabled);
 
-		Map<String, String> accountServer = user.getUserConfig().getServersList().get("account");
-		URL httpUrl = new URL(accountServer.get("url") + "/setup/ws/1/logout?"
-				+ "clientBuildNumber=" + user.getClientBuildNumber() + "&clientId="
-				+ user.getUuid() + "&token=" + valCookie + "&dsid="
-				+ user.getUserConfig().getUserProperties().getProperty("dsid") + "&proxyDest="
-				+ "p30-setup");
+		String accountServer = user.getServerUrl("account");
+		//String accountServer = "https://www.icloud.com";
+		/*
+		 * URL httpUrl = new URL(accountServer.get("url") +
+		 * "/setup/ws/1/logout?" + "clientBuildNumber=" +
+		 * user.getClientBuildNumber() + "&clientId=" + user.getUuid() +
+		 * "&token=" + valCookie + "&dsid=" +
+		 * user.getUserConfig().getUserProperties().getProperty("dsid") +
+		 * "&proxyDest=" + "p30-setup");
+		 */
+		URLBuilder newUrl = new URLBuilder();
+		newUrl.setPath(user.getSessionConfigOptValue("account.url.logout"));
+		//newUrl.setProtocol(user.getSessionConfigOptValue("default.protocol"));
+		newUrl.setUrl(accountServer);
+		newUrl.addQueryString(user.getSessionConfigOptValue("query.arg.clientBN"),
+				user.getClientBuildNumber());
+		newUrl.addQueryString(user.getSessionConfigOptValue("query.arg.clientId"), user.getUuid());
+		newUrl.addQueryString(user.getSessionConfigOptValue("query.arg.dsid"), user.getUserConfig()
+				.getUserProperties().getProperty("dsid"));
+		//newUrl.addQueryString(user.getSessionConfigOptValue("query.arg.proxyDest"), "p30-setup");
+		newUrl.addQueryString(user.getSessionConfigOptValue("query.arg.token"), valCookie);
+		URL httpUrl = newUrl.buildURL();
+
 		conn.setServerUrl(httpUrl);
 		conn.setRequestMethod("POST");
 		conn.setRequestHeaders(headersMap);
@@ -118,9 +125,8 @@ public class AccountManager extends BaseManager implements ManagerInterface {
 		conn.connect();
 
 		if (debugEnabled) {
-			CommonLogic.printJson(conn.getResponseData());
+			CommonLogic.printJson(conn.getResponseDataAsString());
 		}
-
 	}
 
 	public void validate(UserSession user) throws Exception {
@@ -130,32 +136,31 @@ public class AccountManager extends BaseManager implements ManagerInterface {
 		}
 		// TODO: Make all magic values be generated or read from a config file
 
-		URLBuilder urlBuilder = new URLBuilder()
-				.setPath(ServerStrings.getConfig().getProperty("account.url.validate"))
-				.setPort(
-						Integer.parseInt(ServerStrings.getConfig().getProperty(
-								"account.url.default.port")))
-				.setProtocol(ServerStrings.getConfig().getProperty("account.url.default.protocol"))
-				.setUrl(ServerStrings.getConfig().getProperty("account.url.default.host"))
-				.addQueryString(ServerStrings.getConfig().getProperty("query.arg.clientBN"),
+		URL url = new URLBuilder()
+				.setPath(user.getSessionConfigOptValue("account.url.validate"))
+				.setPort(Integer.parseInt(user.getSessionConfigOptValue("default.port")))
+				.setProtocol(user.getSessionConfigOptValue("default.protocol"))
+				.setUrl(user.getSessionConfigOptValue("account.url.default.host"))
+				.addQueryString(user.getSessionConfigOptValue("query.arg.clientBN"),
 						user.getClientBuildNumber())
-				.addQueryString(ServerStrings.getConfig().getProperty("query.arg.clientId"),
-						user.getUuid());
+				.addQueryString(user.getSessionConfigOptValue("query.arg.clientId"), user.getUuid())
+				.buildURL();
 
 		Map<String, String> headersMap = new HashMap<String, String>();
 		headersMap.put("Origin", "https://www.icloud.com");
 		headersMap.put("User-Agent", "Mozilla/5.0 Java_iCloud/1.0 LoginManager/1.0");
-		URL url = urlBuilder.buildURL();
-		ServerConnection conn = new ServerConnection(debugEnabled).setRequestMethod("POST").setServerUrl(url)
-				.setPayload("{}").setRequestCookies(user.getUserTokens().getTokens())
-				.setRequestHeaders(headersMap);
+		ServerConnection conn = new ServerConnection(debugEnabled)
+				.setRequestMethod(user.getSessionConfigOptValue("default.requestMethod"))
+				.setServerUrl(url).setPayload("{}")
+				.setRequestCookies(user.getUserTokens().getTokens()).setRequestHeaders(headersMap);
 		conn.connect();
 
-		parseResponse(user, conn.getResponseData());
+		String responseData = conn.getResponseDataAsString();
+		parseResponse(user, responseData);
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
 
 		if (debugEnabled) {
-			CommonLogic.printJson(conn.getResponseData());
+			CommonLogic.printJson(responseData);
 		}
 	}
 
@@ -181,18 +186,19 @@ public class AccountManager extends BaseManager implements ManagerInterface {
 		String[] webServiceStrings = { "reminders", "mail", "drivews", "settings", "keyvalue",
 				"push", "contacts", "findme", "photos", "ubiquity", "iwmb", "ckdatabasews",
 				"docws", "account", "streams", "notes", "calendar" };
-		String[] memberStrings = { "status", "url", "pcsRequired" };
+		//String[] memberStrings = { "status", "url", "pcsRequired" };
+		String[] memberStrings = {"url"};
 		for (String str : webServiceStrings) {
 			JsonElement obj = webServices2.get(str);
 			JsonObject jelement = obj.getAsJsonObject();
-			Map<String, String> map1 = new HashMap<String, String>();
+			//Map<String, String> map1 = new HashMap<String, String>();
 			for (String mstr : memberStrings) {
 				if (jelement.has(mstr)) {
 					JsonElement json = jelement.get(mstr);
-					map1.put(mstr, json.getAsString());
+					user.addServerUrl(str, json.getAsString());
+					//map1.put(mstr, json.getAsString());
 				}
 			}
-			user.getUserConfig().getServersList().put(str, map1);
 		}
 
 		JsonElement jselement = userData.get("dsInfo");
@@ -210,7 +216,8 @@ public class AccountManager extends BaseManager implements ManagerInterface {
 
 	}
 
-	private void generateQuery() {
-
+	private String generateQuery(UserSession user) {
+		return "{\"apple_id\":" + "\"" + user.getUsername() + "\"" + ",\"password\":" + "\""
+				+ user.getPassword() + "\"" + ",\"extended_login\":" + user.isExtendedLogin() + "}";
 	}
 }
