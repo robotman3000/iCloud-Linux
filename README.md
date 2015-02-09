@@ -1,4 +1,4 @@
 iCloud-Linux
 ============
 
-A iCloud client for linux
+A iCloud Library for Linux and Windows
