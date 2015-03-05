@@ -58,6 +58,7 @@ public class UserSession {
 			urlConfig.put("query.arg.validateToken", "validateToken");
 			urlConfig.put("query.arg.attachmentId", "attachmentId");
 
+			System.out.println(urlConfig.toString());
 			/*
 			 * try { FileOutputStream out = new
 			 * FileOutputStream("defaultConfig"); urlConfig.store(out,
@@ -67,7 +68,28 @@ public class UserSession {
 			 * e1.printStackTrace(); }
 			 */
 		} finally {
-
+			urlConfig.put("account.url.login", "/setup/ws/1/login?");
+			urlConfig.put("account.url.logout", "/setup/ws/1/logout?");
+			urlConfig.put("account.url.validate", "/setup/ws/1/validate?");
+			urlConfig.put("account.url.default.host", "setup.icloud.com");
+			urlConfig.put("notes.url.startup", "/no/startup?");
+			urlConfig.put("notes.url.createnotes", "/no/createNotes?");
+			urlConfig.put("notes.url.updatenotes", "/no/updateNotes?");
+			urlConfig.put("notes.url.deletenotes", "/no/deleteNotes?");
+			urlConfig.put("notes.url.retriveAttachment", "/no/retrieveAttachment?");
+			urlConfig.put("notes.url.changeset", "/no/changeset?");
+			urlConfig.put("notes.url.default.host", "notesws.icloud.com");
+			urlConfig.put("default.protocol", "https://");
+			urlConfig.put("default.port", "443");
+			urlConfig.put("default.requestMethod", "POST");
+			urlConfig.put("query.arg.clientBN", "clientBuildNumber");
+			urlConfig.put("query.arg.clientId", "clientId");
+			urlConfig.put("query.arg.dsid", "dsid");
+			urlConfig.put("query.arg.proxyDest", "proxyDest");
+			urlConfig.put("query.arg.token", "token");
+			urlConfig.put("query.arg.syncToken", "syncToken");
+			urlConfig.put("query.arg.validateToken", "validateToken");
+			urlConfig.put("query.arg.attachmentId", "attachmentId");
 		}
 	}
 
