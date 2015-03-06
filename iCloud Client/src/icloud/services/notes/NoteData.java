@@ -1,5 +1,7 @@
 package icloud.services.notes;
 
+import icloud.services.notes.objects.NoteBook;
+
 import java.util.HashMap;
 import java.util.Map;
 

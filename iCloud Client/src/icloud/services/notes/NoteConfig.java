@@ -8,7 +8,7 @@ public class NoteConfig {
 		return syncToken;
 	}
 
-	protected void setSyncToken(String syncToken) {
+	public void setSyncToken(String syncToken) {
 		this.syncToken = syncToken;
 	}
 }

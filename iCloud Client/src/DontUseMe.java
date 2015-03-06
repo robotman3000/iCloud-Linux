@@ -1,12 +1,13 @@
+import icloud.services.account.AccountJson;
 import icloud.services.account.AccountManager;
 import icloud.services.contacts.Contact;
 import icloud.services.contacts.ContactGroup;
 import icloud.services.contacts.ContactManager;
 import icloud.services.contacts.Photo;
 import icloud.services.notes.NoteManager;
-import icloud.services.notes.Attachment;
-import icloud.services.notes.Note;
-import icloud.services.notes.Note.Details;
+import icloud.services.notes.objects.Attachment;
+import icloud.services.notes.objects.Note;
+import icloud.services.notes.objects.Note.Details;
 import icloud.user.UserSession;
 
 public class DontUseMe {
@@ -17,14 +18,12 @@ public class DontUseMe {
 		boolean extendedLogin = false;
 
 		// Declare user
-		UserSession userA = new UserSession(); // May be removed
-		UserSession userB = new UserSession(username, password);
-		UserSession userC = new UserSession(username, password, extendedLogin);
+		UserSession userA = new UserSession(username, password);
+		UserSession userB = new UserSession(username, password, extendedLogin);
 
 		userA.getPassword();
 		userA.getUsername();
 		userA.isExtendedLogin();
-		userA.setAuth(username, password, extendedLogin); // May be removed
 
 		userA.isPrimaryEmailVerified();
 		userA.getLastName();
@@ -54,14 +53,13 @@ public class DontUseMe {
 
 		// Declare Managers
 		AccountManager accountManager = new AccountManager();
-		AccountManager accountManager2 = new AccountManager(
-				announceConnections, debugEnabled);
+		AccountManager accountManager2 = new AccountManager(announceConnections, debugEnabled);
 
 		// AccountManager Use
 		accountManager.login(user);
 		accountManager.logout(user);
 		accountManager.validate(user);
-
+		
 		// Getters for any of the user properties
 	}
 
@@ -188,5 +186,10 @@ public class DontUseMe {
 		contactManager.getContact(user, contactId);
 		contactManager.getAllContacts(user);
 
+	}
+	
+	public AccountJson getMeAccountJson(){
+		
+		return null;
 	}
 }

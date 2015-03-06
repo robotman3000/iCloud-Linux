@@ -15,6 +15,8 @@ import common.ServerConnection;
 import common.URLBuilder;
 import icloud.services.BaseManager;
 import icloud.services.ManagerInterface;
+import icloud.services.notes.objects.Note;
+import icloud.services.notes.objects.NoteBook;
 import icloud.user.UserSession;
 
 public class NoteManager extends BaseManager implements ManagerInterface {

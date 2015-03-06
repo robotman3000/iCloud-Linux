@@ -1,6 +1,7 @@
-package icloud.services.notes;
+package icloud.services.notes.objects;
 
-import icloud.services.notes.Attachment;
+import icloud.services.notes.objects.Attachment;
+
 import java.util.List;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

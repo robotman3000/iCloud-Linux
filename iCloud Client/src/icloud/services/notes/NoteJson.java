@@ -1,5 +1,7 @@
 package icloud.services.notes;
 
+import icloud.services.notes.objects.Note;
+
 import java.util.List;
 
 public class NoteJson {

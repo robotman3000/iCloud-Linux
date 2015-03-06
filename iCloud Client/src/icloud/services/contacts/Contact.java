@@ -7,12 +7,8 @@ public class Contact {
 	private String period;
 	private String version;
 
-	public Contact(String UID, String revision, String period, String version) {
-
-		UID = this.UID;
-		revision = this.revision;
-		period = this.period;
-		version = this.version;
+	public Contact() {
+		// TODO Auto-generated constructor stub
 	}
 
 	public String getUID() {

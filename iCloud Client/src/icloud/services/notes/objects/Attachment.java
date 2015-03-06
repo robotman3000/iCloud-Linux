@@ -1,4 +1,4 @@
-package icloud.services.notes;
+package icloud.services.notes.objects;
 
 import common.CommonLogic;
 

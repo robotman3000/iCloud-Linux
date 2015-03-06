@@ -9,14 +9,6 @@ public class UserTokens {
 
 	private List<HttpCookie> userTokens = new ArrayList<HttpCookie>();
 
-	public UserTokens() {
-	}
-
-	@Deprecated
-	public UserTokens(List<HttpCookie> userTokens) {
-		updateTokens(userTokens);
-	}
-
 	public String getTokenValue(String tokenName) {
 		String tokenValue = "";
 		Iterator<HttpCookie> iterator = userTokens.iterator();
