@@ -10,12 +10,67 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
+import common.CommonLogic;
 import common.ServerConnection;
+import common.URLBuilder;
 import icloud.services.BaseManager;
+import icloud.services.account.AccountJson;
+import icloud.services.contacts.objects.AddressBook;
+import icloud.services.contacts.objects.Contact;
 import icloud.user.UserSession;
 
 public class ContactManager extends BaseManager {
 
+	public ContactManager(){
+		
+		
+	}
+	
+	public ContactManager(boolean announceConnections, boolean debugEnabled){
+		this();
+		this.announceConnections = announceConnections;
+		this.debugEnabled = debugEnabled;
+	}	
+	
+	public void getMeCard(){
+		
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	Map<String, AddressBook> addressBooks = new HashMap<String, AddressBook>();
 	
 	public ContactManager(UserSession user) throws Exception {

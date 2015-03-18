@@ -1,4 +1,4 @@
-package icloud.services.contacts;
+package icloud.services.contacts.objects;
 
 public class AddressBook {
 
