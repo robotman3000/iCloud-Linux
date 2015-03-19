@@ -2,15 +2,13 @@ package icloud.services.notes;
 
 import icloud.services.notes.objects.Note;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public class NoteJson {
 
-	private String syncToken = null;
-	
-	private List<Note> notes = null;
-
-	private List<Note> deleted = null;
+	private String syncToken;
+	private ArrayList<Note> notes;
+	private ArrayList<Note> deleted;
 	
 	public String getSyncToken() {
 		return syncToken;
@@ -20,19 +18,19 @@ public class NoteJson {
 		this.syncToken = syncToken;
 	}
 
-	public List<Note> getNotes() {
+	public ArrayList<Note> getNotes() {
 		return notes;
 	}
 
-	public void setNotes(List<Note> notes) {
+	public void setNotes(ArrayList<Note> notes) {
 		this.notes = notes;
 	}
 
-	public List<Note> getDeleted() {
+	public ArrayList<Note> getDeleted() {
 		return deleted;
 	}
 
-	public void setDeleted(List<Note> deleted) {
+	public void setDeleted(ArrayList<Note> deleted) {
 		this.deleted = deleted;
 	}
 }

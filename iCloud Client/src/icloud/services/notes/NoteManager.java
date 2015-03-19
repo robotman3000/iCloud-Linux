@@ -9,17 +9,18 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
+
 import com.google.gson.Gson;
+
 import common.CommonLogic;
 import common.ServerConnection;
 import common.URLBuilder;
 import icloud.services.BaseManager;
-import icloud.services.ManagerInterface;
 import icloud.services.notes.objects.Note;
 import icloud.services.notes.objects.NoteBook;
 import icloud.user.UserSession;
 
-public class NoteManager extends BaseManager implements ManagerInterface {
+public class NoteManager extends BaseManager{
 
 	private static final String mainNotebook = "main";
 
@@ -36,13 +37,13 @@ public class NoteManager extends BaseManager implements ManagerInterface {
 
 	public void startup(UserSession user) throws Exception {
 		URLBuilder urlBuilder = new URLBuilder().setUrl(user.getServerUrl("notes")).setPath(
-				user.getSessionConfigOptValue("notes.url.startup"));
-		urlBuilder.addQueryString(user.getSessionConfigOptValue("query.arg.clientBN"),
+				UserSession.notes_url_startup);
+		urlBuilder.addQueryString(UserSession.query_arg_clientBN,
 				user.getClientBuildNumber());
-		urlBuilder.addQueryString(user.getSessionConfigOptValue("query.arg.clientId"),
+		urlBuilder.addQueryString(UserSession.query_arg_clientId,
 				user.getUuid());
-		urlBuilder.addQueryString(user.getSessionConfigOptValue("query.arg.dsid"), user
-				.getUserConfig().getUserProperties().getProperty("dsid"));
+		urlBuilder.addQueryString(UserSession.query_arg_dsid, user
+				.getUserData().getAccountData().getDsInfo().getDsid());
 		Map<String, String> headersMap = new HashMap<String, String>();
 		headersMap.put("Origin", "https://www.icloud.com");
 		headersMap.put("User-Agent", "Mozilla/5.0 Java_iCloud/1.0 LoginManager/1.0");
@@ -62,26 +63,61 @@ public class NoteManager extends BaseManager implements ManagerInterface {
 		changeset(user);
 	}
 
+	public void retrieveNotes(UserSession user, ArrayList<Note> retrieveNotes) throws Exception{
+		
+		ArrayList<Note> sortedNotes = new ArrayList<>();
+		
+		for (Note note : retrieveNotes){
+			Note newNote = new Note();
+			newNote.setNoteID(note.getNoteID());
+			sortedNotes.add(newNote);
+		}
+		
+		Gson gson = new Gson();
+		NoteJson nJson = new NoteJson();
+		nJson.setNotes(sortedNotes);
+
+		Map<String, String> headersMap = new HashMap<String, String>();
+		headersMap.put("Origin", "https://www.icloud.com");
+		headersMap.put("User-Agent", "Mozilla/5.0 Java_iCloud/1.0 NoteManager/1.0");
+
+		ServerConnection conn = new ServerConnection(debugEnabled);
+
+		URLBuilder httpurlBuilder = new URLBuilder().setUrl(user.getServerUrl("notes")).setPath(
+				UserSession.notes_url_retrieveNotes);
+		httpurlBuilder.addQueryString(UserSession.query_arg_clientBN,
+				user.getClientBuildNumber());
+		httpurlBuilder.addQueryString(UserSession.query_arg_clientId,
+				user.getUuid());
+		httpurlBuilder.addQueryString(UserSession.query_arg_dsid, user
+				.getUserData().getAccountData().getDsInfo().getDsid());
+		httpurlBuilder.addQueryString(UserSession.query_arg_syncToken, user
+				.getUserConfig().getNoteConfig().getSyncToken());
+
+		URL httpUrl = httpurlBuilder.buildURL();
+
+		conn.setServerUrl(httpUrl);
+		conn.setRequestMethod("POST");
+		conn.setRequestHeaders(headersMap);
+		conn.setRequestCookies(user.getUserTokens().getTokens());
+		conn.setPayload(gson.toJson(nJson));
+		conn.connect();
+
+		user.getUserTokens().updateTokens(conn.getResponseCookies());
+
+		String responseData = conn.getResponseDataAsString();
+		parseResponse(user, responseData);
+
+		if (debugEnabled) {
+			CommonLogic.printJson(responseData);
+		}
+
+		changeset(user);
+		
+	}
+	
 	public void createNotes(UserSession user, Note newNote) throws Exception {
 
-		/*
-		 * JsonObject innerObject = new JsonObject();
-		 * innerObject.addProperty("dateModified", newNote.getDateModified());
-		 * innerObject.addProperty("folderName", newNote.getFolderName());
-		 * innerObject.addProperty("noteId", newNote.getNoteID());
-		 * innerObject.addProperty("subject", newNote.getSubject());
-		 * 
-		 * JsonObject contentObject = new JsonObject();
-		 * contentObject.addProperty("content", newNote.getContent());
-		 * 
-		 * JsonObject detailsObject = new JsonObject();
-		 * detailsObject.add("detail", contentObject);
-		 * 
-		 * innerObject.add("detail", detailsObject);
-		 * 
-		 * JsonObject jsonObject = new JsonObject(); jsonObject.add("notes",
-		 * innerObject);
-		 */
 		ArrayList<Note> noteList = new ArrayList<Note>();
 		noteList.add(newNote);
 
@@ -95,24 +131,15 @@ public class NoteManager extends BaseManager implements ManagerInterface {
 
 		ServerConnection conn = new ServerConnection(debugEnabled);
 
-		/*
-		 * URL httpUrl = new URL("https://" +
-		 * user.getUserConfig().getServersList().get("notes").get("url") +
-		 * "/no/createNotes?" + "clientBuildNumber=" +
-		 * user.getClientBuildNumber() + "&clientId=" + user.getUuid() +
-		 * "&dsid=" +
-		 * user.getUserConfig().getUserProperties().getProperty("dsid"));
-		 */
-
 		URLBuilder httpurlBuilder = new URLBuilder().setUrl(user.getServerUrl("notes")).setPath(
-				user.getSessionConfigOptValue("notes.url.createnotes"));
-		httpurlBuilder.addQueryString(user.getSessionConfigOptValue("query.arg.clientBN"),
+				UserSession.notes_url_createnotes);
+		httpurlBuilder.addQueryString(UserSession.query_arg_clientBN,
 				user.getClientBuildNumber());
-		httpurlBuilder.addQueryString(user.getSessionConfigOptValue("query.arg.clientId"),
+		httpurlBuilder.addQueryString(UserSession.query_arg_clientId,
 				user.getUuid());
-		httpurlBuilder.addQueryString(user.getSessionConfigOptValue("query.arg.dsid"), user
-				.getUserConfig().getUserProperties().getProperty("dsid"));
-		httpurlBuilder.addQueryString(user.getSessionConfigOptValue("query.arg.syncToken"), user
+		httpurlBuilder.addQueryString(UserSession.query_arg_dsid, user
+				.getUserData().getAccountData().getDsInfo().getDsid());
+		httpurlBuilder.addQueryString(UserSession.query_arg_syncToken, user
 				.getUserConfig().getNoteConfig().getSyncToken());
 
 		URL httpUrl = httpurlBuilder.buildURL();
@@ -151,16 +178,15 @@ public class NoteManager extends BaseManager implements ManagerInterface {
 		ServerConnection conn = new ServerConnection(debugEnabled);
 
 		URLBuilder httpurlBuilder = new URLBuilder().setUrl(user.getServerUrl("notes")).setPath(
-				user.getSessionConfigOptValue("notes.url.updatenotes"));
-		httpurlBuilder.addQueryString(user.getSessionConfigOptValue("query.arg.clientBN"),
+				UserSession.notes_url_updatenotes);
+		httpurlBuilder.addQueryString(UserSession.query_arg_clientBN,
 				user.getClientBuildNumber());
-		httpurlBuilder.addQueryString(user.getSessionConfigOptValue("query.arg.clientId"),
+		httpurlBuilder.addQueryString(UserSession.query_arg_clientId,
 				user.getUuid());
-		httpurlBuilder.addQueryString(user.getSessionConfigOptValue("query.arg.dsid"), user
-				.getUserConfig().getUserProperties().getProperty("dsid"));
-		httpurlBuilder.addQueryString(user.getSessionConfigOptValue("query.arg.syncToken"), user
+		httpurlBuilder.addQueryString(UserSession.query_arg_dsid, user
+		.getUserData().getAccountData().getDsInfo().getDsid());
+		httpurlBuilder.addQueryString(UserSession.query_arg_syncToken, user
 				.getUserConfig().getNoteConfig().getSyncToken());
-
 		URL httpUrl = httpurlBuilder.buildURL();
 
 		conn.setServerUrl(httpUrl);
@@ -190,16 +216,16 @@ public class NoteManager extends BaseManager implements ManagerInterface {
 		ServerConnection conn = new ServerConnection(debugEnabled);
 
 		URLBuilder httpurlBuilder = new URLBuilder().setUrl(user.getServerUrl("notes")).setPath(
-				user.getSessionConfigOptValue("notes.url.retriveAttachment"));
-		httpurlBuilder.addQueryString(user.getSessionConfigOptValue("query.arg.clientBN"),
+				UserSession.notes_url_retriveAttachment);
+		httpurlBuilder.addQueryString(UserSession.query_arg_clientBN,
 				user.getClientBuildNumber());
-		httpurlBuilder.addQueryString(user.getSessionConfigOptValue("query.arg.clientId"),
+		httpurlBuilder.addQueryString(UserSession.query_arg_clientId,
 				user.getUuid());
-		httpurlBuilder.addQueryString(user.getSessionConfigOptValue("query.arg.dsid"), user
-				.getUserConfig().getUserProperties().getProperty("dsid"));
-		httpurlBuilder.addQueryString(user.getSessionConfigOptValue("query.arg.validateToken"),
+		httpurlBuilder.addQueryString(UserSession.query_arg_dsid, user
+				.getUserData().getAccountData().getDsInfo().getDsid());
+		httpurlBuilder.addQueryString(UserSession.query_arg_validateToken,
 				user.getUserTokens().getTokenValue("X-APPLE-WEBAUTH-VALIDATE"));
-		httpurlBuilder.addQueryString(user.getSessionConfigOptValue("query.arg.attachmentId"),
+		httpurlBuilder.addQueryString(UserSession.query_arg_attachmentId,
 				attachmentId);
 
 		URL httpUrl = httpurlBuilder.buildURL();
@@ -240,14 +266,14 @@ public class NoteManager extends BaseManager implements ManagerInterface {
 		 */
 
 		URLBuilder httpurlBuilder = new URLBuilder().setUrl(user.getServerUrl("notes")).setPath(
-				user.getSessionConfigOptValue("notes.url.changeset"));
-		httpurlBuilder.addQueryString(user.getSessionConfigOptValue("query.arg.clientBN"),
+				UserSession.notes_url_changeset);
+		httpurlBuilder.addQueryString(UserSession.query_arg_clientBN,
 				user.getClientBuildNumber());
-		httpurlBuilder.addQueryString(user.getSessionConfigOptValue("query.arg.clientId"),
+		httpurlBuilder.addQueryString(UserSession.query_arg_clientId,
 				user.getUuid());
-		httpurlBuilder.addQueryString(user.getSessionConfigOptValue("query.arg.dsid"), user
-				.getUserConfig().getUserProperties().getProperty("dsid"));
-		httpurlBuilder.addQueryString(user.getSessionConfigOptValue("query.arg.syncToken"), user
+		httpurlBuilder.addQueryString(UserSession.query_arg_dsid, user
+				.getUserData().getAccountData().getDsInfo().getDsid());
+		httpurlBuilder.addQueryString(UserSession.query_arg_syncToken, user
 				.getUserConfig().getNoteConfig().getSyncToken());
 
 		URL httpUrl = httpurlBuilder.buildURL();
@@ -304,13 +330,13 @@ public class NoteManager extends BaseManager implements ManagerInterface {
 
 		URLBuilder urlBuild = new URLBuilder();
 		urlBuild.setUrl(user.getServerUrl("notes"));
-		urlBuild.setPath(user.getSessionConfigOptValue("notes.url.deletenotes"));
-		urlBuild.addQueryString(user.getSessionConfigOptValue("query.arg.clientBN"),
+		urlBuild.setPath(UserSession.notes_url_deletenotes);
+		urlBuild.addQueryString(UserSession.query_arg_clientBN,
 				user.getClientBuildNumber());
-		urlBuild.addQueryString(user.getSessionConfigOptValue("query.arg.clientId"), user.getUuid());
-		urlBuild.addQueryString(user.getSessionConfigOptValue("query.arg.dsid"), user
-				.getUserConfig().getUserProperties().getProperty("dsid"));
-		urlBuild.addQueryString(user.getSessionConfigOptValue("query.arg.syncToken"), user
+		urlBuild.addQueryString(UserSession.query_arg_clientId, user.getUuid());
+		urlBuild.addQueryString(UserSession.query_arg_dsid, user
+				.getUserData().getAccountData().getDsInfo().getDsid());
+		urlBuild.addQueryString(UserSession.query_arg_syncToken, user
 				.getUserConfig().getNoteConfig().getSyncToken());
 		URL httpUrl = urlBuild.buildURL();
 
@@ -394,7 +420,6 @@ public class NoteManager extends BaseManager implements ManagerInterface {
 				return noteList.get(noteID);
 			}
 		}
-		// TODO: add better error returning
 		return null;
 	}
 
@@ -403,7 +428,6 @@ public class NoteManager extends BaseManager implements ManagerInterface {
 			NoteBook noteVar = user.getUserData().getNoteData().getUserNotes().get(noteBookID);
 			return noteVar.getAllNotes().keySet();
 		}
-		// TODO: add better error returning
 		return null;
 	}
 

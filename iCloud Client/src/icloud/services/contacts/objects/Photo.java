@@ -6,6 +6,14 @@ public class Photo {
 	private boolean isCompany;
 	private Crop crop = new Crop();
 
+	public Photo(String photoBase64) {
+		// TODO Auto-generated constructor stub
+	}
+
+	public Photo() {
+		// TODO Auto-generated constructor stub
+	}
+
 	public String getUrl() {
 		return url;
 	}
@@ -76,5 +84,15 @@ public class Photo {
 			this.x = x;
 		}
 
+	}
+
+	public void getPhoto() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void getPhotoAsString() {
+		// TODO Auto-generated method stub
+		
 	}
 }

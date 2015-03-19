@@ -48,4 +48,19 @@ public class ContactGroup {
 	public void setHeaderPositions(HeaderPositions headerPositions) {
 		this.headerPositions = headerPositions;
 	}
+
+	public void addContact(Contact theContact) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void removeContact(Contact theContact) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void getContactList() {
+		// TODO Auto-generated method stub
+		
+	}
 }
