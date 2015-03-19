@@ -1,20 +1,24 @@
 package icloud.services.account.objects;
 
 public class Apps {
-	public final App mail = new App();
-	public final App reminders = new App();
-	public final App iclouddrive = new App();
-	public final App numbers = new App();
-	public final App settings = new App();
-	public final App pages = new App();
-	public final App notes = new App();
-	public final App find = new App();
-	public final App contacts = new App();
-	public final App calendar = new App();
-	public final App keynote = new App();
+	private final App mail = new App();
+	private final App reminders = new App();
+	private final App iclouddrive = new App();
+	private final App numbers = new App();
+	private final App settings = new App();
+	private final App pages = new App();
+	private final App notes = new App();
+	private final App find = new App();
+	private final App contacts = new App();
+	private final App calendar = new App();
+	private final App keynote = new App();
 	
 	public class App{
-		public final boolean isQualifiedForBeta = false;
+		private final boolean isQualifiedForBeta = false;
+
+		public boolean isQualifiedForBeta() {
+			return isQualifiedForBeta;
+		}
 	}
 	
 	public App[] getApps(){

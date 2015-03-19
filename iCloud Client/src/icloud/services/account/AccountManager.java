@@ -1,6 +1,9 @@
 package icloud.services.account;
 
 import icloud.services.BaseManager;
+import icloud.services.account.objects.Device;
+import icloud.services.account.objects.StorageBlockInfo;
+import icloud.services.account.objects.Webservices.Webservice;
 import icloud.user.UserSession;
 
 import java.net.URL;
@@ -8,15 +11,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+
 import common.CommonLogic;
 import common.ServerConnection;
 import common.URLBuilder;
 
 public class AccountManager extends BaseManager {
+
+	// TODO: Add all of the data retrieval methods to AccountManager
 
 	public AccountManager() {
 		this.isInitialized = true;
@@ -42,7 +44,8 @@ public class AccountManager extends BaseManager {
 				.setProtocol(UserSession.default_protocol)
 				.setUrl(UserSession.account_url_default_host);
 
-		newUrl.addQueryString(UserSession.query_arg_clientBN, user.getClientBuildNumber());
+		newUrl.addQueryString(UserSession.query_arg_clientBN,
+				user.getClientBuildNumber());
 		newUrl.addQueryString(UserSession.query_arg_clientId, user.getUuid());
 
 		URL httpUrl = newUrl.buildURL();
@@ -51,14 +54,13 @@ public class AccountManager extends BaseManager {
 		headersMap.put("User-Agent", UserSession.default_header_userAgent);
 
 		ServerConnection conn = new ServerConnection(debugEnabled);
-		conn.setServerUrl(httpUrl)
-			.setRequestMethod(UserSession.POST)
-			.setRequestHeaders(headersMap)
-			.setPayload(generateQuery(user));
+		conn.setServerUrl(httpUrl).setRequestMethod(UserSession.POST)
+				.setRequestHeaders(headersMap).setPayload(generateQuery(user));
 		conn.connect();
 
 		String responseData = conn.getResponseDataAsString();
-		parseResponse(user, new Gson().fromJson(responseData, AccountJson.class));
+		parseResponse(user,
+				new Gson().fromJson(responseData, AccountJson.class));
 
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
 
@@ -94,13 +96,15 @@ public class AccountManager extends BaseManager {
 
 		URLBuilder newUrl = new URLBuilder();
 		newUrl.setPath(UserSession.account_url_logout)
-			  .setUrl(accountServer)
-			  .addQueryString(UserSession.query_arg_clientBN, user.getClientBuildNumber())
-			  .addQueryString(UserSession.query_arg_clientId, user.getUuid())
-			  .addQueryString(UserSession.query_arg_dsid, user.getUserConfig()
-			  .getUserProperties()
-			  .getProperty("dsid"));
-		
+				.setUrl(accountServer)
+				.addQueryString(UserSession.query_arg_clientBN,
+						user.getClientBuildNumber())
+				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
+				.addQueryString(
+						UserSession.query_arg_dsid,
+						user.getUserConfig().getUserProperties()
+								.getProperty("dsid"));
+
 		newUrl.addQueryString(UserSession.query_arg_token, valCookie);
 		URL httpUrl = newUrl.buildURL();
 
@@ -127,7 +131,8 @@ public class AccountManager extends BaseManager {
 				.setPort(UserSession.default_port)
 				.setProtocol(UserSession.default_protocol)
 				.setUrl(UserSession.account_url_default_host)
-				.addQueryString(UserSession.query_arg_clientBN, user.getClientBuildNumber())
+				.addQueryString(UserSession.query_arg_clientBN,
+						user.getClientBuildNumber())
 				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
 				.buildURL();
 
@@ -136,15 +141,15 @@ public class AccountManager extends BaseManager {
 		headersMap.put("User-Agent", UserSession.default_header_userAgent);
 
 		ServerConnection conn = new ServerConnection(debugEnabled)
-				.setRequestMethod(UserSession.POST)
-				.setServerUrl(url)
+				.setRequestMethod(UserSession.POST).setServerUrl(url)
 				.setPayload("{}")
 				.setRequestCookies(user.getUserTokens().getTokens())
 				.setRequestHeaders(headersMap);
 		conn.connect();
 
 		String responseData = conn.getResponseDataAsString();
-		parseResponse(user, new Gson().fromJson(responseData, AccountJson.class));
+		parseResponse(user,
+				new Gson().fromJson(responseData, AccountJson.class));
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
 
 		if (debugEnabled) {
@@ -152,53 +157,222 @@ public class AccountManager extends BaseManager {
 		}
 	}
 
+	public void getDevices(UserSession user) throws Exception {
+
+		if (announceConnections) {
+			// System.out.println("Connecting to: Validate Server");
+		}
+
+		URL url = new URLBuilder()
+				.setPath(UserSession.account_url_getDevices)
+				.setPort(UserSession.default_port)
+				.setProtocol(UserSession.default_protocol)
+				.setUrl(UserSession.account_url_default_host)
+				.addQueryString(UserSession.query_arg_clientBN,
+						user.getClientBuildNumber())
+				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
+				.addQueryString(
+						"dsid",
+						user.getUserData().getAccountData().getDsInfo()
+								.getDsid()).buildURL();
+
+		Map<String, String> headersMap = new HashMap<String, String>();
+		headersMap.put("origin", UserSession.default_header_origin);
+		headersMap.put("User-Agent", UserSession.default_header_userAgent);
+
+		ServerConnection conn = new ServerConnection(debugEnabled)
+				.setRequestMethod(UserSession.GET).setServerUrl(url)
+				.setPayload("{}")
+				.setRequestCookies(user.getUserTokens().getTokens())
+				.setRequestHeaders(headersMap);
+		conn.connect();
+
+		String responseData = conn.getResponseDataAsString();
+		parseResponse(user,
+				new Gson().fromJson(responseData, AccountJson.class));
+		user.getUserTokens().updateTokens(conn.getResponseCookies());
+
+		if (debugEnabled) {
+			CommonLogic.printJson(responseData);
+		}
+
+	}
+
+	public void getFamilyDetails(UserSession user) throws Exception {
+
+		if (announceConnections) {
+			// System.out.println("Connecting to: Validate Server");
+		}
+
+		URL url = new URLBuilder()
+				.setPath(UserSession.account_url_getFamilyDetails)
+				.setPort(UserSession.default_port)
+				.setProtocol(UserSession.default_protocol)
+				.setUrl(UserSession.account_url_default_host)
+				.addQueryString(UserSession.query_arg_clientBN,
+						user.getClientBuildNumber())
+				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
+				.addQueryString(
+						"dsid",
+						user.getUserData().getAccountData().getDsInfo()
+								.getDsid()).buildURL();
+
+		Map<String, String> headersMap = new HashMap<String, String>();
+		headersMap.put("origin", UserSession.default_header_origin);
+		headersMap.put("User-Agent", UserSession.default_header_userAgent);
+
+		ServerConnection conn = new ServerConnection(debugEnabled)
+				.setRequestMethod(UserSession.GET).setServerUrl(url)
+				.setPayload("{}")
+				.setRequestCookies(user.getUserTokens().getTokens())
+				.setRequestHeaders(headersMap);
+		conn.connect();
+
+		String responseData = conn.getResponseDataAsString();
+		parseResponse(user,
+				new Gson().fromJson(responseData, AccountJson.class));
+		user.getUserTokens().updateTokens(conn.getResponseCookies());
+
+		if (debugEnabled) {
+			CommonLogic.printJson(responseData);
+		}
+
+	}
+
+	public void getStorageUsageInfo(UserSession user) throws Exception {
+
+		if (announceConnections) {
+			// System.out.println("Connecting to: Validate Server");
+		}
+
+		URL url = new URLBuilder()
+				.setPath(UserSession.account_url_getStorageUsageInfo)
+				.setPort(UserSession.default_port)
+				.setProtocol(UserSession.default_protocol)
+				.setUrl(UserSession.account_url_default_host)
+				.addQueryString(UserSession.query_arg_clientBN,
+						user.getClientBuildNumber())
+				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
+				.addQueryString(
+						"dsid",
+						user.getUserData().getAccountData().getDsInfo()
+								.getDsid()).buildURL();
+
+		Map<String, String> headersMap = new HashMap<String, String>();
+		headersMap.put("origin", UserSession.default_header_origin);
+		headersMap.put("User-Agent", UserSession.default_header_userAgent);
+
+		ServerConnection conn = new ServerConnection(debugEnabled)
+				.setRequestMethod(UserSession.POST).setServerUrl(url)
+				.setPayload("{}")
+				.setRequestCookies(user.getUserTokens().getTokens())
+				.setRequestHeaders(headersMap);
+		conn.connect();
+
+		String responseData = conn.getResponseDataAsString();
+		parseResponse(user,
+				new Gson().fromJson(responseData, AccountJson.class));
+		user.getUserTokens().updateTokens(conn.getResponseCookies());
+
+		if (debugEnabled) {
+			CommonLogic.printJson(responseData);
+		}
+
+	}
+
 	private void parseResponse(UserSession user, AccountJson aJson) {
 
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		System.out.println("Deseriialized");
-		CommonLogic.printJson(gson.toJson(aJson));
+		// TODO: Add null checks to parseResponse in AccountManager
+		AccountConfig aConf = user.getUserConfig().getAccountConfig();
+		AccountData aData = user.getUserData().getAccountData();
+
+		aConf.setExtendedLogin(aJson.isExtendedLogin());
+		aConf.setPcsServiceIdentitiesIncluded(aJson.isPcsServiceIdentitiesIncluded());
+		aConf.setHasMinimumDeviceForPhotosWeb(aJson.isHasMinimumDeviceForPhotosWeb());
+		aConf.setMemberOfFamily(aJson.isMemberOfFamily());
+		aConf.setPcsEnabled(aJson.isPcsEnabled());
+
+		for (Webservice webService : aJson.webservices.getWebservices()) {
+			user.addServerUrl(webService.getName(), webService.getUrl());
+			aConf.addWebservice(webService);
+		}
 		
-		JsonParser jp = new JsonParser();
-		JsonElement je = jp.parse(gson.toJson(aJson));
-
-		JsonObject userData = je.getAsJsonObject();
-		JsonElement webServices = userData.get("webservices");
-		JsonObject webServices2 = webServices.getAsJsonObject();
-
-		// TODO: Make the code not assume that things will exist
-		String[] webServiceStrings = { "reminders", "mail", "drivews",
-				"settings", "keyvalue", "push", "contacts", "findme", "photos",
-				"ubiquity", "iwmb", "ckdatabasews", "docws", "account",
-				"streams", "notes", "calendar" };
-		// String[] memberStrings = { "status", "url", "pcsRequired" };
-		String[] memberStrings = { "url" };
-		for (String str : webServiceStrings) {
-			JsonElement obj = webServices2.get(str);
-			JsonObject jelement = obj.getAsJsonObject();
-			// Map<String, String> map1 = new HashMap<String, String>();
-			for (String mstr : memberStrings) {
-				if (jelement.has(mstr)) {
-					JsonElement json = jelement.get(mstr);
-					user.addServerUrl(str, json.getAsString());
-					// map1.put(mstr, json.getAsString());
-				}
-			}
+		if (aJson.isSuccess()) {
+			// Do something
+		} else {
+			// Do something else
 		}
 
-		JsonElement jselement = userData.get("dsInfo");
-		JsonObject dsInfo = jselement.getAsJsonObject();
-		String[] dsInfoStrings = { "lastName", "appleId", "dsid",
-				"languageCode", "fullName", "firstName" };
-
-		for (String str : dsInfoStrings) {
-			if (dsInfo.has(str)) {
-				JsonElement var = dsInfo.get(str);
-				user.getUserConfig().getUserProperties()
-						.put(str, var.getAsString());
-
-			}
+		for (Device device : aJson.getDevices()) {
+			aData.addUserDevice(device);
 		}
 
+		for (StorageBlockInfo storeBlock : aJson.getStorageUsageByMedia()) {
+			aData.addStorageBlock(storeBlock);
+		}
+		aData.setDsInfo(aJson.dsInfo);
+		aData.setLocaleInfo(aJson.requestInfo);
+		aData.setStorageTotals(aJson.storageUsageInfo);
+		aData.setStorageQuotas(aJson.quotaStatus);
+		
+		
+		// aData.setRequestInfo(aJson.requestInfo);
+
+		// Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		// JsonParser jp = new JsonParser();
+		// JsonElement je = jp.parse(gson.toJson(aJson));
+		//
+		// JsonObject userData = je.getAsJsonObject();
+		// JsonElement webServices = userData.get("webservices");
+		// JsonObject webServices2 = webServices.getAsJsonObject();
+		//
+		// // TODO: Make the code not assume that things will exist
+		// String[] webServiceStrings = { "reminders", "mail", "drivews",
+		// "settings", "keyvalue", "push", "contacts", "findme", "photos",
+		// "ubiquity", "iwmb", "ckdatabasews", "docws", "account",
+		// "streams", "notes", "calendar" };
+		// // String[] memberStrings = { "status", "url", "pcsRequired" };
+		// String[] memberStrings = { "url" };
+		// for (String str : webServiceStrings) {
+		// JsonElement obj = webServices2.get(str);
+		// JsonObject jelement = obj.getAsJsonObject();
+		// // Map<String, String> map1 = new HashMap<String, String>();
+		// for (String mstr : memberStrings) {
+		// if (jelement.has(mstr)) {
+		// JsonElement json = jelement.get(mstr);
+		// user.addServerUrl(str, json.getAsString());
+		// // map1.put(mstr, json.getAsString());
+		// }
+		// }
+		// }
+		//
+		// JsonElement jselement = userData.get("dsInfo");
+		// JsonObject dsInfo = jselement.getAsJsonObject();
+		// String[] dsInfoStrings = { "lastName", "appleId", "dsid",
+		// "languageCode", "fullName", "firstName" };
+		//
+		// for (String str : dsInfoStrings) {
+		// if (dsInfo.has(str)) {
+		// JsonElement var = dsInfo.get(str);
+		// user.getUserConfig().getUserProperties()
+		// .put(str, var.getAsString());
+		//
+		// }
+		// }
+
+	}
+
+	public void getUserPropsMap(UserSession user) {
+		// user.getUserConfig().
+
+	}
+
+	public void getUsageInfo() {
+
+	}
+
+	public void getDevicesList(UserSession user) {
+		// user.get
 	}
 
 	private String generateQuery(UserSession user) {
