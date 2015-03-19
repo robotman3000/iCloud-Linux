@@ -1,13 +1,13 @@
 import icloud.services.account.AccountJson;
 import icloud.services.account.AccountManager;
-import icloud.services.contacts.Contact;
-import icloud.services.contacts.ContactGroup;
 import icloud.services.contacts.ContactManager;
-import icloud.services.contacts.Photo;
+import icloud.services.contacts.objects.Photo;
+import icloud.services.contacts.objects.Contact;
+import icloud.services.contacts.objects.ContactGroup;
 import icloud.services.notes.NoteManager;
 import icloud.services.notes.objects.Attachment;
 import icloud.services.notes.objects.Note;
-import icloud.services.notes.objects.Note.Details;
+
 import icloud.user.UserSession;
 
 public class DontUseMe {
@@ -25,24 +25,25 @@ public class DontUseMe {
 		userA.getUsername();
 		userA.isExtendedLogin();
 
-		userA.isPrimaryEmailVerified();
-		userA.getLastName();
-		userA.getLocale();
-		userA.hasICloudQualifyingDevice();
-		userA.isPaidDeveloper();
-		userA.getAppleId();
-		userA.getDsid();
-		userA.getPrimaryEmail();
-		userA.brMigrated(); // May change to usingICloudDrive();
-		userA.getLanguageCode();
-		userA.getADsID();
-		userA.isLocked();
-		userA.getFullName();
-		userA.getFirstName();
-		userA.getAppleIdAliases();
-		userA.getRegion();
-		userA.getTimeZone();
-		userA.getCountry();
+//		userA.isPrimaryEmailVerified();
+//		userA.getLastName();
+//		userA.getLocale();
+//		userA.hasICloudQualifyingDevice();
+//		userA.isPaidDeveloper();
+//		userA.getAppleId();
+//		userA.getDsid();
+//		userA.getPrimaryEmail();
+//		userA.brMigrated(); // May change to usingICloudDrive();
+//		userA.getLanguageCode();
+//		userA.getADsID();
+//		userA.isLocked();
+//		userA.getFullName();
+//		userA.getFirstName();
+//		userA.getAppleIdAliases();
+//		userA.getRegion();
+//		userA.getTimeZone();
+//		userA.getCountry();
+//		userA.hasMinimumDeviceForPhotosWeb();
 
 	}
 
@@ -70,7 +71,6 @@ public class DontUseMe {
 
 		String content = null;
 		String dateModified = null;
-		Details detail = null;
 		String folderName = null;
 		String size = null;
 		String subject = null;
@@ -91,7 +91,6 @@ public class DontUseMe {
 
 		theNote.getContent();
 		theNote.getDateModified();
-		theNote.getDetail(); // May be removed
 		theNote.getFolderName();
 		theNote.getNoteID();
 		theNote.getSize();
@@ -100,7 +99,6 @@ public class DontUseMe {
 
 		theNote.setContent(content);
 		theNote.setDateModified(dateModified);
-		theNote.setDetail(detail); // May be Removed
 		theNote.setFolderName(folderName);
 		theNote.setSize(size); // May be changed to updateSize();
 		theNote.setSubject(subject);
@@ -156,13 +154,13 @@ public class DontUseMe {
 		thePhoto.getPhoto();
 		thePhoto.getPhotoAsString();
 
-		theContact.set();/* any contact properties */
+	//	theContact.set();/* any contact properties */
 		// Declare Managers
 		ContactManager contactManager = new ContactManager();
 		ContactManager contactManager2 = new ContactManager(announceConnections, debugEnabled);
 
 		// Contact Manager Use
-		contactManager.startup(user);
+/*		contactManager.startup(user);
 		contactManager.changeset(user);
 
 		contactManager.getMeCard(user);
@@ -176,7 +174,7 @@ public class DontUseMe {
 		contactManager.updateContacts(user, theContact);
 		contactManager.deleteContacts(user, theContact);
 
-		contactManager.importContact(user, null/* the .vcf contact */);
+		contactManager.importContact(user, null the .vcf contact );
 		contactManager.exportContact(user, theContact);
 
 		contactManager.getContactPhoto(theContact);
@@ -184,7 +182,7 @@ public class DontUseMe {
 		contactManager.getGroupsList(user);
 		contactManager.getContactsList(user, theGroup);
 		contactManager.getContact(user, contactId);
-		contactManager.getAllContacts(user);
+		contactManager.getAllContacts(user);*/
 
 	}
 	
