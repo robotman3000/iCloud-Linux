@@ -1,5 +1,7 @@
 package icloud.services.account.objects;
 
+import com.google.gson.annotations.SerializedName;
+
 public class DSInfo {
 
 	private final boolean primaryEmailVerified = false;
@@ -10,8 +12,8 @@ public class DSInfo {
 	private final boolean hasICloudQualifyingDevice = false;
 	private final boolean isPaidDeveloper = false;
 	private final String appleId = "";
-	private final boolean gilligan_invited = false;
-	private final boolean gilligan_enabled = false;
+	@SerializedName("gilligan-invited") private final boolean gilligan_invited = false;
+	@SerializedName("gilligan-enabled") private final boolean gilligan_enabled = false;
 	private final String dsid = "";
 	private final String primaryEmail = "";
 	private final int statusCode = -1;

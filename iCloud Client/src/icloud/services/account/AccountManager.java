@@ -2,13 +2,17 @@ package icloud.services.account;
 
 import icloud.services.BaseManager;
 import icloud.services.account.objects.Device;
+import icloud.services.account.objects.QuotaStatus;
+import icloud.services.account.objects.RequestInfo;
 import icloud.services.account.objects.StorageBlockInfo;
+import icloud.services.account.objects.StorageUsageInfo;
 import icloud.services.account.objects.Webservices.Webservice;
 import icloud.user.UserSession;
 
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gson.Gson;
 
@@ -304,17 +308,27 @@ public class AccountManager extends BaseManager {
 		}
 
 		for (Device device : aJson.getDevices()) {
-			aData.addUserDevice(device);
+			aData.addUserDevice(device.getUdid(), device);
 		}
 
 		for (StorageBlockInfo storeBlock : aJson.getStorageUsageByMedia()) {
-			aData.addStorageBlock(storeBlock);
+			aData.addStorageBlock(storeBlock.getDisplayLabel(), storeBlock);
 		}
 		aData.setDsInfo(aJson.dsInfo);
-		aData.setLocaleInfo(aJson.requestInfo);
+		aData.setRequestInfo(aJson.requestInfo);
 		aData.setStorageTotals(aJson.storageUsageInfo);
-		aData.setStorageQuotas(aJson.quotaStatus);
-		
+		aData.setQuotaStatus(aJson.quotaStatus);
+
+	}
+
+	private String generateQuery(UserSession user) {
+		return "{\"apple_id\":" + "\"" + user.getUsername() + "\""
+				+ ",\"password\":" + "\"" + user.getPassword() + "\""
+				+ ",\"extended_login\":" + user.isExtendedLogin() + "}";
+	}
+	
+	@SuppressWarnings("unused")
+	private void oldParseResponse(){
 		
 		// aData.setRequestInfo(aJson.requestInfo);
 
@@ -359,25 +373,117 @@ public class AccountManager extends BaseManager {
 		//
 		// }
 		// }
-
+		
 	}
 
-	public void getUserPropsMap(UserSession user) {
-		// user.getUserConfig().
-
+	public boolean isPrimaryEmailVerified(UserSession user) {
+		return user.getUserData().getAccountData().getDsInfo().isPrimaryEmailVerified();
 	}
 
-	public void getUsageInfo() {
-
+	public String getiCloudAppleIdAlias(UserSession user) {
+		return user.getUserData().getAccountData().getDsInfo().getiCloudAppleIdAlias();
 	}
 
-	public void getDevicesList(UserSession user) {
-		// user.get
+	public String getLastName(UserSession user) {
+		return user.getUserData().getAccountData().getDsInfo().getLastName();
 	}
 
-	private String generateQuery(UserSession user) {
-		return "{\"apple_id\":" + "\"" + user.getUsername() + "\""
-				+ ",\"password\":" + "\"" + user.getPassword() + "\""
-				+ ",\"extended_login\":" + user.isExtendedLogin() + "}";
+	public String getAppleIdAlias(UserSession user) {
+		return user.getUserData().getAccountData().getDsInfo().getAppleIdAlias();
 	}
+
+	public String getLocale(UserSession user) {
+		return user.getUserData().getAccountData().getDsInfo().getLocale();
+	}
+
+	public boolean isHasICloudQualifyingDevice(UserSession user) {
+		return user.getUserData().getAccountData().getDsInfo().isHasICloudQualifyingDevice();
+	}
+
+	public boolean isPaidDeveloper(UserSession user) {
+		return user.getUserData().getAccountData().getDsInfo().isPaidDeveloper();
+	}
+
+	public String getAppleId(UserSession user) {
+		return user.getUserData().getAccountData().getDsInfo().getAppleId();
+	}
+
+	public boolean isGilligan_invited(UserSession user) {
+		return user.getUserData().getAccountData().getDsInfo().isGilligan_invited();
+	}
+
+	public boolean isGilligan_enabled(UserSession user) {
+		return user.getUserData().getAccountData().getDsInfo().isGilligan_enabled();
+	}
+
+	public String getDsid(UserSession user) {
+		return user.getUserData().getAccountData().getDsInfo().getDsid();
+	}
+
+	public String getPrimaryEmail(UserSession user) {
+		return user.getUserData().getAccountData().getDsInfo().getPrimaryEmail();
+	}
+
+	public int getStatusCode(UserSession user) {
+		return user.getUserData().getAccountData().getDsInfo().getStatusCode();
+	}
+
+	public boolean isBrMigrated(UserSession user) {
+		return user.getUserData().getAccountData().getDsInfo().isBrMigrated();
+	}
+
+	public String getLanguageCode(UserSession user) {
+		return user.getUserData().getAccountData().getDsInfo().getLanguageCode();
+	}
+
+	public String getaDsID(UserSession user) {
+		return user.getUserData().getAccountData().getDsInfo().getaDsID();
+	}
+
+	public boolean isLocked(UserSession user) {
+		return user.getUserData().getAccountData().getDsInfo().isLocked();
+	}
+
+	public String getFullName(UserSession user) {
+		return user.getUserData().getAccountData().getDsInfo().getFullName();
+	}
+
+	public String getFirstName(UserSession user) {
+		return user.getUserData().getAccountData().getDsInfo().getFirstName();
+	}
+
+	public String[] getAppleIdAliases(UserSession user) {
+		return user.getUserData().getAccountData().getDsInfo().getAppleIdAliases();
+	}
+
+	public Set<String> getDevicesList(UserSession user) {
+		return user.getUserData().getAccountData().getDevices().keySet();
+	}
+
+	public Device getDevice(UserSession user, String deviceId) {
+		return user.getUserData().getAccountData().getDevices().get(deviceId);
+	}
+
+	public Set<String> getStorageBlockList(UserSession user) {
+		return user.getUserData().getAccountData().getStorageBlocks().keySet();
+	}
+	
+	public StorageBlockInfo getStorageBlock(UserSession user, String key) {
+		return user.getUserData().getAccountData().getStorageBlocks().get(key);
+	}
+
+	public StorageUsageInfo getStorageUsage(UserSession user) {
+		return user.getUserData().getAccountData().getStorageTotals();
+	}
+
+	public QuotaStatus getStorageQuotaStatus(UserSession user) {
+		return user.getUserData().getAccountData().getQuotaStatus();
+	}
+
+	public RequestInfo getUserLocale(UserSession user) {
+		return user.getUserData().getAccountData().getRequestInfo();
+	}
+
+
+
 }
