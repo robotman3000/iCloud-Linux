@@ -23,6 +23,7 @@ import common.URLBuilder;
 public class AccountManager extends BaseManager {
 
 	// TODO: Add all of the data retrieval methods to AccountManager
+	//TODO: Add safety checks to the getters and setters. ie dont return null instead throw an exeception
 
 	public AccountManager() {
 		this.isInitialized = true;
@@ -285,40 +286,71 @@ public class AccountManager extends BaseManager {
 	}
 
 	private void parseResponse(UserSession user, AccountJson aJson) {
-
-		// TODO: Add null checks to parseResponse in AccountManager
 		AccountConfig aConf = user.getUserConfig().getAccountConfig();
 		AccountData aData = user.getUserData().getAccountData();
-
-		aConf.setExtendedLogin(aJson.isExtendedLogin());
-		aConf.setPcsServiceIdentitiesIncluded(aJson.isPcsServiceIdentitiesIncluded());
-		aConf.setHasMinimumDeviceForPhotosWeb(aJson.isHasMinimumDeviceForPhotosWeb());
-		aConf.setMemberOfFamily(aJson.isMemberOfFamily());
-		aConf.setPcsEnabled(aJson.isPcsEnabled());
-
-		for (Webservice webService : aJson.webservices.getWebservices()) {
-			user.addServerUrl(webService.getName(), webService.getUrl());
-			aConf.addWebservice(webService);
+		
+		if(aJson.isExtendedLogin() != null){
+			aConf.setExtendedLogin(aJson.isExtendedLogin());
 		}
 		
-		if (aJson.isSuccess()) {
-			// Do something
-		} else {
-			// Do something else
+		if(aJson.isPcsServiceIdentitiesIncluded() != null){
+			aConf.setPcsServiceIdentitiesIncluded(aJson.isPcsServiceIdentitiesIncluded());
 		}
-
-		for (Device device : aJson.getDevices()) {
-			aData.addUserDevice(device.getUdid(), device);
+		
+		if(aJson.isHasMinimumDeviceForPhotosWeb() != null){
+			aConf.setHasMinimumDeviceForPhotosWeb(aJson.isHasMinimumDeviceForPhotosWeb());
 		}
-
-		for (StorageBlockInfo storeBlock : aJson.getStorageUsageByMedia()) {
-			aData.addStorageBlock(storeBlock.getDisplayLabel(), storeBlock);
+		
+		if(aJson.isMemberOfFamily() != null){
+			aConf.setMemberOfFamily(aJson.isMemberOfFamily());
 		}
-		aData.setDsInfo(aJson.dsInfo);
-		aData.setRequestInfo(aJson.requestInfo);
-		aData.setStorageTotals(aJson.storageUsageInfo);
-		aData.setQuotaStatus(aJson.quotaStatus);
-
+		
+		if(aJson.isPcsEnabled() != null){
+			aConf.setPcsEnabled(aJson.isPcsEnabled());
+		}
+		
+		if(aJson.webservices != null && aJson.webservices.getWebservices() != null){
+			for (Webservice webService : aJson.webservices.getWebservices()) {
+				user.addServerUrl(webService.getName(), webService.getUrl());
+				aConf.addWebservice(webService);
+			}
+		}
+		
+		if(aJson.isSuccess() != null){
+			if (aJson.isSuccess()) {
+				// Do something
+			} else {
+				// Do something else
+			}
+		}
+		
+		if(aJson.getDevices() != null){
+			for (Device device : aJson.getDevices()) {
+				aData.addUserDevice(device.getUdid(), device);
+			}
+		}
+		
+		if(aJson.getStorageUsageByMedia() != null){
+			for (StorageBlockInfo storeBlock : aJson.getStorageUsageByMedia()) {
+				aData.addStorageBlock(storeBlock.getDisplayLabel(), storeBlock);
+			}
+		}
+		
+		if(aJson.dsInfo != null){
+			aData.setDsInfo(aJson.dsInfo);
+		}
+		
+		if(aJson.requestInfo != null){
+			aData.setRequestInfo(aJson.requestInfo);
+		}
+		
+		if(aJson.storageUsageInfo != null){
+			aData.setStorageTotals(aJson.storageUsageInfo);
+		}
+		
+		if(aJson.quotaStatus != null){
+			aData.setQuotaStatus(aJson.quotaStatus);
+		}
 	}
 
 	private String generateQuery(UserSession user) {
@@ -396,7 +428,7 @@ public class AccountManager extends BaseManager {
 		return user.getUserData().getAccountData().getDsInfo().getLocale();
 	}
 
-	public boolean isHasICloudQualifyingDevice(UserSession user) {
+	public boolean hasICloudQualifyingDevice(UserSession user) {
 		return user.getUserData().getAccountData().getDsInfo().isHasICloudQualifyingDevice();
 	}
 

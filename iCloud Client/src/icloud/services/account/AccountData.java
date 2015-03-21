@@ -11,6 +11,7 @@ import icloud.services.account.objects.StorageUsageInfo;
 
 public class AccountData {
 
+	//TODO: Add safety checks to the getters and setters. ie don't return null instead throw an exeception
 	private RequestInfo requestInfo = new RequestInfo();
 	private DSInfo dsInfo = new DSInfo();
 	private StorageUsageInfo storageTotals = new StorageUsageInfo();

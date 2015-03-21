@@ -1,9 +1,9 @@
 package icloud.services.account.objects;
 
 public class RequestInfo {
-	private final String region = "";
-	private final String timeZone = "";
-	private final String country = "";
+	private String region = "";
+	private String timeZone = "";
+	private String country = "";
 
 	public String getRegion() {
 		return region;

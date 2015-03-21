@@ -22,6 +22,8 @@ import icloud.user.UserSession;
 
 public class NoteManager extends BaseManager{
 
+	//TODO: test if you can create/update/delete multipule notes at once like retrieveNotes
+	
 	private static final String mainNotebook = "main";
 
 	public NoteManager() {
@@ -390,7 +392,7 @@ public class NoteManager extends BaseManager{
 		while (it.hasNext()) {
 			Note note = it.next();
 			String uuid = noteIDtoUUID(note.getNoteID());
-			note.setUuid(uuid);
+			note.updateUUID();
 			user.getUserData().getNoteData().getUserNotes().get(mainNotebook).addNote(uuid, note);
 		}
 	}
@@ -435,6 +437,22 @@ public class NoteManager extends BaseManager{
 		return user.getUserData().getNoteData().getUserNotes().keySet();
 	}
 
+	public boolean hasNoteBook(UserSession user, String noteBookId){
+		if(user.getUserData().getNoteData().getUserNotes().containsKey(noteBookId)){
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean hasNote(UserSession user, String noteId, String noteBookId){
+		if(hasNoteBook(user, noteBookId)){
+			if(user.getUserData().getNoteData().getUserNotes().get(noteBookId).hasNote(noteId)){
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	private String noteIDtoUUID(String convertID) {
 		return Integer.toString(convertID.hashCode());
 	}

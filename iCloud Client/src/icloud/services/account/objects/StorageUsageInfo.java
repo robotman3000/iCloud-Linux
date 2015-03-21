@@ -6,8 +6,8 @@ public class StorageUsageInfo {
 	private String usedStorageInBytes;
 	private String compStorageInBytes;
 
-	public int getTotalStorageInBytes() {
-		return Integer.parseInt(totalStorageInBytes);
+	public String getTotalStorageInBytes() {
+		return totalStorageInBytes;
 	}
 
 	public int getCommerceStorageInBytes() {

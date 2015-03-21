@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 public class ServerConnection {
 
 	// TODO: Add Exception throwing; Add Exception handling; Add Javadoc
@@ -175,6 +178,8 @@ public class ServerConnection {
 			e.printStackTrace();
 			System.err.println("Reported Error Message: "
 					+ CommonLogic.convertStreamToString(httpconnection.getErrorStream()));
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			System.err.println("ServerConnection Object\n" + gson.toJson(this));
 			// System.err.println(httpconnection.getRequestProperties());
 			// System.err.println(httpconnection.getURL());
 		}

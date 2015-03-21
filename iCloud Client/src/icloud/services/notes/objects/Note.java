@@ -61,14 +61,14 @@ public class Note {
 		return Integer.toString(this.noteId.hashCode());
 	}
 
-	public void setUuid(String uuid) {
-		this.uuid = uuid;
+	public void updateUUID() {
+		this.uuid = Integer.toString(noteId.hashCode());
 	}
 
 	public ArrayList<Attachment> getAttachments() {
 		return this.attachments;
 	}
-
+	
 	public String getContent() {
 		if (this.detail.content != null) {
 			return Jsoup.parse(this.detail.content).toString();

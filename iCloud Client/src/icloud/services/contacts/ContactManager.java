@@ -10,11 +10,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
-import common.CommonLogic;
 import common.ServerConnection;
-import common.URLBuilder;
 import icloud.services.BaseManager;
-import icloud.services.account.AccountJson;
 import icloud.services.contacts.objects.AddressBook;
 import icloud.services.contacts.objects.Contact;
 import icloud.user.UserSession;

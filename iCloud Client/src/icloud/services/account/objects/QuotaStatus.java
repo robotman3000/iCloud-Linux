@@ -13,7 +13,7 @@ public class QuotaStatus {
 		return paidQuota;
 	}
 
-	public boolean isHaveMaxQuotaTier() {
+	public boolean hasMaxQuotaTier() {
 		return haveMaxQuotaTier;
 	}
 }

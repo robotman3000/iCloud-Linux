@@ -24,7 +24,7 @@ public class UserSession {
 	public static final String account_url_validate = "/setup/ws/1/validate?";
 	public static final String account_url_default_host = "setup.icloud.com";
 	public static final String account_url_getDevices = "/setup/web/device/getDevices?";
-	public static final String account_url_getFamilyDetails = "/setup/web/device/getFamilyDetails?";
+	public static final String account_url_getFamilyDetails = "/setup/web/family/getFamilyDetails?";
 	public static final String account_url_getStorageUsageInfo = "/setup/ws/1/storageUsageInfo?";
 	
 	

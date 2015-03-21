@@ -9,51 +9,54 @@ import icloud.services.account.objects.StorageBlockInfo;
 import icloud.services.account.objects.StorageUsageInfo;
 import icloud.services.account.objects.Webservices;
 
-import java.util.TreeSet;
+import java.util.HashSet;
+
+import com.google.gson.annotations.SerializedName;
 
 public class AccountJson {
-	private boolean isExtendedLogin;
-	private boolean pcsServiceIdentitiesIncluded;
-	private boolean hasMinimumDeviceForPhotosWeb;
-	private boolean pcsEnabled;
+	private Boolean isExtendedLogin;
+	private Boolean pcsServiceIdentitiesIncluded;
+	private Boolean hasMinimumDeviceForPhotosWeb;
+	private Boolean pcsEnabled;
 	private int version;
-	private boolean isMemberOfFamily;
+	private Boolean isMemberOfFamily;
 	private int status;
-	private String status_message;
-	private String error;
-	private boolean success;
 	
-	private TreeSet<String> appsOrder;
-	private TreeSet<Device> devices;
-	private TreeSet<StorageBlockInfo> storageUsageByMedia;
+	@SerializedName("status-message") private String status_message;
+	private String error;
+	private Boolean success;
+	
+	private HashSet<String> appsOrder;
+	private HashSet<Device> devices;
+	private HashSet<StorageBlockInfo> storageUsageByMedia;
 
 	//TODO: Add below object to json file in AccountJson
 	/*,"configBag":{"urls":{"accountCreateUI":"string","getICloudTerms":"string","accountCreate":"string","downloadICloudTerms":"string","accountRepairUI":"string","repairDone":"string"},"accountCreateEnabled":"true"}}*/
 	
-	public Webservices webservices = new Webservices();
-	public DSInfo dsInfo = new DSInfo();
-	public Apps apps = new Apps();
-	public RequestInfo requestInfo = new RequestInfo();
-	public StorageUsageInfo storageUsageInfo = new StorageUsageInfo();
-	public QuotaStatus quotaStatus = new QuotaStatus();
+	public Webservices webservices;
+	public DSInfo dsInfo;
+	public Apps apps;
+	public RequestInfo requestInfo;
+	public StorageUsageInfo storageUsageInfo;
+	public QuotaStatus quotaStatus;
 
-	public boolean isExtendedLogin() {
+	public Boolean isExtendedLogin() {
 		return isExtendedLogin;
 	}
 
-	public boolean isPcsServiceIdentitiesIncluded() {
+	public Boolean isPcsServiceIdentitiesIncluded() {
 		return pcsServiceIdentitiesIncluded;
 	}
 
-	public boolean isHasMinimumDeviceForPhotosWeb() {
+	public Boolean isHasMinimumDeviceForPhotosWeb() {
 		return hasMinimumDeviceForPhotosWeb;
 	}
 
-	public boolean isPcsEnabled() {
+	public Boolean isPcsEnabled() {
 		return pcsEnabled;
 	}
 
-	public boolean isSuccess() {
+	public Boolean isSuccess() {
 		return success;
 	}
 
@@ -65,7 +68,7 @@ public class AccountJson {
 		return version;
 	}
 
-	public boolean isMemberOfFamily() {
+	public Boolean isMemberOfFamily() {
 		return isMemberOfFamily;
 	}
 
@@ -77,15 +80,15 @@ public class AccountJson {
 		return status_message;
 	}
 
-	public TreeSet<String> getAppsOrder() {
+	public HashSet<String> getAppsOrder() {
 		return appsOrder;
 	}
 
-	public TreeSet<Device> getDevices() {
+	public HashSet<Device> getDevices() {
 		return devices;
 	}
 
-	public TreeSet<StorageBlockInfo> getStorageUsageByMedia() {
+	public HashSet<StorageBlockInfo> getStorageUsageByMedia() {
 		return storageUsageByMedia;
 	}
 }

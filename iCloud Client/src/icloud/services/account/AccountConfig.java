@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 public class AccountConfig {
 
+	//TODO: Add safety checks to the getters and setters. ie don't return null instead throw an exeception
 	private boolean isExtendedLogin = false;
 	private boolean pcsServiceIdentitiesIncluded = false;
 	private boolean hasMinimumDeviceForPhotosWeb = false;

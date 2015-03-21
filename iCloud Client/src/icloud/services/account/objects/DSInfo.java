@@ -4,26 +4,26 @@ import com.google.gson.annotations.SerializedName;
 
 public class DSInfo {
 
-	private final boolean primaryEmailVerified = false;
-	private final String iCloudAppleIdAlias = "";
-	private final String lastName = "";
-	private final String appleIdAlias = "";
-	private final String locale = "";
-	private final boolean hasICloudQualifyingDevice = false;
-	private final boolean isPaidDeveloper = false;
-	private final String appleId = "";
-	@SerializedName("gilligan-invited") private final boolean gilligan_invited = false;
-	@SerializedName("gilligan-enabled") private final boolean gilligan_enabled = false;
-	private final String dsid = "";
-	private final String primaryEmail = "";
-	private final int statusCode = -1;
-	private final boolean brMigrated = false;
-	private final String languageCode = "";
-	private final String aDsID = "";
-	private final boolean locked = false;
-	private final String fullName = "";
-	private final String firstName = "";
-	private final String[] appleIdAliases = {};
+	private boolean primaryEmailVerified = false;
+	private String iCloudAppleIdAlias = "";
+	private String lastName = "";
+	private String appleIdAlias = "";
+	private String locale = "";
+	private boolean hasICloudQualifyingDevice = false;
+	private boolean isPaidDeveloper = false;
+	private String appleId = "";
+	@SerializedName("gilligan-invited") private boolean gilligan_invited = false;
+	@SerializedName("gilligan-enabled") private boolean gilligan_enabled = false;
+	private String dsid = "";
+	private String primaryEmail = "";
+	private int statusCode = -1;
+	private boolean brMigrated = false;
+	private String languageCode = "";
+	private String aDsID = "";
+	private boolean locked = false;
+	private String fullName = "";
+	private String firstName = "a first name";
+	private String[] appleIdAliases = {};
 
 	public boolean isPrimaryEmailVerified() {
 		return primaryEmailVerified;
