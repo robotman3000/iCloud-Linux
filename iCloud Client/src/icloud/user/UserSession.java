@@ -37,8 +37,14 @@ public class UserSession {
 	public static final String notes_url_changeset = "/no/changeset?";
 	public static final String notes_url_default_host = "notesws.icloud.com";
 
-	public static final String CONTACTS_URL_DEFAULT_HOST = "contactsws.icloud.com";
-
+	public static final String contacts_url_default_host = "contactsws.icloud.com";
+	public static final String contacts_url_getMeCard  = "/co/mecard/?";
+	public static final String contacts_url_setMeCard = "/co/mecardid/card/?";
+	public static final String contacts_url_startup = " /co/startup?";
+	public static final String contacts_url_changeset = "/co/changeset?";
+	public static final String contacts_url_groups = "/co/groups/card/?";
+	public static final String contacts_url_contacts = "/co/contats/card/?";
+	
 	public static final String default_protocol = "https://";
 	public static final int default_port = 443;
 	public static final String default_header_origin = "https://www.icloud.com";
@@ -46,6 +52,8 @@ public class UserSession {
 
 	public static final String POST = "POST";
 	public static final String GET = "GET";
+	public static final String PUT = "PUT";
+	public static final String DELETE = "DELETE";
 
 	public static final String query_arg_clientBN = "clientBuildNumber";
 	public static final String query_arg_clientId = "clientId";
@@ -55,6 +63,11 @@ public class UserSession {
 	public static final String query_arg_syncToken = "syncToken";
 	public static final String query_arg_validateToken = "validateToken";
 	public static final String query_arg_attachmentId = "attachmentId";
+	public static final String query_arg_clientVersion = "clientVersion";
+	public static final String query_arg_locale = "locale";
+	public static final String query_arg_order = "order";
+	public static final String query_arg_prefToken = "prefToken";
+	public static final String query_arg_method = "method";
 
 	public UserSession(String username, String password) {
 		this.username = username;

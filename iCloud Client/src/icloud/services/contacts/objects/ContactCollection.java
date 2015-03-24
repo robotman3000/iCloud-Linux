@@ -6,7 +6,7 @@ public class ContactCollection {
 	private ArrayList<String> groupsOrder = new ArrayList<>();
 	private String etag;
 	private String collectionId;
-
+	
 	public ArrayList<String> getGroupsOrder() {
 		return groupsOrder;
 	}

@@ -2,22 +2,22 @@ package icloud.services.contacts;
 
 import icloud.services.contacts.objects.Contact;
 import icloud.services.contacts.objects.ContactCollection;
-import icloud.services.contacts.objects.ContactGroup;
+import icloud.services.contacts.objects.AddressBook;
 import icloud.services.contacts.objects.HeaderPositions;
 
 import java.util.ArrayList;
 
 public class ContactJson {
 
-	private final String meCardId = "";
-	private final String prefToken = "";
-	private final String syncToken = "";
-	private final HeaderPositions headerPositions = new HeaderPositions();
-	private final ArrayList<String> contactsOrder = new ArrayList<>();
-	private final ArrayList<ContactGroup> groups = new ArrayList<>();
-	private final ArrayList<ContactGroup> deletes = new ArrayList<>();
-	private final ArrayList<ContactCollection> collections = new ArrayList<>();
-	private final ArrayList<Contact> contacts = new ArrayList<>();
+	private String meCardId;
+	private String prefToken;
+	private String syncToken;
+	private HeaderPositions headerPositions;
+	private ArrayList<String> contactsOrder;
+	private ArrayList<AddressBook> groups;
+	private ArrayList<AddressBook> deletes;
+	private ArrayList<ContactCollection> collections;
+	private ArrayList<Contact> contacts;
 
 	public String getMeCardId() {
 		return meCardId;
@@ -39,7 +39,7 @@ public class ContactJson {
 		return contactsOrder;
 	}
 
-	public ArrayList<ContactGroup> getGroups() {
+	public ArrayList<AddressBook> getGroups() {
 		return groups;
 	}
 
@@ -51,8 +51,44 @@ public class ContactJson {
 		return contacts;
 	}
 
-	public ArrayList<ContactGroup> getDeletes() {
+	public ArrayList<AddressBook> getDeletes() {
 		return deletes;
+	}
+
+	public void setMeCardId(String meCardId) {
+		this.meCardId = meCardId;
+	}
+
+	public void setPrefToken(String prefToken) {
+		this.prefToken = prefToken;
+	}
+
+	public void setSyncToken(String syncToken) {
+		this.syncToken = syncToken;
+	}
+
+	public void setHeaderPositions(HeaderPositions headerPositions) {
+		this.headerPositions = headerPositions;
+	}
+
+	public void setContactsOrder(ArrayList<String> contactsOrder) {
+		this.contactsOrder = contactsOrder;
+	}
+
+	public void setGroups(ArrayList<AddressBook> groups) {
+		this.groups = groups;
+	}
+
+	public void setDeletes(ArrayList<AddressBook> deletes) {
+		this.deletes = deletes;
+	}
+
+	public void setCollections(ArrayList<ContactCollection> collections) {
+		this.collections = collections;
+	}
+
+	public void setContacts(ArrayList<Contact> contacts) {
+		this.contacts = contacts;
 	}
 
 }

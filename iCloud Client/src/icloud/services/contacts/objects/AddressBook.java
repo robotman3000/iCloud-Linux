@@ -1,71 +1,66 @@
 package icloud.services.contacts.objects;
 
+import java.util.ArrayList;
+
 public class AddressBook {
+	private String groupId;
+	private ArrayList<String> contactIds = new ArrayList<>();
+	private String etag;
+	private String name;
+	private HeaderPositions headerPositions = new HeaderPositions();
 
-	private String addressBookName;
-	private String UID;
-	private String revision;
-	private String period;
-	private String version;
-	private Contact[] members;
-
-	public AddressBook(String addressBookName, String UID, String revision, String period, String version, Contact[] members) {
-
-		addressBookName = this.addressBookName;
-		UID = this.UID;
-		revision = this.revision;
-		period = this.period;
-		version = this.version;
-		members = this.members;
-
+	public String getGroupId() {
+		return groupId;
 	}
 
-	public Contact[] getMembers() {
-		return members;
+	public ArrayList<String> getContactIds() {
+		return contactIds;
 	}
 
-	public void setMembers(Contact[] members) {
-		this.members = members;
+	public String getEtag() {
+		return etag;
 	}
 
-	public String getVersion() {
-		return version;
+	public String getName() {
+		return name;
 	}
 
-	public void setVersion(String version) {
-		this.version = version;
+	public HeaderPositions getHeaderPositions() {
+		return headerPositions;
 	}
 
-	public String getPeriod() {
-		return period;
+	public void setGroupId(String groupId) {
+		this.groupId = groupId;
 	}
 
-	public void setPeriod(String period) {
-		this.period = period;
+	public void setContactIds(ArrayList<String> contactIds) {
+		this.contactIds = contactIds;
 	}
 
-	public String getRevision() {
-		return revision;
+	public void setEtag(String etag) {
+		this.etag = etag;
 	}
 
-	public void setRevision(String revision) {
-		this.revision = revision;
+	public void setName(String name) {
+		this.name = name;
 	}
 
-	public String getUID() {
-		return UID;
+	public void setHeaderPositions(HeaderPositions headerPositions) {
+		this.headerPositions = headerPositions;
 	}
 
-	public void setUID(String uID) {
-		UID = uID;
+	public void addContact(Contact theContact) {
+		// TODO Auto-generated method stub
+		
 	}
 
-	public String getAddressBookName() {
-		return addressBookName;
+	public void removeContact(Contact theContact) {
+		// TODO Auto-generated method stub
+		
 	}
 
-	public void setAddressBookName(String addressBookName) {
-		this.addressBookName = addressBookName;
+	public void getContactList() {
+		// TODO Auto-generated method stub
+		
 	}
-
 }
