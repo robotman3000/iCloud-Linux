@@ -4,23 +4,23 @@ import java.util.ArrayList;
 
 public class Webservices {
 
-	private final Webservice reminders = new Webservice();
-	private final Webservice mail = new Webservice();
-	private final Webservice drivews = new Webservice();
-	private final Webservice settings = new Webservice();
-	private final Webservice keyvalue = new Webservice();
-	private final Webservice push = new Webservice();
-	private final Webservice contacts = new Webservice();
-	private final Webservice findme = new Webservice();
-	private final Webservice photos = new Webservice();
-	private final Webservice ubiquity = new Webservice();
-	private final Webservice iwmb = new Webservice();
-	private final Webservice ckdatabasews = new Webservice();
-	private final Webservice docws = new Webservice();
-	private final Webservice account = new Webservice();
-	private final Webservice streams = new Webservice();
-	private final Webservice notes = new Webservice();
-	private final Webservice calendar = new Webservice();
+	private Webservice reminders = new Webservice();
+	private Webservice mail = new Webservice();
+	private Webservice drivews = new Webservice();
+	private Webservice settings = new Webservice();
+	private Webservice keyvalue = new Webservice();
+	private Webservice push = new Webservice();
+	private Webservice contacts = new Webservice();
+	private Webservice findme = new Webservice();
+	private Webservice photos = new Webservice();
+	private Webservice ubiquity = new Webservice();
+	private Webservice iwmb = new Webservice();
+	private Webservice ckdatabasews = new Webservice();
+	private Webservice docws = new Webservice();
+	private Webservice account = new Webservice();
+	private Webservice streams = new Webservice();
+	private Webservice notes = new Webservice();
+	private Webservice calendar = new Webservice();
 
 	public class Webservice {
 		private transient String name = "";
