@@ -1,17 +1,22 @@
-import icloud.services.account.AccountJson;
+import java.util.ArrayList;
+
 import icloud.services.account.AccountManager;
+import icloud.services.account.objects.Device;
+import icloud.services.account.objects.QuotaStatus;
+import icloud.services.account.objects.RequestInfo;
+import icloud.services.account.objects.StorageBlockInfo;
 import icloud.services.contacts.ContactManager;
 import icloud.services.contacts.objects.Photo;
 import icloud.services.contacts.objects.Contact;
-import icloud.services.contacts.objects.ContactGroup;
+import icloud.services.contacts.objects.AddressBook;
 import icloud.services.notes.NoteManager;
 import icloud.services.notes.objects.Attachment;
 import icloud.services.notes.objects.Note;
-
 import icloud.user.UserSession;
 
 public class DontUseMe {
 
+	@SuppressWarnings("unused")
 	public void DontRun() throws Exception {
 		String username = "";
 		String password = "";
@@ -23,35 +28,24 @@ public class DontUseMe {
 
 		userA.getPassword();
 		userA.getUsername();
-		userA.isExtendedLogin();
-
-//		userA.isPrimaryEmailVerified();
-//		userA.getLastName();
-//		userA.getLocale();
-//		userA.hasICloudQualifyingDevice();
-//		userA.isPaidDeveloper();
-//		userA.getAppleId();
-//		userA.getDsid();
-//		userA.getPrimaryEmail();
-//		userA.brMigrated(); // May change to usingICloudDrive();
-//		userA.getLanguageCode();
-//		userA.getADsID();
-//		userA.isLocked();
-//		userA.getFullName();
-//		userA.getFirstName();
-//		userA.getAppleIdAliases();
-//		userA.getRegion();
-//		userA.getTimeZone();
-//		userA.getCountry();
-//		userA.hasMinimumDeviceForPhotosWeb();
+		userA.isExtendedLogin(); //May remove
+		userA.getUserTokens(); // Used to save the cookies for the validate call
 
 	}
 
-	@SuppressWarnings("unused")
+	@SuppressWarnings({ "unused", "null" })
 	public void DontRunAccounts(UserSession user) throws Exception {
 		boolean debugEnabled = false;
 		boolean announceConnections = false;
 
+		Device theDevice = null;
+		StorageBlockInfo storageBlock = null;
+		QuotaStatus quotaState = null;
+		RequestInfo userLocale = null;
+		
+		String deviceId = null;
+		String storageId = null;
+		
 		// Declare Managers
 		AccountManager accountManager = new AccountManager();
 		AccountManager accountManager2 = new AccountManager(announceConnections, debugEnabled);
@@ -60,8 +54,65 @@ public class DontUseMe {
 		accountManager.login(user);
 		accountManager.logout(user);
 		accountManager.validate(user);
+		accountManager.getDevices(user);
+		accountManager.getFamilyDetails(user);
+		accountManager.getStorageUsageInfo(user);
 		
 		// Getters for any of the user properties
+		accountManager.getDevicesList(user);
+		accountManager.getDevice(user, deviceId);
+		
+		accountManager.getStorageBlockList(user);
+		accountManager.getStorageBlock(user, storageId);
+		accountManager.getStorageUsage(user);
+		accountManager.getStorageQuotaStatus(user);
+		
+		accountManager.getUserLocale(user);
+		
+		accountManager.getaDsID(user);
+		accountManager.getAppleId(user);
+		accountManager.getAppleIdAlias(user);
+		accountManager.getDsid(user);
+		accountManager.getFirstName(user);
+		accountManager.getFullName(user);
+		accountManager.getiCloudAppleIdAlias(user);
+		accountManager.getLanguageCode(user);
+		accountManager.getLastName(user);
+		accountManager.getLocale(user);
+		accountManager.getPrimaryEmail(user);
+		accountManager.getStatusCode(user);
+		accountManager.hasICloudQualifyingDevice(user);
+		accountManager.isBrMigrated(user);
+		accountManager.isGilligan_enabled(user);
+		accountManager.isGilligan_invited(user);
+		accountManager.isLocked(user);
+		accountManager.isPaidDeveloper(user);
+		accountManager.isPrimaryEmailVerified(user);	
+		
+		// Object Use
+		theDevice.getImei();
+		theDevice.getModel();
+		theDevice.getModelDisplayName();
+		theDevice.getModelLargePhotoURL1x();
+		theDevice.getModelLargePhotoURL2x();
+		theDevice.getModelSmallPhotoURL1x();
+		theDevice.getModelSmallPhotoURL2x();
+		theDevice.getName();
+		theDevice.getSerialNumber();
+		theDevice.getUdid();
+		
+		storageBlock.getDisplayColor();
+		storageBlock.getDisplayLabel();
+		storageBlock.getMediaKey();
+		storageBlock.getUsageInBytes();
+		
+		quotaState.hasMaxQuotaTier();
+		quotaState.isOverQuota();
+		quotaState.isPaidQuota();
+		
+		userLocale.getCountry();
+		userLocale.getRegion();
+		userLocale.getTimeZone();
 	}
 
 	@SuppressWarnings("unused")
@@ -79,15 +130,17 @@ public class DontUseMe {
 		String attachmentId = null;
 		String noteBookID = null;
 		String noteID = null;
-
+		ArrayList<Note> retrieveNotes = null;
+		
 		// Declare Objects
 		Note theNote = new Note();
 		Attachment theAttachment = new Attachment();
 
 		// Note Use
-		theNote.getAttachments(); // May be changed to getAttachmentsList();
-		// theNote.getAttachment(attachmentID);
-		// theNote.hasAttachment(attachmentID);
+		theNote.getAttachments();
+		//theNote.getAttachmentsList();
+		//theNote.getAttachment(attachmentId);
+		//theNote.hasAttachment(attachmentId);
 
 		theNote.getContent();
 		theNote.getDateModified();
@@ -102,7 +155,7 @@ public class DontUseMe {
 		theNote.setFolderName(folderName);
 		theNote.setSize(size); // May be changed to updateSize();
 		theNote.setSubject(subject);
-		theNote.setUuid(uuid); // May be changed to updateUUID();
+		theNote.updateUUID(); // May be changed to updateUUID();
 
 		// Attachment Use
 		theAttachment.getAttachmentId();
@@ -118,18 +171,22 @@ public class DontUseMe {
 		// NoteManager Use
 		noteManager.startup(user);//
 		noteManager.changeset(user);//
-
 		noteManager.createNotes(user, theNote);//
 		noteManager.deleteNotes(user, theNote);//
 		noteManager.updateNotes(user, theNote);//
 		noteManager.retriveAttachment(user, attachmentId);//
+		noteManager.retrieveNotes(user, retrieveNotes);
 
 		noteManager.getNotebookList(user);
 		noteManager.getNotesList(user, noteBookID);
 		noteManager.getNote(user, noteID, noteBookID);
-
+		
+		noteManager.hasNoteBook(user, noteBookID);
+		noteManager.hasNote(user, noteID, noteBookID);
 	}
 
+
+	@SuppressWarnings("unused")
 	public void DontRunContacts(UserSession user) {
 		boolean debugEnabled = false;
 		boolean announceConnections = false;
@@ -141,7 +198,7 @@ public class DontUseMe {
 		// Declare Objects
 		Contact theContact = new Contact();
 		Photo thePhoto = new Photo(photoBase64);
-		ContactGroup theGroup = new ContactGroup();
+		AddressBook theGroup = new AddressBook();
 
 		// Object Use
 		theGroup.setName(groupName);
@@ -184,10 +241,5 @@ public class DontUseMe {
 		contactManager.getContact(user, contactId);
 		contactManager.getAllContacts(user);*/
 
-	}
-	
-	public AccountJson getMeAccountJson(){
-		
-		return null;
 	}
 }
