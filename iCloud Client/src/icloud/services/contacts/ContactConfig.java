@@ -1,5 +1,7 @@
 package icloud.services.contacts;
 
+import icloud.services.contacts.objects.HeaderPositions;
+
 public class ContactConfig {
 	private String prefToken;
 	private String syncToken;
@@ -18,5 +20,10 @@ public class ContactConfig {
 
 	public void setPrefToken(String prefToken) {
 		this.prefToken = prefToken;
+	}
+
+	public void setHeaderPositions(HeaderPositions headerPositions) {
+		// TODO Auto-generated method stub
+		
 	}
 }

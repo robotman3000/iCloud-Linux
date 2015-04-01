@@ -3,6 +3,7 @@ package icloud.services.contacts;
 import icloud.services.contacts.objects.Contact;
 import icloud.services.contacts.objects.ContactCollection;
 import icloud.services.contacts.objects.AddressBook;
+import icloud.services.contacts.objects.Deletes;
 import icloud.services.contacts.objects.HeaderPositions;
 
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ public class ContactJson {
 	private HeaderPositions headerPositions;
 	private ArrayList<String> contactsOrder;
 	private ArrayList<AddressBook> groups;
-	private ArrayList<AddressBook> deletes;
+	private Deletes deletes;
 	private ArrayList<ContactCollection> collections;
 	private ArrayList<Contact> contacts;
 
@@ -51,7 +52,7 @@ public class ContactJson {
 		return contacts;
 	}
 
-	public ArrayList<AddressBook> getDeletes() {
+	public Deletes getDeletes() {
 		return deletes;
 	}
 
@@ -79,7 +80,7 @@ public class ContactJson {
 		this.groups = groups;
 	}
 
-	public void setDeletes(ArrayList<AddressBook> deletes) {
+	public void setDeletes(Deletes deletes) {
 		this.deletes = deletes;
 	}
 

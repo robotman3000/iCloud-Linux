@@ -8,6 +8,7 @@ public class AddressBook {
 	private String etag;
 	private String name;
 	private HeaderPositions headerPositions = new HeaderPositions();
+	private transient String UUID = "";
 
 	public String getGroupId() {
 		return groupId;
@@ -51,16 +52,24 @@ public class AddressBook {
 
 	public void addContact(Contact theContact) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void removeContact(Contact theContact) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void getContactList() {
 		// TODO Auto-generated method stub
-		
+
+	}
+
+	public void updateUUID() {
+		this.UUID = Integer.toString(this.groupId.hashCode());
+	}
+
+	public String getUUID() {
+		return UUID;
 	}
 }

@@ -20,6 +20,7 @@ public class Contact {
 	private String nickName = "";
 	private String phoneticLastName = "";
 	private String jobTitle = "";
+	private transient String UUID = "";
 
 	private ArrayList<KeyValuePair> urls = new ArrayList<>();
 	private ArrayList<KeyValuePair> relatedNames = new ArrayList<>();
@@ -229,6 +230,14 @@ public class Contact {
 
 	public void setProfiles(ArrayList<ProfileKeyValuePair> profiles) {
 		this.profiles = profiles;
+	}
+
+	public void updateUUID() {
+		this.UUID = Integer.toString(this.contactId.hashCode());
+	}
+
+	public String getUUID() {
+		return UUID;
 	}
 
 }

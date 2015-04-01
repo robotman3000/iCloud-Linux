@@ -38,7 +38,7 @@ public class NoteManager extends BaseManager{
 	}
 
 	public void startup(UserSession user) throws Exception {
-		URLBuilder urlBuilder = new URLBuilder().setUrl(user.getServerUrl("notes")).setPath(
+		URLBuilder urlBuilder = new URLBuilder().setHost(user.getServerUrl("notes")).setPath(
 				UserSession.notes_url_startup);
 		urlBuilder.addQueryString(UserSession.query_arg_clientBN,
 				user.getClientBuildNumber());
@@ -85,7 +85,7 @@ public class NoteManager extends BaseManager{
 
 		ServerConnection conn = new ServerConnection(debugEnabled);
 
-		URLBuilder httpurlBuilder = new URLBuilder().setUrl(user.getServerUrl("notes")).setPath(
+		URLBuilder httpurlBuilder = new URLBuilder().setHost(user.getServerUrl("notes")).setPath(
 				UserSession.notes_url_retrieveNotes);
 		httpurlBuilder.addQueryString(UserSession.query_arg_clientBN,
 				user.getClientBuildNumber());
@@ -133,7 +133,7 @@ public class NoteManager extends BaseManager{
 
 		ServerConnection conn = new ServerConnection(debugEnabled);
 
-		URLBuilder httpurlBuilder = new URLBuilder().setUrl(user.getServerUrl("notes")).setPath(
+		URLBuilder httpurlBuilder = new URLBuilder().setHost(user.getServerUrl("notes")).setPath(
 				UserSession.notes_url_createnotes);
 		httpurlBuilder.addQueryString(UserSession.query_arg_clientBN,
 				user.getClientBuildNumber());
@@ -179,7 +179,7 @@ public class NoteManager extends BaseManager{
 
 		ServerConnection conn = new ServerConnection(debugEnabled);
 
-		URLBuilder httpurlBuilder = new URLBuilder().setUrl(user.getServerUrl("notes")).setPath(
+		URLBuilder httpurlBuilder = new URLBuilder().setHost(user.getServerUrl("notes")).setPath(
 				UserSession.notes_url_updatenotes);
 		httpurlBuilder.addQueryString(UserSession.query_arg_clientBN,
 				user.getClientBuildNumber());
@@ -217,7 +217,7 @@ public class NoteManager extends BaseManager{
 
 		ServerConnection conn = new ServerConnection(debugEnabled);
 
-		URLBuilder httpurlBuilder = new URLBuilder().setUrl(user.getServerUrl("notes")).setPath(
+		URLBuilder httpurlBuilder = new URLBuilder().setHost(user.getServerUrl("notes")).setPath(
 				UserSession.notes_url_retriveAttachment);
 		httpurlBuilder.addQueryString(UserSession.query_arg_clientBN,
 				user.getClientBuildNumber());
@@ -267,7 +267,7 @@ public class NoteManager extends BaseManager{
 		 * "&syncToken=" + user.getUserConfig().getNoteConfig().getSyncToken());
 		 */
 
-		URLBuilder httpurlBuilder = new URLBuilder().setUrl(user.getServerUrl("notes")).setPath(
+		URLBuilder httpurlBuilder = new URLBuilder().setHost(user.getServerUrl("notes")).setPath(
 				UserSession.notes_url_changeset);
 		httpurlBuilder.addQueryString(UserSession.query_arg_clientBN,
 				user.getClientBuildNumber());
@@ -331,7 +331,7 @@ public class NoteManager extends BaseManager{
 		ServerConnection conn = new ServerConnection(debugEnabled);
 
 		URLBuilder urlBuild = new URLBuilder();
-		urlBuild.setUrl(user.getServerUrl("notes"));
+		urlBuild.setHost(user.getServerUrl("notes"));
 		urlBuild.setPath(UserSession.notes_url_deletenotes);
 		urlBuild.addQueryString(UserSession.query_arg_clientBN,
 				user.getClientBuildNumber());

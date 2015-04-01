@@ -1,6 +1,7 @@
 package icloud.services.account;
 
 import icloud.services.BaseManager;
+import icloud.services.URLConfig;
 import icloud.services.account.objects.Device;
 import icloud.services.account.objects.QuotaStatus;
 import icloud.services.account.objects.RequestInfo;
@@ -18,6 +19,7 @@ import com.google.gson.Gson;
 
 import common.CommonLogic;
 import common.ServerConnection;
+import common.SystemLogger;
 import common.URLBuilder;
 
 public class AccountManager extends BaseManager {
@@ -29,10 +31,9 @@ public class AccountManager extends BaseManager {
 		this.isInitialized = true;
 	}
 
-	public AccountManager(boolean announceConnections, boolean debugEnabled) {
+	public AccountManager(SystemLogger logger) {
 		this();
-		this.announceConnections = announceConnections;
-		this.debugEnabled = debugEnabled;
+		this.logger = logger;
 	}
 
 	public void login(UserSession user) throws Exception {
@@ -44,22 +45,22 @@ public class AccountManager extends BaseManager {
 		Map<String, String> headersMap = new HashMap<String, String>();
 		URLBuilder newUrl = new URLBuilder();
 
-		newUrl.setPath(UserSession.account_url_login)
-				.setPort(UserSession.default_port)
-				.setProtocol(UserSession.default_protocol)
-				.setUrl(UserSession.account_url_default_host);
+		newUrl.setPath(URLConfig.account_url_login)
+				.setPort(URLConfig.default_port)
+				.setProtocol(URLConfig.default_protocol)
+				.setHost(URLConfig.account_url_default_host);
 
-		newUrl.addQueryString(UserSession.query_arg_clientBN,
+		newUrl.addQueryString(URLConfig.query_arg_clientBN,
 				user.getClientBuildNumber());
-		newUrl.addQueryString(UserSession.query_arg_clientId, user.getUuid());
+		newUrl.addQueryString(URLConfig.query_arg_clientId, user.getUuid());
 
 		URL httpUrl = newUrl.buildURL();
 
-		headersMap.put("origin", UserSession.default_header_origin);
-		headersMap.put("User-Agent", UserSession.default_header_userAgent);
+		headersMap.put("origin", URLConfig.default_header_origin);
+		headersMap.put("User-Agent", URLConfig.default_header_userAgent);
 
-		ServerConnection conn = new ServerConnection(debugEnabled);
-		conn.setServerUrl(httpUrl).setRequestMethod(UserSession.POST)
+		ServerConnection conn = new ServerConnection();
+		conn.setServerUrl(httpUrl).setRequestMethod(URLConfig.POST)
 				.setRequestHeaders(headersMap).setPayload(generateQuery(user));
 		conn.connect();
 
@@ -92,29 +93,29 @@ public class AccountManager extends BaseManager {
 		String valCookie = user.getUserTokens().getTokenValue(
 				"X-APPLE-WEBAUTH-VALIDATE");
 
-		headersMap.put("origin", UserSession.default_header_origin);
-		headersMap.put("User-Agent", UserSession.default_header_userAgent);
+		headersMap.put("origin", URLConfig.default_header_origin);
+		headersMap.put("User-Agent", URLConfig.default_header_userAgent);
 
-		ServerConnection conn = new ServerConnection(debugEnabled);
+		ServerConnection conn = new ServerConnection().setLogger(logger);
 
 		String accountServer = user.getServerUrl("account");
 
 		URLBuilder newUrl = new URLBuilder();
-		newUrl.setPath(UserSession.account_url_logout)
-				.setUrl(accountServer)
-				.addQueryString(UserSession.query_arg_clientBN,
+		newUrl.setPath(URLConfig.account_url_logout)
+				.setHost(accountServer)
+				.addQueryString(URLConfig.query_arg_clientBN,
 						user.getClientBuildNumber())
-				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
+				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
 				.addQueryString(
-						UserSession.query_arg_dsid,
+						URLConfig.query_arg_dsid,
 						user.getUserConfig().getUserProperties()
 								.getProperty("dsid"));
 
-		newUrl.addQueryString(UserSession.query_arg_token, valCookie);
+		newUrl.addQueryString(URLConfig.query_arg_token, valCookie);
 		URL httpUrl = newUrl.buildURL();
 
 		conn.setServerUrl(httpUrl);
-		conn.setRequestMethod(UserSession.POST);
+		conn.setRequestMethod(URLConfig.POST);
 		conn.setRequestHeaders(headersMap);
 		conn.setRequestCookies(user.getUserTokens().getTokens());
 		conn.setPayload("{}");
@@ -132,21 +133,21 @@ public class AccountManager extends BaseManager {
 		}
 
 		URL url = new URLBuilder()
-				.setPath(UserSession.account_url_validate)
-				.setPort(UserSession.default_port)
-				.setProtocol(UserSession.default_protocol)
-				.setUrl(UserSession.account_url_default_host)
-				.addQueryString(UserSession.query_arg_clientBN,
+				.setPath(URLConfig.account_url_validate)
+				.setPort(URLConfig.default_port)
+				.setProtocol(URLConfig.default_protocol)
+				.setHost(URLConfig.account_url_default_host)
+				.addQueryString(URLConfig.query_arg_clientBN,
 						user.getClientBuildNumber())
-				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
+				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
 				.buildURL();
 
 		Map<String, String> headersMap = new HashMap<String, String>();
-		headersMap.put("origin", UserSession.default_header_origin);
-		headersMap.put("User-Agent", UserSession.default_header_userAgent);
+		headersMap.put("origin", URLConfig.default_header_origin);
+		headersMap.put("User-Agent", URLConfig.default_header_userAgent);
 
-		ServerConnection conn = new ServerConnection(debugEnabled)
-				.setRequestMethod(UserSession.POST).setServerUrl(url)
+		ServerConnection conn = new ServerConnection().setLogger(logger)
+				.setRequestMethod(URLConfig.POST).setServerUrl(url)
 				.setPayload("{}")
 				.setRequestCookies(user.getUserTokens().getTokens())
 				.setRequestHeaders(headersMap);
@@ -169,24 +170,24 @@ public class AccountManager extends BaseManager {
 		}
 
 		URL url = new URLBuilder()
-				.setPath(UserSession.account_url_getDevices)
-				.setPort(UserSession.default_port)
-				.setProtocol(UserSession.default_protocol)
-				.setUrl(UserSession.account_url_default_host)
-				.addQueryString(UserSession.query_arg_clientBN,
+				.setPath(URLConfig.account_url_getDevices)
+				.setPort(URLConfig.default_port)
+				.setProtocol(URLConfig.default_protocol)
+				.setHost(URLConfig.account_url_default_host)
+				.addQueryString(URLConfig.query_arg_clientBN,
 						user.getClientBuildNumber())
-				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
+				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
 				.addQueryString(
 						"dsid",
 						user.getUserData().getAccountData().getDsInfo()
 								.getDsid()).buildURL();
 
 		Map<String, String> headersMap = new HashMap<String, String>();
-		headersMap.put("origin", UserSession.default_header_origin);
-		headersMap.put("User-Agent", UserSession.default_header_userAgent);
+		headersMap.put("origin", URLConfig.default_header_origin);
+		headersMap.put("User-Agent", URLConfig.default_header_userAgent);
 
-		ServerConnection conn = new ServerConnection(debugEnabled)
-				.setRequestMethod(UserSession.GET).setServerUrl(url)
+		ServerConnection conn = new ServerConnection().setLogger(logger)
+				.setRequestMethod(URLConfig.GET).setServerUrl(url)
 				.setPayload("{}")
 				.setRequestCookies(user.getUserTokens().getTokens())
 				.setRequestHeaders(headersMap);
@@ -210,24 +211,24 @@ public class AccountManager extends BaseManager {
 		}
 
 		URL url = new URLBuilder()
-				.setPath(UserSession.account_url_getFamilyDetails)
-				.setPort(UserSession.default_port)
-				.setProtocol(UserSession.default_protocol)
-				.setUrl(UserSession.account_url_default_host)
-				.addQueryString(UserSession.query_arg_clientBN,
+				.setPath(URLConfig.account_url_getFamilyDetails)
+				.setPort(URLConfig.default_port)
+				.setProtocol(URLConfig.default_protocol)
+				.setHost(URLConfig.account_url_default_host)
+				.addQueryString(URLConfig.query_arg_clientBN,
 						user.getClientBuildNumber())
-				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
+				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
 				.addQueryString(
 						"dsid",
 						user.getUserData().getAccountData().getDsInfo()
 								.getDsid()).buildURL();
 
 		Map<String, String> headersMap = new HashMap<String, String>();
-		headersMap.put("origin", UserSession.default_header_origin);
-		headersMap.put("User-Agent", UserSession.default_header_userAgent);
+		headersMap.put("origin", URLConfig.default_header_origin);
+		headersMap.put("User-Agent", URLConfig.default_header_userAgent);
 
-		ServerConnection conn = new ServerConnection(debugEnabled)
-				.setRequestMethod(UserSession.GET).setServerUrl(url)
+		ServerConnection conn = new ServerConnection().setLogger(logger)
+				.setRequestMethod(URLConfig.GET).setServerUrl(url)
 				.setPayload("{}")
 				.setRequestCookies(user.getUserTokens().getTokens())
 				.setRequestHeaders(headersMap);
@@ -251,24 +252,24 @@ public class AccountManager extends BaseManager {
 		}
 
 		URL url = new URLBuilder()
-				.setPath(UserSession.account_url_getStorageUsageInfo)
-				.setPort(UserSession.default_port)
-				.setProtocol(UserSession.default_protocol)
-				.setUrl(UserSession.account_url_default_host)
-				.addQueryString(UserSession.query_arg_clientBN,
+				.setPath(URLConfig.account_url_getStorageUsageInfo)
+				.setPort(URLConfig.default_port)
+				.setProtocol(URLConfig.default_protocol)
+				.setHost(URLConfig.account_url_default_host)
+				.addQueryString(URLConfig.query_arg_clientBN,
 						user.getClientBuildNumber())
-				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
+				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
 				.addQueryString(
 						"dsid",
 						user.getUserData().getAccountData().getDsInfo()
 								.getDsid()).buildURL();
 
 		Map<String, String> headersMap = new HashMap<String, String>();
-		headersMap.put("origin", UserSession.default_header_origin);
-		headersMap.put("User-Agent", UserSession.default_header_userAgent);
+		headersMap.put("origin", URLConfig.default_header_origin);
+		headersMap.put("User-Agent", URLConfig.default_header_userAgent);
 
-		ServerConnection conn = new ServerConnection(debugEnabled)
-				.setRequestMethod(UserSession.POST).setServerUrl(url)
+		ServerConnection conn = new ServerConnection().setLogger(logger)
+				.setRequestMethod(URLConfig.POST).setServerUrl(url)
 				.setPayload("{}")
 				.setRequestCookies(user.getUserTokens().getTokens())
 				.setRequestHeaders(headersMap);

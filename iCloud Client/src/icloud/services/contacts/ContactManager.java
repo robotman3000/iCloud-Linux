@@ -3,6 +3,7 @@ package icloud.services.contacts;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import com.google.gson.Gson;
@@ -37,7 +38,7 @@ public class ContactManager extends BaseManager {
 				.setPath(UserSession.contacts_url_startup)
 				.setPort(UserSession.default_port)
 				.setProtocol(UserSession.default_protocol)
-				.setUrl(UserSession.contacts_url_default_host)
+				.setHost(UserSession.contacts_url_default_host)
 				.addQueryString(UserSession.query_arg_clientBN, user.getClientBuildNumber())
 				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
 				.addQueryString("dsid", user.getUserData().getAccountData().getDsInfo().getDsid())
@@ -78,7 +79,7 @@ public class ContactManager extends BaseManager {
 				.setPath(UserSession.contacts_url_changeset)
 				.setPort(UserSession.default_port)
 				.setProtocol(UserSession.default_protocol)
-				.setUrl(UserSession.contacts_url_default_host)
+				.setHost(UserSession.contacts_url_default_host)
 				.addQueryString(UserSession.query_arg_clientBN, user.getClientBuildNumber())
 				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
 				.addQueryString("dsid", user.getUserData().getAccountData().getDsInfo().getDsid())
@@ -118,7 +119,7 @@ public class ContactManager extends BaseManager {
 				.setPath(UserSession.contacts_url_getMeCard)
 				.setPort(UserSession.default_port)
 				.setProtocol(UserSession.default_protocol)
-				.setUrl(UserSession.contacts_url_default_host)
+				.setHost(UserSession.contacts_url_default_host)
 				.addQueryString(UserSession.query_arg_clientBN,
 						user.getClientBuildNumber())
 				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
@@ -164,7 +165,7 @@ public class ContactManager extends BaseManager {
 				.setPath(UserSession.contacts_url_setMeCard)
 				.setPort(UserSession.default_port)
 				.setProtocol(UserSession.default_protocol)
-				.setUrl(UserSession.contacts_url_default_host)
+				.setHost(UserSession.contacts_url_default_host)
 				.addQueryString(UserSession.query_arg_clientBN, user.getClientBuildNumber())
 				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
 				.addQueryString("dsid", user.getUserData().getAccountData().getDsInfo().getDsid())
@@ -215,7 +216,7 @@ public class ContactManager extends BaseManager {
 				.setPath(UserSession.contacts_url_groups)
 				.setPort(UserSession.default_port)
 				.setProtocol(UserSession.default_protocol)
-				.setUrl(UserSession.contacts_url_default_host)
+				.setHost(UserSession.contacts_url_default_host)
 				.addQueryString(UserSession.query_arg_clientBN, user.getClientBuildNumber())
 				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
 				.addQueryString(UserSession.query_arg_dsid, user.getUserData().getAccountData().getDsInfo().getDsid())
@@ -266,7 +267,7 @@ public class ContactManager extends BaseManager {
 				.setPath(UserSession.contacts_url_groups)
 				.setPort(UserSession.default_port)
 				.setProtocol(UserSession.default_protocol)
-				.setUrl(UserSession.contacts_url_default_host)
+				.setHost(UserSession.contacts_url_default_host)
 				.addQueryString(UserSession.query_arg_clientBN, user.getClientBuildNumber())
 				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
 				.addQueryString(UserSession.query_arg_dsid, user.getUserData().getAccountData().getDsInfo().getDsid())
@@ -314,7 +315,7 @@ public class ContactManager extends BaseManager {
 				.setPath(UserSession.contacts_url_groups)
 				.setPort(UserSession.default_port)
 				.setProtocol(UserSession.default_protocol)
-				.setUrl(UserSession.contacts_url_default_host)
+				.setHost(UserSession.contacts_url_default_host)
 				.addQueryString(UserSession.query_arg_clientBN, user.getClientBuildNumber())
 				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
 				.addQueryString(UserSession.query_arg_dsid, user.getUserData().getAccountData().getDsInfo().getDsid())
@@ -363,7 +364,7 @@ public class ContactManager extends BaseManager {
 				.setPath(UserSession.contacts_url_groups)
 				.setPort(UserSession.default_port)
 				.setProtocol(UserSession.default_protocol)
-				.setUrl(UserSession.contacts_url_default_host)
+				.setHost(UserSession.contacts_url_default_host)
 				.addQueryString(UserSession.query_arg_clientBN, user.getClientBuildNumber())
 				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
 				.addQueryString(UserSession.query_arg_dsid, user.getUserData().getAccountData().getDsInfo().getDsid())
@@ -414,7 +415,7 @@ public class ContactManager extends BaseManager {
 				.setPath(UserSession.contacts_url_groups)
 				.setPort(UserSession.default_port)
 				.setProtocol(UserSession.default_protocol)
-				.setUrl(UserSession.contacts_url_default_host)
+				.setHost(UserSession.contacts_url_default_host)
 				.addQueryString(UserSession.query_arg_clientBN, user.getClientBuildNumber())
 				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
 				.addQueryString(UserSession.query_arg_dsid, user.getUserData().getAccountData().getDsInfo().getDsid())
@@ -463,7 +464,7 @@ public class ContactManager extends BaseManager {
 				.setPath(UserSession.contacts_url_groups)
 				.setPort(UserSession.default_port)
 				.setProtocol(UserSession.default_protocol)
-				.setUrl(UserSession.contacts_url_default_host)
+				.setHost(UserSession.contacts_url_default_host)
 				.addQueryString(UserSession.query_arg_clientBN, user.getClientBuildNumber())
 				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
 				.addQueryString(UserSession.query_arg_dsid, user.getUserData().getAccountData().getDsInfo().getDsid())
@@ -500,21 +501,63 @@ public class ContactManager extends BaseManager {
 		ContactConfig cConfig = user.getUserConfig().getContactConfig();
 		ContactData cData = user.getUserData().getContactData();
 		
+		//TODO: add null checks
 		cData.setMeCardId(contactJson.getMeCardId());
 		cConfig.setPrefToken(contactJson.getPrefToken());
 		cConfig.setSyncToken(contactJson.getSyncToken());
+		cConfig.setHeaderPositions(contactJson.getHeaderPositions());
+		
+		parseContacts(user, contactJson);
+		
+		parseGroups(user, contactJson);
+		
+		parseDeletes(user, contactJson);
 	}
 	
+	//TODO: make one parse method that uses generics
 	private void parseContacts(UserSession user, ContactJson contactJson){
-		ContactConfig cConfig = user.getUserConfig().getContactConfig();
 		ContactData cData = user.getUserData().getContactData();
-		
-		
+		Iterator<Contact> it = contactJson.getContacts().iterator();
+		while(it.hasNext()){
+			Contact theContact = it.next();
+			theContact.updateUUID();
+			cData.getUserContacts().put(theContact.getUUID(), theContact);	
+		}
 	}
 	
 	private void parseGroups(UserSession user, ContactJson contactJson){
-		ContactConfig cConfig = user.getUserConfig().getContactConfig();
 		ContactData cData = user.getUserData().getContactData();
+		Iterator<AddressBook> it = contactJson.getGroups().iterator();
+		while(it.hasNext()){
+			AddressBook theAddressBook = it.next();
+			theAddressBook.updateUUID();
+			cData.getUserGroups().put(theAddressBook.getUUID(), theAddressBook);	
+		}
+	}
+	
+	private void parseDeletes(UserSession user, ContactJson contactJson){
+		ContactData cData = user.getUserData().getContactData();
+
+		Iterator<String> itContact = contactJson.getDeletes().getContactIds().iterator();
+		Iterator<String> itGroup = contactJson.getDeletes().getGroupIds().iterator();
+		
+		while (itContact.hasNext()){
+			String theDeleted = itContact.next();
+			if (cData.getUserContacts().containsKey(theDeleted)){
+				cData.getUserContacts().remove(theDeleted);
+			} else {
+				System.err.println("Did not remove non existant contact: " + theDeleted);
+			}
+		}
+		
+		while (itGroup.hasNext()){
+			String theDeleted = itGroup.next();
+			if (cData.getUserGroups().containsKey(theDeleted)){
+				cData.getUserGroups().remove(theDeleted);
+			} else {
+				System.err.println("Did not remove non existant group: " + theDeleted);
+			}
+		}
 		
 	}
 	
