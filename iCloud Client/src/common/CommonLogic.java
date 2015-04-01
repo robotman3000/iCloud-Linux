@@ -37,7 +37,7 @@ public class CommonLogic {
 	public static void splitOut() {
 		System.out.println("================================================================================");
 	}
-
+	
 	public static String convertStreamToString(InputStream is) throws IOException {
 		// Copy Pasted Code
 
@@ -109,5 +109,12 @@ public class CommonLogic {
 		System.out.println("*** BEGIN JSON PRINT ***");
 		System.out.println(result2);
 		System.out.println("*** END JSON PRINT ***");
+	}
+	
+	public static boolean isNull(Object obj){
+		if(obj != null){
+			return true;
+		}
+		return false;
 	}
 }

@@ -7,6 +7,7 @@ import java.util.Scanner;
 import java.util.Set;
 
 import common.CommonLogic;
+import common.SystemLogger;
 import icloud.services.account.AccountManager;
 import icloud.services.account.objects.Device;
 import icloud.services.account.objects.QuotaStatus;
@@ -21,7 +22,8 @@ import icloud.user.UserSession;
 public class RunMe {
 
 	UserSession user;
-	AccountManager accountManager = new AccountManager();
+	SystemLogger loudMouth = new SystemLogger().setSystemLogLevel(SystemLogger.LoggingVerboseity.INFO);
+	AccountManager accountManager = new AccountManager(loudMouth);
 
 	public static void main(String[] args) {
 		if (args.length != 2) {
@@ -32,13 +34,13 @@ public class RunMe {
 		RunMe main = new RunMe();
 		main.signIn(args[0], args[1]);
 		main.interactiveUserPrint();
-		main.interactiveNotes();
+		//main.interactiveNotes();
 		main.signOut();
 	}
 
 	private void interactiveUserPrint() {
 		if (queryUserBoolean("Do you want to fetch & print the user config?")) {
-			log("Fetching user data");
+			loudMouth.log("Fetching user data", this.getClass().getName(), SystemLogger.LoggingVerboseity.INFO);
 			try {
 				accountManager.getDevices(user);
 				accountManager.getFamilyDetails(user);
@@ -230,16 +232,16 @@ public class RunMe {
 
 	private void signIn(String username, String password) {
 		try {
-			log("Attempting to authenticate user");
-			log("Using username: " + username);
-			log("Using password: " + password);
+			loudMouth.log("Attempting to authenticate user", this.getClass().getName(), SystemLogger.LoggingVerboseity.INFO);
+			loudMouth.log("Using username: " + username, this.getClass().getName(), SystemLogger.LoggingVerboseity.INFO);
+			loudMouth.log("Using password: " + password, this.getClass().getName(), SystemLogger.LoggingVerboseity.INFO);
 			user = new UserSession(username, password);
 			accountManager.login(user);
-			log("Login succeeded; User is now signed in");
+			loudMouth.log("Login succeeded; User is now signed in", this.getClass().getName(), SystemLogger.LoggingVerboseity.INFO);
 		} catch (Exception e) {
 			// TODO Catch Invalid Credintals Exeption
-			log("Login failed; User is not signed in");
-			err("Invalid login info provided");
+			loudMouth.log("Login failed; User is not signed in", this.getClass().getName(), SystemLogger.LoggingVerboseity.ERROR);
+			loudMouth.log("Invalid login info provided", this.getClass().getName(), SystemLogger.LoggingVerboseity.ERROR);
 			e.printStackTrace();
 		}
 	}

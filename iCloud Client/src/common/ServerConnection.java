@@ -23,6 +23,7 @@ import com.google.gson.GsonBuilder;
 public class ServerConnection {
 
 	// TODO: Add Exception throwing; Add Exception handling; Add Javadoc
+	// TODO: implement constructor stubs
 	private boolean isExpended = false;
 
 	private URL serverUrl = null;
@@ -37,27 +38,48 @@ public class ServerConnection {
 	private int responseCode = -1;
 	private InputStream responseData = null;
 	private String responseErrorStream = null;
+	private SystemLogger logger = new SystemLogger(SystemLogger.LoggingVerboseity.NONE);
 
-	private boolean debugEnabled = false;
-
+	
+	public ServerConnection(URL connectionUrl, String requestMethod, List<HttpCookie> requestCookies, Map<String, String> requestHeaders){
+		this();
+	}
+	
+	public ServerConnection(URL connectionUrl, String requestMethod, List<HttpCookie> requestCookies){
+		this();
+	}
+	
+	public ServerConnection(URL connectionUrl, String requestMethod, Map<String, String> requestHeaders){
+		this();
+	}
+	
+	public ServerConnection(URL connectionUrl, String requestMethod){
+		this();
+	}
+	
 	public ServerConnection() {
 
 	}
-
-	public ServerConnection(boolean enableDebugLogging) {
-		setDebugenabled(enableDebugLogging);
+	
+	public ServerConnection setLogger(SystemLogger logger){
+		// Don't make a new copy so that logger settings stay in sync by using the same object reference
+		//TODO: fix a null pointer exeception that could occur if the logger is made null by external sources
+		if (logger != null){
+			this.logger = logger;
+		}
+		return this;
 	}
 
-	public int connect() throws Exception /* throws Exception */{
+	public int connect() throws Exception {
 		isExpended = true;
 		boolean usePayload = false;
 
 		System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
 
-		if (debugEnabled) {
-			CommonLogic.splitOut();
-			System.out.println("Start connection details");
-			CommonLogic.splitOut();
+		if (logger != null) {
+			logger.log(logger.getSeperator(), this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
+			logger.log("Start connection details", this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
+			logger.log(logger.getSeperator(), this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
 		}
 
 		CookieManager manager = new CookieManager();
@@ -69,6 +91,7 @@ public class ServerConnection {
 		HttpURLConnection httpconnection;
 
 		if (serverUrl == null) {
+			//TODO: throw new InvalidHostException()
 			System.err.println("Server URL can't be null" + "\n"
 					+ "Set with setServerUrl(URL url);");
 			return -1;
@@ -77,16 +100,16 @@ public class ServerConnection {
 			httpconnection = (HttpURLConnection) httpurl.openConnection();
 
 			// Debug Output
-			if (debugEnabled) {
-				System.out.println("URL is: " + httpurl);
-				System.out.println("URL Details: {");
-				System.out.println("	Protocol: " + httpurl.getProtocol());
-				System.out.println("	Host: " + httpurl.getHost());
-				System.out.println("	Port: " + httpurl.getPort());
-				System.out.println("	Path: " + httpurl.getPath());
-				System.out.println("	File: " + httpurl.getFile());
-				System.out.println("	Query: " + httpurl.getQuery());
-				System.out.println("}");
+			if (logger != null) {
+				logger.log("URL is: " + httpurl, this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
+				logger.log("URL Details: {", this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
+				logger.log("	Protocol: " + httpurl.getProtocol(), this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
+				logger.log("	Host: " + httpurl.getHost(), this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
+				logger.log("	Port: " + httpurl.getPort(), this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
+				logger.log("	Path: " + httpurl.getPath(), this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
+				logger.log("	File: " + httpurl.getFile(), this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
+				logger.log("	Query: " + httpurl.getQuery(), this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
+				logger.log("}", this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
 			}
 		}
 
@@ -104,8 +127,8 @@ public class ServerConnection {
 				httpconnection.setDoOutput(false);
 				usePayload = false;
 			}
-			if (debugEnabled) {
-				System.out.println("Request Method: " + httpconnection.getRequestMethod());
+			if (logger != null) {
+				logger.log("Request Method: " + httpconnection.getRequestMethod(), this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
 			}
 		}
 
@@ -116,8 +139,8 @@ public class ServerConnection {
 				String key = iterator.next();
 				httpconnection.setRequestProperty(key, requestHeaders.get(key));
 			}
-			if (debugEnabled) {
-				System.out.println("Headers: " + httpconnection.getRequestProperties());
+			if (logger != null) {
+				logger.log("Headers: " + httpconnection.getRequestProperties(), this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
 			}
 		}
 		if (requestCookies != null) {
@@ -125,8 +148,8 @@ public class ServerConnection {
 			while (iterator.hasNext()) {
 				HttpCookie key = iterator.next();
 				cookieJar.add(httpurl.toURI(), key);
-				if (debugEnabled) {
-					System.out.println("Added connection cookie: " + key);
+				if (logger != null) {
+					logger.log("Added connection cookie: " + key, this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
 				}
 			}
 
@@ -134,12 +157,13 @@ public class ServerConnection {
 
 		if (usePayload) {
 			if (payload == null) {
+				//TODO: throw new InvalidPayloadException()
 				System.err.println("Post Data can't be null" + "\n" + "Set with setPayload();");
 				return -1;
 			} else {
 				setPayload(payload);
-				if (debugEnabled) {
-					System.out.println("Payload: " + payload);
+				if (logger != null) {
+					logger.log("Payload: " + payload, this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
 				}
 			}
 		}
@@ -153,21 +177,22 @@ public class ServerConnection {
 			httpconnection.connect();
 		}
 
-		if (debugEnabled) {
-			System.out.println("Response Details:");
-			System.out.println("Input: " + httpconnection.getDoInput() + "\n" + "Output: "
-					+ httpconnection.getDoOutput());
-			System.out.println("URL: " + httpconnection.getURL() + "\n" + "Response Message: "
-					+ httpconnection.getResponseMessage() + "\n" + "Returned Headers: "
-					+ httpconnection.getHeaderFields());
-			System.out.println("Error Stream: "
-					+ CommonLogic.convertStreamToString(httpconnection.getErrorStream()));
+		if (logger != null) {
+			logger.log("Response Details:", this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
+			logger.log("Input: " + httpconnection.getDoInput(), this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
+			logger.log("Output: " + httpconnection.getDoOutput(), this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
+			logger.log("URL: " + httpconnection.getURL(), this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
+			logger.log("Response Message: " + httpconnection.getResponseMessage(), this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
+			logger.log("Returned Headers: " + httpconnection.getHeaderFields(), this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
+			logger.log("Error Stream: "
+					+ CommonLogic.convertStreamToString(httpconnection.getErrorStream()), this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
+
 			for (HttpCookie cookie : cookieJar.getCookies()) {
-				System.out.println("CookieHandler retrieved cookie: " + cookie);
+				logger.log("CookieHandler retrieved cookie: " + cookie, this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
 			}
-			CommonLogic.splitOut();
-			System.out.println("End Connection Deails");
-			CommonLogic.splitOut();
+			logger.log(logger.getSeperator(), this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
+			logger.log("End connection details", this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
+			logger.log(logger.getSeperator(), this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
 		}
 
 		InputStream is = null;
@@ -175,10 +200,13 @@ public class ServerConnection {
 			is = httpconnection.getInputStream();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
+			//TODO: finish this
 			e.printStackTrace();
+			logger.log(logger.getSeperator(), this.getClass().getName(), SystemLogger.LoggingVerboseity.ERROR);
 			System.err.println("Reported Error Message: "
 					+ CommonLogic.convertStreamToString(httpconnection.getErrorStream()));
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			logger.log(logger.getSeperator(), this.getClass().getName(), SystemLogger.LoggingVerboseity.ERROR);
 			System.err.println("ServerConnection Object\n" + gson.toJson(this));
 			// System.err.println(httpconnection.getRequestProperties());
 			// System.err.println(httpconnection.getURL());
@@ -195,8 +223,46 @@ public class ServerConnection {
 		return getResponseCode();
 	}
 
+	
+	public String getPayload() {
+		return payload;
+	}
+
+	public List<HttpCookie> getRequestCookies() {
+		return requestCookies;
+	}
+
+	public Map<String, String> getRequestHeaders() {
+		return requestHeaders;
+	}
+
+	public String getRequestMethod() {
+		return requestMethod;
+	}
+
 	public URL getServerUrl() {
 		return serverUrl;
+	}
+
+
+	public ServerConnection setPayload(String payload) {
+		this.payload = payload;
+		return this;
+	}
+
+	public ServerConnection setRequestCookies(List<HttpCookie> requestCookies) {
+		this.requestCookies = requestCookies;
+		return this;
+	}
+
+	public ServerConnection setRequestHeaders(Map<String, String> requestHeaders) {
+		this.requestHeaders = requestHeaders;
+		return this;
+	}
+
+	public ServerConnection setRequestMethod(String requestMethod) {
+		this.requestMethod = requestMethod;
+		return this;
 	}
 
 	public ServerConnection setServerUrl(URL serverUrl) {
@@ -206,73 +272,43 @@ public class ServerConnection {
 		this.serverUrl = serverUrl;
 		return this;
 	}
-
-	public Map<String, String> getRequestHeaders() {
-		return requestHeaders;
-	}
-
-	public ServerConnection setRequestHeaders(Map<String, String> requestHeaders) {
-		this.requestHeaders = requestHeaders;
-		return this;
-	}
-
-	public String getPayload() {
-		return payload;
-	}
-
-	public ServerConnection setPayload(String payload) {
-		this.payload = payload;
-		return this;
-	}
-
-	public String getRequestMethod() {
-		return requestMethod;
-	}
-
-	public ServerConnection setRequestMethod(String requestMethod) {
-		this.requestMethod = requestMethod;
-		return this;
-	}
-
-	public List<HttpCookie> getRequestCookies() {
-		return requestCookies;
-	}
-
-	public ServerConnection setRequestCookies(List<HttpCookie> requestCookies) {
-		this.requestCookies = requestCookies;
-		return this;
-	}
-
-	public String getResponseMessage() {
-		return responseMessage;
-	}
-
-	private void setResponseMessage(String responseMessage) {
-		this.responseMessage = responseMessage;
-	}
-
-	public Map<String, List<String>> getResponseHeaders() {
-		return responseHeaders;
-	}
-
-	private void setResponseHeaders(Map<String, List<String>> map) {
-		this.responseHeaders = map;
-	}
-
-	public List<HttpCookie> getResponseCookies() {
-		return responseCookies;
+	
+	
+	private void setResponseCode(int responseCode) {
+		this.responseCode = responseCode;
 	}
 
 	private void setResponseCookies(List<HttpCookie> responseCookies) {
 		this.responseCookies = responseCookies;
 	}
 
+	private void setResponseData(InputStream responseData) {
+		this.responseData = responseData;
+	}
+
+	private void setResponseErrorStream(String responseErrorStream) {
+		this.responseErrorStream = responseErrorStream;
+	}
+
+	private void setResponseHeaders(Map<String, List<String>> map) {
+		this.responseHeaders = map;
+	}
+
+	private void setResponseMessage(String responseMessage) {
+		this.responseMessage = responseMessage;
+	}
+
+	
 	public int getResponseCode() {
 		return responseCode;
 	}
 
-	private void setResponseCode(int responseCode) {
-		this.responseCode = responseCode;
+	public List<HttpCookie> getResponseCookies() {
+		return responseCookies;
+	}
+
+	public InputStream getResponseData() {
+		return this.responseData;
 	}
 
 	public String getResponseDataAsString() {
@@ -291,27 +327,16 @@ public class ServerConnection {
 		return sb.toString();
 	}
 
-	public InputStream getResponseData() {
-		return this.responseData;
-	}
-
-	private void setResponseData(InputStream responseData) {
-		this.responseData = responseData;
-	}
-
-	public boolean isDebugenabled() {
-		return debugEnabled;
-	}
-
-	private void setDebugenabled(boolean debugenabled) {
-		this.debugEnabled = debugenabled;
-	}
-
 	public String getResponseErrorStream() {
 		return responseErrorStream;
 	}
 
-	private void setResponseErrorStream(String responseErrorStream) {
-		this.responseErrorStream = responseErrorStream;
+	public Map<String, List<String>> getResponseHeaders() {
+		return responseHeaders;
 	}
+
+	public String getResponseMessage() {
+		return responseMessage;
+	}
+
 }
