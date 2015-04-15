@@ -8,5 +8,5 @@ public class BaseManager {
 	protected boolean isInitialized = false;
 	protected boolean announceConnections = false;
 	protected boolean debugEnabled = false;
-	protected SystemLogger logger = new SystemLogger();
+	protected SystemLogger logger;
 }

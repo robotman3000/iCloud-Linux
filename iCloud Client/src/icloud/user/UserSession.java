@@ -4,6 +4,7 @@ import java.util.Properties;
 
 import common.CommonLogic;
 import common.SystemLogger;
+import common.SystemLogger.LoggingVerboseity;
 
 public class UserSession {
 
@@ -88,5 +89,9 @@ public class UserSession {
 
 	public SystemLogger getLogger() {
 		return loudMouth;
+	}
+	
+	public void setLoggingLevel(LoggingVerboseity logMessages){
+		
 	}
 }

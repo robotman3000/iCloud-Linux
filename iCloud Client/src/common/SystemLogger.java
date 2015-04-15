@@ -8,7 +8,6 @@ public class SystemLogger {
 	public enum LoggingVerboseity{
 		
 		NONE(){
-			@SuppressWarnings("unused")
 			int logNumber = 0;
 			protected int getLogNumber() {
 				return logNumber;
@@ -16,7 +15,6 @@ public class SystemLogger {
 		},
 		
 		INFO(){
-			@SuppressWarnings("unused")
 			int logNumber = 1;
 			protected int getLogNumber() {
 				return logNumber;
@@ -24,7 +22,6 @@ public class SystemLogger {
 		}, 
 		
 		WARNING(){
-			@SuppressWarnings("unused")
 			int logNumber = 2;
 			protected int getLogNumber() {
 				return logNumber;
@@ -32,7 +29,6 @@ public class SystemLogger {
 		}, 
 		
 		ERROR(){
-			@SuppressWarnings("unused")
 			int logNumber = 3;
 			protected int getLogNumber() {
 				return logNumber;
@@ -40,8 +36,14 @@ public class SystemLogger {
 		}, 
 		
 		DEVELOPER(){
-			@SuppressWarnings("unused")
 			int logNumber = 4;
+			protected int getLogNumber() {
+				return logNumber;
+			}
+		},
+		
+		EXTREME(){
+			int logNumber = 5;
 			protected int getLogNumber() {
 				return logNumber;
 			}
@@ -68,7 +70,7 @@ public class SystemLogger {
 	}
 
 	public void log(String logMessage, String sender, LoggingVerboseity logLevel){
-		if(systemLogLevel.getLogNumber() <= logLevel.getLogNumber()){
+		if(systemLogLevel.getLogNumber() >= logLevel.getLogNumber()){
 			logLevel.logMessage(logMessage, sender);
 		}
 	}

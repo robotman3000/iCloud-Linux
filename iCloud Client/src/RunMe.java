@@ -22,7 +22,7 @@ import icloud.user.UserSession;
 public class RunMe {
 
 	UserSession user;
-	SystemLogger loudMouth = new SystemLogger().setSystemLogLevel(SystemLogger.LoggingVerboseity.INFO);
+	SystemLogger loudMouth = new SystemLogger().setSystemLogLevel(SystemLogger.LoggingVerboseity.DEVELOPER);
 	AccountManager accountManager = new AccountManager(loudMouth);
 
 	public static void main(String[] args) {
@@ -236,6 +236,9 @@ public class RunMe {
 			loudMouth.log("Using username: " + username, this.getClass().getName(), SystemLogger.LoggingVerboseity.INFO);
 			loudMouth.log("Using password: " + password, this.getClass().getName(), SystemLogger.LoggingVerboseity.INFO);
 			user = new UserSession(username, password);
+			SystemLogger log = user.getLogger(); 
+			log = loudMouth;
+			loudMouth.setSystemLogLevel(SystemLogger.LoggingVerboseity.DEVELOPER);
 			accountManager.login(user);
 			loudMouth.log("Login succeeded; User is now signed in", this.getClass().getName(), SystemLogger.LoggingVerboseity.INFO);
 		} catch (Exception e) {

@@ -59,7 +59,7 @@ public class AccountManager extends BaseManager {
 		headersMap.put("origin", URLConfig.default_header_origin);
 		headersMap.put("User-Agent", URLConfig.default_header_userAgent);
 
-		ServerConnection conn = new ServerConnection();
+		ServerConnection conn = new ServerConnection().setLogger(logger);
 		conn.setServerUrl(httpUrl).setRequestMethod(URLConfig.POST)
 				.setRequestHeaders(headersMap).setPayload(generateQuery(user));
 		conn.connect();
@@ -102,6 +102,8 @@ public class AccountManager extends BaseManager {
 
 		URLBuilder newUrl = new URLBuilder();
 		newUrl.setPath(URLConfig.account_url_logout)
+				.setProtocol("https://")
+				.setPort(443)
 				.setHost(accountServer)
 				.addQueryString(URLConfig.query_arg_clientBN,
 						user.getClientBuildNumber())
