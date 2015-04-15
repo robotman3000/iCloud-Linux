@@ -1,67 +1,90 @@
 package common;
 
-import icloud.services.URLConfig;
-
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 public class URLBuilder {
-	// TODO: Add Exception throwing; Add Exception handling; Add Javadoc
-	private String protocol = "http:\\";
-	private int port = 80;
-	private String host = "example.com";
-	private String file = "index.html";
+	// TODO: Add Javadoc; auto insert default values for missing args
+	private String protocol = "";
+	private int port = -1;
+	private String host = "";
+	private String file = "";
 	private HashMap<String, String> queryStringMap = new HashMap<>();
-	private SystemLogger logger = new SystemLogger(SystemLogger.LoggingVerboseity.NONE); 
-	
+
 	// TODO: Make all applicable methods use the systemlogger
-	public URLBuilder(String protocol, String host, int port, String file, HashMap<String, String> keyMap){
-		this.setProtocol(protocol);
-		this.setHost(host);
-		this.setPort(port);
-		this.setPath(file);
-		this.setQueryStringMap(keyMap);	
+	public URLBuilder(String protocol, String host, int port, String file, HashMap<String, String> keyMap) {
+		this(protocol, host, port, file);
+		this.setQueryStringMap(keyMap);
 	}
-	
-	public URLBuilder(String protocol, String host, int port, String file, KeyValuePair... keyValues){
+
+	public URLBuilder(String protocol, String host, int port, String file, KeyValuePair... keyValues) {
+		this(protocol, host, port, file);
+
 		HashMap<String, String> list = new HashMap<>();
-		if(keyValues != null && keyValues.length > 0){
-			for(KeyValuePair kv : keyValues){
-				if(kv.getKey() != null && kv.getValue() != null && kv.getKey().length() > 0 && kv.getValue().length() > 0){
+		if (keyValues != null && keyValues.length > 0) {
+			for (KeyValuePair kv : keyValues) {
+				if (kv.getKey() != null && kv.getValue() != null && kv.getKey().length() > 0
+						&& kv.getValue().length() > 0) {
 					list.put(kv.getKey(), kv.getValue());
 				}
 			}
 		}
-		this.setProtocol(protocol);
-		this.setHost(host);
-		this.setPort(port);
-		this.setPath(file);
-		this.setQueryStringMap(list);	
+		this.setQueryStringMap(list);
 	}
 
-	public URLBuilder(String protocol, String host, int port, String file){
-		this(protocol, host, port, file, new KeyValuePair("", ""));
+	public URLBuilder(String protocol, String host, int port, String file) {
+		this(protocol, host, port);
+		setPath(file);
 	}
-	
-	public URLBuilder(String protocol, String host, int port){
-		this(protocol, host, port, "");
+
+	public URLBuilder(String protocol, String host, int port) {
+		this(protocol, host);
+		setPort(port);
 	}
-	
+
 	public URLBuilder(String protocol, String host) {
-		this(protocol, host, URLConfig.default_port, "");
+		this(host);
+		setProtocol(protocol);
 	}
-	
+
 	public URLBuilder(String host) {
-		this(URLConfig.default_protocol, host);
+		setHost(host);
 	}
-	
+
+	public URLBuilder(URL fromUrl) {
+		URI theUri;
+		try {
+			theUri = fromUrl.toURI();
+			setProtocol(theUri.getAuthority());
+			setHost(theUri.getHost());
+			setPath(theUri.getPath());
+			setPort(theUri.getPort());
+
+			String[] list = theUri.getQuery().split("&");
+			for (String str : list) {
+				String[] abc = str.trim().replaceFirst("=", "\n").split("\n");
+				if (abc.length == 2) {
+					addQueryString(abc[0], abc[1]);
+				} else {
+					System.err.println("Skipped adding query string: " + str);
+				}
+			}
+		} catch (URISyntaxException e) {
+			// This shouln't ever happen. if it does then either my reasoning is
+			// wrong or there is a bug somewhere
+			e.printStackTrace();
+		}
+	}
+
 	public URLBuilder() {
-		
+
 	}
-	
+
 	public URL buildURL() throws MalformedURLException {
 		Iterator<String> it = queryStringMap.keySet().iterator();
 		StringBuilder queryStringB = new StringBuilder();
@@ -83,7 +106,7 @@ public class URLBuilder {
 		if (host != null) {
 			str.append(host);
 		}
-
+		
 		if (port != -1) {
 			str.append(":" + port);
 		}
@@ -97,7 +120,7 @@ public class URLBuilder {
 		url = new URL(str.toString());
 		return url;
 	}
-	
+
 	public URLBuilder addQueryString(String key, String value) {
 		queryStringMap.put(key, value);
 		return this;
@@ -108,19 +131,24 @@ public class URLBuilder {
 			queryStringMap.remove(key);
 		}
 	}
-	
+
 	public URLBuilder setPath(String path) {
-		if(path != null && path.length() > 0){
+		if (path != null && path.length() > 0) {
 			this.file = cleanSlashes(path);
 		} else {
-			//TODO: throw new InvalidPathException();
+			throw new IllegalArgumentException("Invalid path provided");
 		}
 		return this;
 	}
 
 	public URLBuilder setPort(int port) {
 		// Nothing needed here as int's can't be null
-		this.port = port;
+		if (port > 0) {
+			this.port = port;
+		} else {
+			port = -1; // The "invalid" port used later in buildUrl()
+		}
+
 		return this;
 	}
 
@@ -128,20 +156,23 @@ public class URLBuilder {
 		try {
 			String newProtocol = protocol.replaceAll("://", "");
 			@SuppressWarnings("unused")
-			URL url = new URL(newProtocol, "example.com", "/index.html"); /* This will throw a MalformedURLException if something is wrong
-			* so we can safely assume that the protocol is at fault and not the hard coded values */
+			/*
+			 * This will throw a MalformedURLException if something is wrong so
+			 * we can safely assume that the protocol is at fault and not the
+			 * hard coded values
+			 */
+			URL url = new URL(newProtocol, "example.com", "/index.html");
 			this.protocol = newProtocol;
 		} catch (MalformedURLException e) {
-			//TODO: throw new InvalidProtocolException
-			e.printStackTrace();
+			throw new IllegalArgumentException("Invalid protocol provided");
 		}
 		return this;
 	}
 
 	public URLBuilder setQueryStringMap(HashMap<String, String> queryStrings) {
 		// Make a new map as to stop uncontroled modifications
-		for(String key : queryStrings.keySet()){
-			for(String value : queryStrings.values()){
+		for (String key : queryStrings.keySet()) {
+			for (String value : queryStrings.values()) {
 				this.queryStringMap.put(key, value);
 			}
 		}
@@ -149,23 +180,14 @@ public class URLBuilder {
 	}
 
 	public URLBuilder setHost(String host) {
-		if(host != null && host.length() > 0){
-			this.host = cleanSlashes(host);
+		if (host != null && host.length() > 0) {
+			this.host = cleanPort(cleanProtocol(cleanSlashes(host)));
 		} else {
-			//TODO: throw new InvalidHostException();
+			throw new IllegalArgumentException("Invalid host provided");
 		}
 		return this;
 	}
 
-	public URLBuilder setLogger(SystemLogger logger){
-		// Don't make a new copy so that logger settings stay in sync by using the same object reference
-		//TODO: fix a null pointer exeception that could occur if the logger is made null by external sources
-		if (logger != null){
-			this.logger = logger;
-		}
-		return this;
-	}
-	
 	public String getPath() {
 		return file;
 	}
@@ -181,8 +203,8 @@ public class URLBuilder {
 	public Map<String, String> getQueryStringMap() {
 		// Make a new map as to stop uncontroled modifications
 		HashMap<String, String> listor = new HashMap<>();
-		for(String key : queryStringMap.keySet()){
-			for(String value : queryStringMap.values()){
+		for (String key : queryStringMap.keySet()) {
+			for (String value : queryStringMap.values()) {
 				listor.put(key, value);
 			}
 		}
@@ -192,16 +214,34 @@ public class URLBuilder {
 	public String getUrl() {
 		return host;
 	}
-	
-	private String cleanSlashes(String cleanMe){
+
+	private String cleanSlashes(String cleanMe) {
 		String layer1 = cleanMe.trim();
 		int length = layer1.length();
-		if(layer1.charAt(length - 1) == "/".charAt(0) 
-				|| layer1.charAt(length - 1) == "\\".charAt(0)){
+		if (layer1.charAt(length - 1) == "/".charAt(0) || layer1.charAt(length - 1) == "\\".charAt(0)) {
 			StringBuilder str = new StringBuilder(layer1);
 			str.deleteCharAt(str.length());
 			return str.toString();
 		}
 		return layer1;
+	}
+
+	private String cleanProtocol(String cleanMe) {
+		String str1 = cleanMe.replaceFirst("://", "@@@@");
+		if (str1.contains("@@@@")) {
+			String[] str2 = str1.split("@@@@");
+			String cleaned = str2[1];
+			return cleaned;
+		}
+		return cleanMe;
+	}
+	
+	private String cleanPort(String host2) {
+		if(host2.contains(":")){
+			String[] str2 = host2.split(":");
+			String cleaned = str2[0];
+			return cleaned;
+		}
+		return host2;
 	}
 }

@@ -12,6 +12,8 @@ import java.net.CookieStore;
 import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +27,7 @@ public class ServerConnection {
 	// TODO: Add Exception throwing; Add Exception handling; Add Javadoc
 	// TODO: implement constructor stubs
 	private boolean isExpended = false;
+	private boolean printExceptions = true; // TODO: make this editable
 
 	private URL serverUrl = null;
 	private Map<String, String> requestHeaders = null;
@@ -38,49 +41,58 @@ public class ServerConnection {
 	private int responseCode = -1;
 	private InputStream responseData = null;
 	private String responseErrorStream = null;
-	private SystemLogger logger = new SystemLogger(SystemLogger.LoggingVerboseity.NONE);
+	private SystemLogger logger;
 
-	
-	public ServerConnection(URL connectionUrl, String requestMethod, List<HttpCookie> requestCookies, Map<String, String> requestHeaders){
-		this();
+	public ServerConnection(URL connectionUrl, String requestMethod, List<HttpCookie> requestCookies, Map<String, String> requestHeaders) {
+		this(connectionUrl, requestMethod);
+		this.setRequestCookies(requestCookies);
+		this.setRequestHeaders(requestHeaders);
 	}
-	
-	public ServerConnection(URL connectionUrl, String requestMethod, List<HttpCookie> requestCookies){
-		this();
+
+	public ServerConnection(URL connectionUrl, String requestMethod, List<HttpCookie> requestCookies) {
+		this(connectionUrl, requestMethod);
+		this.setRequestCookies(requestCookies);
 	}
-	
-	public ServerConnection(URL connectionUrl, String requestMethod, Map<String, String> requestHeaders){
-		this();
+
+	public ServerConnection(URL connectionUrl, String requestMethod, Map<String, String> requestHeaders) {
+		this(connectionUrl, requestMethod);
+		this.setRequestHeaders(requestHeaders);
 	}
-	
-	public ServerConnection(URL connectionUrl, String requestMethod){
-		this();
+
+	public ServerConnection(URL connectionUrl, String requestMethod) {
+		this.setServerUrl(connectionUrl);
+		this.setRequestMethod(requestMethod);
 	}
-	
+
 	public ServerConnection() {
 
 	}
-	
-	public ServerConnection setLogger(SystemLogger logger){
-		// Don't make a new copy so that logger settings stay in sync by using the same object reference
-		//TODO: fix a null pointer exeception that could occur if the logger is made null by external sources
-		if (logger != null){
+
+	public ServerConnection setLogger(SystemLogger logger) {
+		// Don't make a new copy so that logger settings stay in sync by using
+		// the same object reference
+		// TODO: fix a null pointer exeception that could occur if the logger is
+		// made null by external sources
+		if (logger != null) {
 			this.logger = logger;
 		}
 		return this;
 	}
 
 	public int connect() throws Exception {
+		// This method uses null values to determine if it should use a value
+		if (isExpended) { // this object is not meant to be reused
+			return -1;
+		}
 		isExpended = true;
 		boolean usePayload = false;
 
-		System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
-
-		if (logger != null) {
-			logger.log(logger.getSeperator(), this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
-			logger.log("Start connection details", this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
-			logger.log(logger.getSeperator(), this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
-		}
+		System.setProperty("sun.net.http.allowRestrictedHeaders", "true"); // Allow
+																			// use
+																			// of
+																			// headers
+																			// like
+																			// "origin"
 
 		CookieManager manager = new CookieManager();
 		manager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
@@ -89,15 +101,30 @@ public class ServerConnection {
 
 		URL httpurl;
 		HttpURLConnection httpconnection;
+		if (logger != null) {
+			logger.log(logger.getSeperator(), this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
+			logger.log("Start connection details", this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
+			logger.log(logger.getSeperator(), this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
+		}
 
 		if (serverUrl == null) {
-			//TODO: throw new InvalidHostException()
-			System.err.println("Server URL can't be null" + "\n"
-					+ "Set with setServerUrl(URL url);");
+			// TODO: throw new InvalidHostException();
+			System.err.println("Server URL can't be null" + "\n" + "Set with setServerUrl(URL url);");
 			return -1;
 		} else {
 			httpurl = getServerUrl();
-			httpconnection = (HttpURLConnection) httpurl.openConnection();
+			httpconnection = (HttpURLConnection) httpurl.openConnection(); // This is
+																			// the
+																			// point
+																			// where
+																			// we
+																			// actually
+																			// start
+																			// to
+																			// talk
+																			// to
+																			// the
+																			// server
 
 			// Debug Output
 			if (logger != null) {
@@ -114,8 +141,7 @@ public class ServerConnection {
 		}
 
 		if (requestMethod == null) {
-			System.err.println("Request Method can't be null" + "\n"
-					+ "Set with setRequestMethod(String requestMethod);");
+			System.err.println("Request Method can't be null" + "\n" + "Set with setRequestMethod(String requestMethod);");
 			return -1;
 		} else {
 			httpconnection.setRequestMethod(getRequestMethod());
@@ -157,7 +183,7 @@ public class ServerConnection {
 
 		if (usePayload) {
 			if (payload == null) {
-				//TODO: throw new InvalidPayloadException()
+				// TODO: throw new InvalidPayloadException();
 				System.err.println("Post Data can't be null" + "\n" + "Set with setPayload();");
 				return -1;
 			} else {
@@ -168,7 +194,10 @@ public class ServerConnection {
 			}
 		}
 
-		if (httpconnection.getDoOutput()) {
+		logger.log("Attempting to make connection to server", this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
+		if (httpconnection.getDoOutput()) { // this is it, this is where we make
+											// the actual http request
+			// Send our payoad
 			OutputStream dos = new DataOutputStream(httpconnection.getOutputStream());
 			dos.write(getPayload().getBytes());
 			dos.flush();
@@ -184,8 +213,7 @@ public class ServerConnection {
 			logger.log("URL: " + httpconnection.getURL(), this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
 			logger.log("Response Message: " + httpconnection.getResponseMessage(), this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
 			logger.log("Returned Headers: " + httpconnection.getHeaderFields(), this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
-			logger.log("Error Stream: "
-					+ CommonLogic.convertStreamToString(httpconnection.getErrorStream()), this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
+			logger.log("Error Stream: " + CommonLogic.convertStreamToString(httpconnection.getErrorStream()), this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
 
 			for (HttpCookie cookie : cookieJar.getCookies()) {
 				logger.log("CookieHandler retrieved cookie: " + cookie, this.getClass().getName(), SystemLogger.LoggingVerboseity.DEVELOPER);
@@ -199,31 +227,30 @@ public class ServerConnection {
 		try {
 			is = httpconnection.getInputStream();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			//TODO: finish this
-			e.printStackTrace();
-			logger.log(logger.getSeperator(), this.getClass().getName(), SystemLogger.LoggingVerboseity.ERROR);
-			System.err.println("Reported Error Message: "
-					+ CommonLogic.convertStreamToString(httpconnection.getErrorStream()));
-			Gson gson = new GsonBuilder().setPrettyPrinting().create();
-			logger.log(logger.getSeperator(), this.getClass().getName(), SystemLogger.LoggingVerboseity.ERROR);
-			System.err.println("ServerConnection Object\n" + gson.toJson(this));
-			// System.err.println(httpconnection.getRequestProperties());
-			// System.err.println(httpconnection.getURL());
+			setResponseErrorStream(CommonLogic.convertStreamToString(httpconnection.getErrorStream()));
+			if (printExceptions) {
+				e.printStackTrace();
+				logger.log(logger.getSeperator(), this.getClass().getName(), SystemLogger.LoggingVerboseity.ERROR);
+				System.err.println("Server Sent Error Message: " + CommonLogic.convertStreamToString(httpconnection.getErrorStream()));
+				Gson gson = new GsonBuilder().setPrettyPrinting().create();
+				logger.log(logger.getSeperator(), this.getClass().getName(), SystemLogger.LoggingVerboseity.ERROR);
+				System.err.println("ServerConnection Object\n" + gson.toJson(this));
+			}
+			throw e;
 		}
 		List<HttpCookie> cookies = cookieJar.getCookies();
 
+		// these won't run if there was an error connecting to the server or the
+		// server returned an error code
 		setResponseMessage(httpconnection.getResponseMessage());
 		setResponseData(is);
 		setResponseHeaders(httpconnection.getHeaderFields());
 		setResponseCookies(cookies);
 		setResponseCode(httpconnection.getResponseCode());
-		setResponseErrorStream(CommonLogic.convertStreamToString(httpconnection.getErrorStream()));
 
 		return getResponseCode();
 	}
 
-	
 	public String getPayload() {
 		return payload;
 	}
@@ -244,36 +271,101 @@ public class ServerConnection {
 		return serverUrl;
 	}
 
-
 	public ServerConnection setPayload(String payload) {
-		this.payload = payload;
+		if (payload != null) {
+			this.payload = payload.trim(); // the trim is just to
+													// get us a new instance of
+													// the string
+		} else {
+			throw new IllegalArgumentException("The payload can't be null");
+		}
 		return this;
 	}
 
 	public ServerConnection setRequestCookies(List<HttpCookie> requestCookies) {
-		this.requestCookies = requestCookies;
+		this.requestCookies = new ArrayList<>();
+		if (requestCookies != null) {
+			for (HttpCookie cookie : requestCookies) {
+				if (cookie != null) {
+					this.requestCookies.add(cookie);
+				}
+			}
+		} else {
+			throw new IllegalArgumentException("The request cookies can't be null");
+		}
+		return this;
+	}
+
+	public ServerConnection setRequestCookies(HttpCookie... requestCookiesAray) {
+		this.requestCookies = new ArrayList<>();
+		if (requestCookiesAray != null) {
+			for (HttpCookie cookie : requestCookiesAray) {
+				if (cookie != null) {
+					this.requestCookies.add(cookie);
+				}
+			}
+		} else {
+			throw new IllegalArgumentException("The request cookies can't be null");
+		}
 		return this;
 	}
 
 	public ServerConnection setRequestHeaders(Map<String, String> requestHeaders) {
-		this.requestHeaders = requestHeaders;
+		this.requestHeaders = new HashMap<>();
+		if (requestHeaders != null) {
+			for (String key : requestHeaders.keySet()) {
+				if (key != null && !key.isEmpty()) {
+					if (requestHeaders.containsKey(key)) {
+						String value = requestHeaders.get(key);
+						if (value != null && !value.isEmpty()) {
+							this.requestHeaders.put(key, value);
+						}
+					}
+				}
+			}
+		} else {
+			throw new IllegalArgumentException("The request headers can't be null");
+		}
+		return this;
+	}
+
+	public ServerConnection setRequestHeaders(KeyValuePair... requestHeaders) {
+		this.requestHeaders = new HashMap<>();
+		if (requestHeaders != null) {
+			for (KeyValuePair requestHeader : requestHeaders) {
+				String key = requestHeader.getKey();
+				if (key != null && !key.isEmpty()) {
+					String value = requestHeader.getValue();
+					if (value != null && !value.isEmpty()) {
+						this.requestHeaders.put(key, value);
+					}
+				}
+			}
+		} else {
+			throw new IllegalArgumentException("The request headers can't be null");
+		}
 		return this;
 	}
 
 	public ServerConnection setRequestMethod(String requestMethod) {
-		this.requestMethod = requestMethod;
+		if (requestMethod != null) {
+			this.requestMethod = requestMethod.toUpperCase();
+		} else {
+			throw new IllegalArgumentException("The request method \'" + requestMethod + "\' is invalid");
+		}
+
 		return this;
 	}
 
 	public ServerConnection setServerUrl(URL serverUrl) {
-		if (isExpended) {
-
+		if (serverUrl != null) {
+			this.serverUrl = serverUrl;
+		} else {
+			throw new IllegalArgumentException("The provided url object is invalid");
 		}
-		this.serverUrl = serverUrl;
 		return this;
 	}
-	
-	
+
 	private void setResponseCode(int responseCode) {
 		this.responseCode = responseCode;
 	}
@@ -298,7 +390,6 @@ public class ServerConnection {
 		this.responseMessage = responseMessage;
 	}
 
-	
 	public int getResponseCode() {
 		return responseCode;
 	}
