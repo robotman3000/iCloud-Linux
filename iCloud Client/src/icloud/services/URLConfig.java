@@ -7,6 +7,39 @@ import common.CommonLogic;
 
 public class URLConfig {
 
+	public enum ServerNames{
+		
+		TEst(){
+
+			@Override
+			public void updateURL(String protocol, String url, int port) throws MalformedURLException {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void updateURL(String url, int port) throws MalformedURLException {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void updateURL(String url) throws MalformedURLException {
+				// TODO Auto-generated method stub
+				
+			}
+
+			
+		};
+		
+		public abstract void updateURL(String protocol, String url, int port) throws MalformedURLException;
+		
+		public abstract void updateURL(String url, int port) throws MalformedURLException;
+		
+		public abstract void updateURL(String url) throws MalformedURLException;
+		
+	}
+	
 	public static final String account_url_default_host = "setup.icloud.com";
 	public static final String account_url_login = "/setup/ws/1/login?";
 	public static final String account_url_logout = "/setup/ws/1/logout?";
@@ -87,7 +120,7 @@ public class URLConfig {
 		return notesURL;
 	}
 
-	public URL getContactsURL() {
+/*	public URL getContactsURL() {
 		if (CommonLogic.isNull(contactsURL)) {
 			try {
 				updateContactsURL(default_protocol, contacts_url_default_host,
@@ -97,8 +130,10 @@ public class URLConfig {
 				e.printStackTrace();
 			}
 		}
-		return contactsURL;
-	}
+		return contactsURL;	public void updateContactsURL(String url) throws MalformedURLException {
+			contactsURL = new URL(default_protocol, url, default_port, "");
+		}
+	}*/
 
 	
 	public void updateAccountsURL(String protocol, String url, int port) throws MalformedURLException {
