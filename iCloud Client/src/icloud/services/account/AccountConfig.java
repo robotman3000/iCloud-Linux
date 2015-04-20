@@ -12,7 +12,7 @@ public class AccountConfig {
 	private boolean hasMinimumDeviceForPhotosWeb = false;
 	private boolean isMemberOfFamily = false;
 	private boolean pcsEnabled;
-	private HashMap<String, Webservice> webservices = new HashMap<>();
+	private HashMap<String, Webservice> webservices = new HashMap<String, Webservice>();
 
 	public boolean isExtendedLogin() {
 		return isExtendedLogin;

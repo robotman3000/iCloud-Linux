@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class AddressBook {
 	private String groupId;
-	private ArrayList<String> contactIds = new ArrayList<>();
+	private ArrayList<String> contactIds = new ArrayList<String>();
 	private String etag;
 	private String name;
 	private HeaderPositions headerPositions = new HeaderPositions();

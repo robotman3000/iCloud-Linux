@@ -2,84 +2,53 @@ package common;
 
 public class SystemLogger {
 
-	private LoggingVerboseity systemLogLevel = LoggingVerboseity.NONE;
+	private LoggingVerbosity systemLogLevel = LoggingVerbosity.NONE;
 	private final String seperator = "================================================================================";
-	
-	public enum LoggingVerboseity{
+	//TODO: make these use their ordinal
+	public enum LoggingVerbosity{
 		
-		NONE(){
-			int logNumber = 0;
-			protected int getLogNumber() {
-				return logNumber;
-			}
-		},
+		NONE(), 
+		INFO(), 
+		WARNING(), 
+		ERROR(), 
+		DEVELOPER(),
+		EXTREME();
 		
-		INFO(){
-			int logNumber = 1;
-			protected int getLogNumber() {
-				return logNumber;
-			}
-		}, 
-		
-		WARNING(){
-			int logNumber = 2;
-			protected int getLogNumber() {
-				return logNumber;
-			}
-		}, 
-		
-		ERROR(){
-			int logNumber = 3;
-			protected int getLogNumber() {
-				return logNumber;
-			}
-		}, 
-		
-		DEVELOPER(){
-			int logNumber = 4;
-			protected int getLogNumber() {
-				return logNumber;
-			}
-		},
-		
-		EXTREME(){
-			int logNumber = 5;
-			protected int getLogNumber() {
-				return logNumber;
-			}
-		};
-		
-		//CUSTOM(){
-			
-		//}
-		protected void logMessage(String Message, String Sender) {
-			System.out.println("[" + this.toString() + "] " + Sender + ": " + Message);	
+		protected Void logError(String Message, String Sender){
+			System.err.println("[" + this.toString() + "] " + Sender + ": " + Message);
+			return null;
 		}
 		
-		protected abstract int getLogNumber();
-		
-		private int logNumber;
+		protected Void logMessage(String Message, String Sender) {
+			System.out.println("[" + this.toString() + "] " + Sender + ": " + Message);
+			return null;	
+		}
 	}
 	
 	public SystemLogger(){
 		
 	}
 	
-	public SystemLogger(LoggingVerboseity logLevel) {
+	public SystemLogger(LoggingVerbosity logLevel) {
 		this.systemLogLevel = logLevel;
 	}
 
-	public void log(String logMessage, String sender, LoggingVerboseity logLevel){
-		if(systemLogLevel.getLogNumber() >= logLevel.getLogNumber()){
-			logLevel.logMessage(logMessage, sender);
+	public void log(String logMessage, String sender, LoggingVerbosity logLevel){
+		boolean logErr = false;
+		if (logLevel == LoggingVerbosity.ERROR){
+			logErr = true;
+		}
+		if(systemLogLevel.ordinal() >= logLevel.ordinal()){
+			@SuppressWarnings("unused")
+			Void nullVar = (logErr ? logLevel.logError(logMessage, sender) : logLevel.logMessage(logMessage, sender));
 		}
 	}
 
-	public LoggingVerboseity getSystemLogLevel() {
+	public LoggingVerbosity getSystemLogLevel() {
 		return systemLogLevel;
 	}
 
-	public SystemLogger setSystemLogLevel(LoggingVerboseity systemLogLevel) {
+	public SystemLogger setSystemLogLevel(LoggingVerbosity systemLogLevel) {
 		this.systemLogLevel = systemLogLevel;
 		return this;
 	}

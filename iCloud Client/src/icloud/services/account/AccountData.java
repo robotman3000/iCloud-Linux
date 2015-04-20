@@ -15,8 +15,8 @@ public class AccountData {
 	private RequestInfo requestInfo = new RequestInfo();
 	private DSInfo dsInfo = new DSInfo();
 	private StorageUsageInfo storageTotals = new StorageUsageInfo();
-	private HashMap<String, Device> devices = new HashMap<>();
-	private HashMap<String, StorageBlockInfo> storageBlocks = new HashMap<>();
+	private HashMap<String, Device> devices = new HashMap<String, Device>();
+	private HashMap<String, StorageBlockInfo> storageBlocks = new HashMap<String, StorageBlockInfo>();
 	private QuotaStatus quotaStatus = new QuotaStatus();
 
 	public DSInfo getDsInfo() {

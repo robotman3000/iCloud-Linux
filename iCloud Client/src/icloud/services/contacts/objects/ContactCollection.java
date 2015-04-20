@@ -3,7 +3,7 @@ package icloud.services.contacts.objects;
 import java.util.ArrayList;
 
 public class ContactCollection {
-	private ArrayList<String> groupsOrder = new ArrayList<>();
+	private ArrayList<String> groupsOrder = new ArrayList<String>();
 	private String etag;
 	private String collectionId;
 	

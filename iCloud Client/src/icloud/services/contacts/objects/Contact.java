@@ -22,14 +22,14 @@ public class Contact {
 	private String jobTitle = "";
 	private transient String UUID = "";
 
-	private ArrayList<KeyValuePair> urls = new ArrayList<>();
-	private ArrayList<KeyValuePair> relatedNames = new ArrayList<>();
-	private ArrayList<KeyValuePair> phones = new ArrayList<>();
-	private ArrayList<Address> streetAddresses = new ArrayList<>();
-	private ArrayList<KeyValuePair> emailAdresses = new ArrayList<>();
-	private ArrayList<IMKeyValuePair> IMs = new ArrayList<>();
-	private ArrayList<KeyValuePair> dates = new ArrayList<>();
-	private ArrayList<ProfileKeyValuePair> profiles = new ArrayList<>();
+	private ArrayList<KeyValuePair> urls = new ArrayList<KeyValuePair>();
+	private ArrayList<KeyValuePair> relatedNames = new ArrayList<KeyValuePair>();
+	private ArrayList<KeyValuePair> phones = new ArrayList<KeyValuePair>();
+	private ArrayList<Address> streetAddresses = new ArrayList<Address>();
+	private ArrayList<KeyValuePair> emailAdresses = new ArrayList<KeyValuePair>();
+	private ArrayList<IMKeyValuePair> IMs = new ArrayList<IMKeyValuePair>();
+	private ArrayList<KeyValuePair> dates = new ArrayList<KeyValuePair>();
+	private ArrayList<ProfileKeyValuePair> profiles = new ArrayList<ProfileKeyValuePair>();
 	private Photo photo = new Photo();
 
 	public String getMiddleName() {

@@ -8,6 +8,7 @@ import java.util.Set;
 
 import common.CommonLogic;
 import common.SystemLogger;
+import common.SystemLogger.LoggingVerbosity;
 import icloud.services.account.AccountManager;
 import icloud.services.account.objects.Device;
 import icloud.services.account.objects.QuotaStatus;
@@ -22,7 +23,7 @@ import icloud.user.UserSession;
 public class RunMe {
 
 	UserSession user;
-	SystemLogger loudMouth = new SystemLogger().setSystemLogLevel(SystemLogger.LoggingVerboseity.DEVELOPER);
+	SystemLogger loudMouth = new SystemLogger().setSystemLogLevel(SystemLogger.LoggingVerbosity.DEVELOPER);
 	AccountManager accountManager = new AccountManager(loudMouth);
 
 	public static void main(String[] args) {
@@ -40,7 +41,8 @@ public class RunMe {
 
 	private void interactiveUserPrint() {
 		if (queryUserBoolean("Do you want to fetch & print the user config?")) {
-			loudMouth.log("Fetching user data", this.getClass().getName(), SystemLogger.LoggingVerboseity.INFO);
+			loudMouth.log("Fetching user data", this.getClass().getName(), SystemLogger.LoggingVerbosity.INFO);
+			//loudMouth.log("Hi", getClass().getCanonicalName(), LoggingVerbosity.ERROR);
 			try {
 				accountManager.getDevices(user);
 				accountManager.getFamilyDetails(user);
@@ -232,19 +234,19 @@ public class RunMe {
 
 	private void signIn(String username, String password) {
 		try {
-			loudMouth.log("Attempting to authenticate user", this.getClass().getName(), SystemLogger.LoggingVerboseity.INFO);
-			loudMouth.log("Using username: " + username, this.getClass().getName(), SystemLogger.LoggingVerboseity.INFO);
-			loudMouth.log("Using password: " + password, this.getClass().getName(), SystemLogger.LoggingVerboseity.INFO);
+			loudMouth.log("Attempting to authenticate user", this.getClass().getName(), SystemLogger.LoggingVerbosity.INFO);
+			loudMouth.log("Using username: " + username, this.getClass().getName(), SystemLogger.LoggingVerbosity.INFO);
+			loudMouth.log("Using password: " + password, this.getClass().getName(), SystemLogger.LoggingVerbosity.INFO);
 			user = new UserSession(username, password);
 			SystemLogger log = user.getLogger(); 
 			log = loudMouth;
-			loudMouth.setSystemLogLevel(SystemLogger.LoggingVerboseity.DEVELOPER);
+			loudMouth.setSystemLogLevel(SystemLogger.LoggingVerbosity.DEVELOPER);
 			accountManager.login(user);
-			loudMouth.log("Login succeeded; User is now signed in", this.getClass().getName(), SystemLogger.LoggingVerboseity.INFO);
+			loudMouth.log("Login succeeded; User is now signed in", this.getClass().getName(), SystemLogger.LoggingVerbosity.INFO);
 		} catch (Exception e) {
 			// TODO Catch Invalid Credintals Exeption
-			loudMouth.log("Login failed; User is not signed in", this.getClass().getName(), SystemLogger.LoggingVerboseity.ERROR);
-			loudMouth.log("Invalid login info provided", this.getClass().getName(), SystemLogger.LoggingVerboseity.ERROR);
+			loudMouth.log("Login failed; User is not signed in", this.getClass().getName(), SystemLogger.LoggingVerbosity.ERROR);
+			loudMouth.log("Invalid login info provided", this.getClass().getName(), SystemLogger.LoggingVerbosity.ERROR);
 			e.printStackTrace();
 		}
 	}
@@ -252,7 +254,7 @@ public class RunMe {
 	private void signOut() {
 		try {
 			log("Attempting to deauthenticate user");
-			accountManager.logout(user);
+			//accountManager.logout(user);
 			log("Logout succeeded; User is now signed out");
 		} catch (Exception e) {
 			// TODO Catch any execptions thrown

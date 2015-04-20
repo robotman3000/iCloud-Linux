@@ -17,7 +17,6 @@ import java.util.Set;
 
 import com.google.gson.Gson;
 
-import common.CommonLogic;
 import common.ServerConnection;
 import common.SystemLogger;
 import common.URLBuilder;
@@ -31,32 +30,29 @@ public class AccountManager extends BaseManager {
 		super();
 	}
 
-	public AccountManager(SystemLogger logger) {
-		super(logger);
-	}
-
 	public void login(UserSession user) throws Exception {
 		
 		URL httpUrl = new URLBuilder()
-				.setPath(URLConfig.account_url_login)
-				.setPort(URLConfig.default_port)
 				.setProtocol(URLConfig.default_protocol)
 				.setHost(URLConfig.account_url_default_host)
+				.setPort(URLConfig.default_port)
+				.setPath(URLConfig.account_url_login)
 				.addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
 				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
 				.buildURL();
 		
-		Map<String, String> headersMap = new HashMap<String, String>();
-		headersMap.put("origin", URLConfig.default_header_origin);
-		headersMap.put("User-Agent", URLConfig.default_header_userAgent);
-
-		ServerConnection conn = new ServerConnection().setLogger(getLogger())
-				.setServerUrl(httpUrl).setRequestMethod(URLConfig.POST)
-				.setRequestHeaders(headersMap).setPayload(generateQuery(user));
+		ServerConnection conn = new ServerConnection()
+				.setLogger(logger)
+				.setServerUrl(httpUrl)
+				.setRequestMethod(URLConfig.POST)
+				.addRequestHeader("origin", URLConfig.default_header_origin)
+				.addRequestHeader("User-Agent", URLConfig.default_header_userAgent)
+				.setPayload(generateQuery(user));
 		conn.connect();
 
-		String responseData = conn.getResponseDataAsString();
+		String responseData = /*request.getBody();*/conn.getResponseDataAsString();
 		parseResponse(user, new Gson().fromJson(responseData, AccountJson.class));
+		//System.out.println(responseData);
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
 
 		//if (debugEnabled) {
@@ -75,7 +71,8 @@ public class AccountManager extends BaseManager {
 				.setProtocol(URLConfig.default_protocol)
 				.setPort(URLConfig.default_port)
 				.setHost(URLConfig.account_url_default_host)
-				.addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber()).addQueryString(URLConfig.query_arg_clientId, user.getUuid())
+				.addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
+				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
 				.addQueryString(URLConfig.query_arg_dsid, user.getUserConfig().getUserProperties().getProperty("dsid"))
 				.addQueryString(URLConfig.query_arg_token, valCookie)
 				.buildURL();
@@ -104,8 +101,8 @@ public class AccountManager extends BaseManager {
 
 		URL url = new URLBuilder()
 				.setPath(URLConfig.account_url_validate)
-				.setPort(URLConfig.default_port)
 				.setProtocol(URLConfig.default_protocol)
+				.setPort(URLConfig.default_port)
 				.setHost(URLConfig.account_url_default_host)
 				.addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
 				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
@@ -134,14 +131,27 @@ public class AccountManager extends BaseManager {
 
 	public void getDevices(UserSession user) throws Exception {
 
-		URL url = new URLBuilder().setPath(URLConfig.account_url_getDevices).setPort(URLConfig.default_port).setProtocol(URLConfig.default_protocol).setHost(URLConfig.account_url_default_host).addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
-				.addQueryString(URLConfig.query_arg_clientId, user.getUuid()).addQueryString("dsid", user.getUserData().getAccountData().getDsInfo().getDsid()).buildURL();
+		URL url = new URLBuilder()
+				.setPath(URLConfig.account_url_getDevices)
+				.setPort(URLConfig.default_port)
+				.setProtocol(URLConfig.default_protocol)
+				.setHost(URLConfig.account_url_default_host)
+				.addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
+				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
+				.addQueryString("dsid", user.getUserData().getAccountData().getDsInfo().getDsid())
+				.buildURL();
 
 		Map<String, String> headersMap = new HashMap<String, String>();
 		headersMap.put("origin", URLConfig.default_header_origin);
 		headersMap.put("User-Agent", URLConfig.default_header_userAgent);
 
-		ServerConnection conn = new ServerConnection().setLogger(logger).setRequestMethod(URLConfig.GET).setServerUrl(url).setPayload("{}").setRequestCookies(user.getUserTokens().getTokens()).setRequestHeaders(headersMap);
+		ServerConnection conn = new ServerConnection()
+				.setLogger(logger)
+				.setRequestMethod(URLConfig.GET)
+				.setServerUrl(url)
+				.setPayload("{}")
+				.setRequestCookies(user.getUserTokens().getTokens())
+				.setRequestHeaders(headersMap);
 		conn.connect();
 
 		String responseData = conn.getResponseDataAsString();

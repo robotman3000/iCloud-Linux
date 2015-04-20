@@ -7,9 +7,19 @@
 			<attribute name="javadoc_location" value="jar:file:/home/enims/git/iCloud-Linux/iCloud%20Client/libs/gson-2.3/gson-2.3-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="libs/jsoup-1.8.1/jsoup-1.8.1.jar">
+	<classpathentry kind="lib" path="libs/jsoup-1.8.1/jsoup-1.8.1.jar" sourcepath="libs/jsoup-1.8.1/jsoup-1.8.1-sources.jar">
 		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/iCloud Client/libs/jsoup-1.8.1/jsoup-1.8.1-javadoc.jar!/"/>
+			<attribute name="javadoc_location" value="jar:platform:/resource/iCloud%20Client/libs/jsoup-1.8.1/jsoup-1.8.1-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/enims/Desktop/Playground/Unirest-Clone/unirest-java/target/unirest-java-1.4.6-SNAPSHOT-jar-with-dependencies.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/home/enims/Desktop/Playground/Unirest-Clone/unirest-java/target/unirest-java-1.4.6-SNAPSHOT-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/enims/Desktop/Playground/Unirest-Clone/unirest-java/target/unirest-java-1.4.6-SNAPSHOT.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/home/enims/Desktop/Playground/Unirest-Clone/unirest-java/target/unirest-java-1.4.6-SNAPSHOT-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="output" path="bin"/>

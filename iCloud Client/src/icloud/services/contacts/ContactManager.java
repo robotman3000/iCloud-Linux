@@ -203,7 +203,7 @@ public class ContactManager extends BaseManager {
 			// System.out.println("Connecting to: Validate Server");
 		}
 
-		ArrayList<AddressBook> groups = new ArrayList<>();
+		ArrayList<AddressBook> groups = new ArrayList<AddressBook>();
 		AddressBook newOne = new AddressBook();
 		newOne.setGroupId(newGroup.getGroupId());
 		newOne.setName(newGroup.getName());
@@ -254,7 +254,7 @@ public class ContactManager extends BaseManager {
 			// System.out.println("Connecting to: Validate Server");
 		}
 
-		ArrayList<AddressBook> groups = new ArrayList<>();
+		ArrayList<AddressBook> groups = new ArrayList<AddressBook>();
 		AddressBook newOne = new AddressBook();
 		newOne.setGroupId(deleteGroup.getGroupId());
 		newOne.setEtag(deleteGroup.getEtag());
@@ -306,7 +306,7 @@ public class ContactManager extends BaseManager {
 			// System.out.println("Connecting to: Validate Server");
 		}
 
-		ArrayList<AddressBook> groups = new ArrayList<>();
+		ArrayList<AddressBook> groups = new ArrayList<AddressBook>();
 		ContactJson cJson = new ContactJson();
 		cJson.setGroups(groups);
 		Gson gson = new Gson();
@@ -354,7 +354,7 @@ public class ContactManager extends BaseManager {
 			// System.out.println("Connecting to: Validate Server");
 		}
 
-		ArrayList<Contact> contacts = new ArrayList<>();
+		ArrayList<Contact> contacts = new ArrayList<Contact>();
 		ContactJson cJson = new ContactJson();
 		contacts.add(newContact);
 		cJson.setContacts(contacts);
@@ -402,7 +402,7 @@ public class ContactManager extends BaseManager {
 			// System.out.println("Connecting to: Validate Server");
 		}
 
-		ArrayList<Contact> contacts = new ArrayList<>();
+		ArrayList<Contact> contacts = new ArrayList<Contact>();
 		ContactJson cJson = new ContactJson();
 		Contact newContact = new Contact();
 		newContact.setEtag(deleteContact.getEtag());
@@ -454,7 +454,7 @@ public class ContactManager extends BaseManager {
 			// System.out.println("Connecting to: Validate Server");
 		}
 
-		ArrayList<Contact> contacts = new ArrayList<>();
+		ArrayList<Contact> contacts = new ArrayList<Contact>();
 		ContactJson cJson = new ContactJson();
 		contacts.add(updateContact);
 		cJson.setContacts(contacts);

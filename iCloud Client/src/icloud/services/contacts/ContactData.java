@@ -10,7 +10,7 @@ public class ContactData {
 	
 	private String meCardId = "";
 	private HashMap<String, Contact> userContacts = new HashMap<String, Contact>();
-	private HashMap<String, AddressBook> userGroups = new HashMap<>();
+	private HashMap<String, AddressBook> userGroups = new HashMap<String, AddressBook>();
 
 	public ContactData(){
 		

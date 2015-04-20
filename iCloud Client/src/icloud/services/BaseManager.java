@@ -1,9 +1,11 @@
 package icloud.services;
 
-import common.SystemLogger;
-import common.SystemLogger.LoggingVerboseity;
+import java.net.URL;
 
-public class BaseManager {
+import common.SystemLogger;
+import common.SystemLogger.LoggingVerbosity;
+
+public abstract class BaseManager {
 
 	// TODO: Add Exception throwing; Add Exception handling; Add Javadoc
 	// TODO: add a method generate the default headers
@@ -27,17 +29,17 @@ public class BaseManager {
 		if (logger != null){
 			this.logger = logger;
 		} else {
-			this.logger = new SystemLogger().setSystemLogLevel(SystemLogger.LoggingVerboseity.ERROR);
+			this.logger = new SystemLogger().setSystemLogLevel(SystemLogger.LoggingVerbosity.ERROR);
 		}
 	}
 	
-	protected void setLogLevel(LoggingVerboseity logLevel){
+	protected void setLogLevel(LoggingVerbosity logLevel){
 		if (logLevel != null){
 			this.logger.setSystemLogLevel(logLevel);
 		}
 	}
 	
-	protected LoggingVerboseity getLogLevel(){
+	protected LoggingVerbosity getLogLevel(){
 		return this.logger.getSystemLogLevel();
 	}
 }
