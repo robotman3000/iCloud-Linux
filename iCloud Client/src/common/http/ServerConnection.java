@@ -1,4 +1,4 @@
-package common;
+package common.http;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -21,12 +21,15 @@ import java.util.Set;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import common.SystemLogger.LoggingVerbosity;
+import common.CommonLogic;
+import common.KeyValuePair;
 
 public class ServerConnection {
 
 	// TODO: Add Exception throwing; Add Exception handling; Add Javadoc
-	//TODO: add has methods and remove methods and all adders and setters
+	// TODO: add has methods and remove methods and all adders and setters
+	// TODO: Add logging
+	// TODO: Add complete support for the HttpHeader class
 	private boolean isExpended = false;
 	private boolean printExceptions = true; // TODO: make this editable
 
@@ -42,7 +45,6 @@ public class ServerConnection {
 	private int responseCode = -1;
 	private InputStream responseData = null;
 	private String responseErrorStream = null;
-	private SystemLogger logger = new SystemLogger(LoggingVerbosity.ERROR);
 
 	public ServerConnection(URL connectionUrl, String requestMethod, List<HttpCookie> requestCookies, Map<String, String> requestHeaders) {
 		this(connectionUrl, requestMethod);
@@ -69,17 +71,6 @@ public class ServerConnection {
 
 	}
 
-	public ServerConnection setLogger(SystemLogger logger) {
-		// Don't make a new copy so that logger settings stay in sync by using
-		// the same object reference
-		// TODO: fix a null pointer exeception that could occur if the logger is
-		// made null by external sources
-		if (logger != null) {
-			this.logger = logger;
-		}
-		return this;
-	}
-
 	public int connect() throws Exception {
 		// This method uses null values to determine if it should use a value
 		if (isExpended) { // this object is not meant to be reused
@@ -102,32 +93,22 @@ public class ServerConnection {
 
 		URL httpurl;
 		HttpURLConnection httpconnection;
-		if (logger != null) {
+/*		if (logger != null) {
 			logger.log(logger.getSeperator(), this.getClass().getName(), SystemLogger.LoggingVerbosity.DEVELOPER);
 			logger.log("Start connection details", this.getClass().getName(), SystemLogger.LoggingVerbosity.DEVELOPER);
 			logger.log(logger.getSeperator(), this.getClass().getName(), SystemLogger.LoggingVerbosity.DEVELOPER);
 		}
-
+*/
 		if (serverUrl == null) {
 			// TODO: throw new InvalidHostException();
 			System.err.println("Server URL can't be null" + "\n" + "Set with setServerUrl(URL url);");
 			return -1;
 		} else {
 			httpurl = getServerUrl();
-			httpconnection = (HttpURLConnection) httpurl.openConnection(); // This is
-																			// the
-																			// point
-																			// where
-																			// we
-																			// actually
-																			// start
-																			// to
-																			// talk
-																			// to
-																			// the
+			httpconnection = (HttpURLConnection) httpurl.openConnection(); // This is the point where we actually start to talk to the
 																			// server
 
-			// Debug Output
+/*			// Debug Output
 			if (logger != null) {
 				logger.log("URL is: " + httpurl, this.getClass().getName(), SystemLogger.LoggingVerbosity.DEVELOPER);
 				logger.log("URL Details: {", this.getClass().getName(), SystemLogger.LoggingVerbosity.DEVELOPER);
@@ -138,7 +119,7 @@ public class ServerConnection {
 				logger.log("	File: " + httpurl.getFile(), this.getClass().getName(), SystemLogger.LoggingVerbosity.DEVELOPER);
 				logger.log("	Query: " + httpurl.getQuery(), this.getClass().getName(), SystemLogger.LoggingVerbosity.DEVELOPER);
 				logger.log("}", this.getClass().getName(), SystemLogger.LoggingVerbosity.DEVELOPER);
-			}
+			}*/
 		}
 
 		if (requestMethod == null) {
@@ -154,9 +135,9 @@ public class ServerConnection {
 				httpconnection.setDoOutput(false);
 				usePayload = false;
 			}
-			if (logger != null) {
+/*			if (logger != null) {
 				logger.log("Request Method: " + httpconnection.getRequestMethod(), this.getClass().getName(), SystemLogger.LoggingVerbosity.DEVELOPER);
-			}
+			}*/
 		}
 
 		if (requestHeaders != null) {
@@ -166,18 +147,18 @@ public class ServerConnection {
 				String key = iterator.next();
 				httpconnection.setRequestProperty(key, requestHeaders.get(key));
 			}
-			if (logger != null) {
+/*			if (logger != null) {
 				logger.log("Headers: " + httpconnection.getRequestProperties(), this.getClass().getName(), SystemLogger.LoggingVerbosity.DEVELOPER);
-			}
+			}*/
 		}
 		if (requestCookies != null) {
 			Iterator<HttpCookie> iterator = requestCookies.iterator();
 			while (iterator.hasNext()) {
 				HttpCookie key = iterator.next();
 				cookieJar.add(httpurl.toURI(), key);
-				if (logger != null) {
+/*				if (logger != null) {
 					logger.log("Added connection cookie: " + key, this.getClass().getName(), SystemLogger.LoggingVerbosity.DEVELOPER);
-				}
+				}*/
 			}
 
 		}
@@ -189,13 +170,13 @@ public class ServerConnection {
 				return -1;
 			} else {
 				setPayload(payload);
-				if (logger != null) {
+/*				if (logger != null) {
 					logger.log("Payload: " + payload, this.getClass().getName(), SystemLogger.LoggingVerbosity.DEVELOPER);
-				}
+				}*/
 			}
 		}
 
-		logger.log("Attempting to make connection to server", this.getClass().getName(), SystemLogger.LoggingVerbosity.DEVELOPER);
+		//logger.log("Attempting to make connection to server", this.getClass().getName(), SystemLogger.LoggingVerbosity.DEVELOPER);
 		if (httpconnection.getDoOutput()) { // this is it, this is where we make
 											// the actual http request
 			// Send our payoad
@@ -207,7 +188,7 @@ public class ServerConnection {
 			httpconnection.connect();
 		}
 
-		if (logger != null) {
+/*		if (logger != null) {
 			logger.log("Response Details:", this.getClass().getName(), SystemLogger.LoggingVerbosity.DEVELOPER);
 			logger.log("Input: " + httpconnection.getDoInput(), this.getClass().getName(), SystemLogger.LoggingVerbosity.DEVELOPER);
 			logger.log("Output: " + httpconnection.getDoOutput(), this.getClass().getName(), SystemLogger.LoggingVerbosity.DEVELOPER);
@@ -222,7 +203,7 @@ public class ServerConnection {
 			logger.log(logger.getSeperator(), this.getClass().getName(), SystemLogger.LoggingVerbosity.DEVELOPER);
 			logger.log("End connection details", this.getClass().getName(), SystemLogger.LoggingVerbosity.DEVELOPER);
 			logger.log(logger.getSeperator(), this.getClass().getName(), SystemLogger.LoggingVerbosity.DEVELOPER);
-		}
+		}*/
 
 		InputStream is = null;
 		try {
@@ -230,12 +211,12 @@ public class ServerConnection {
 		} catch (IOException e) {
 			setResponseErrorStream(CommonLogic.convertStreamToString(httpconnection.getErrorStream()));
 			if (printExceptions) {
-				e.printStackTrace();
-				logger.log(logger.getSeperator(), this.getClass().getName(), SystemLogger.LoggingVerbosity.ERROR);
-				System.err.println("Server Sent Error Message: " + CommonLogic.convertStreamToString(httpconnection.getErrorStream()));
+				//System.err.println("Server Sent Error Message: " + CommonLogic.convertStreamToString(httpconnection.getErrorStream()));
 				Gson gson = new GsonBuilder().setPrettyPrinting().create();
-				logger.log(logger.getSeperator(), this.getClass().getName(), SystemLogger.LoggingVerbosity.ERROR);
+				//logger.log(logger.getSeperator(), this.getClass().getName(), SystemLogger.LoggingVerbosity.ERROR);
 				System.err.println("ServerConnection Object\n" + gson.toJson(this));
+				e.printStackTrace();
+				//logger.log(logger.getSeperator(), this.getClass().getName(), SystemLogger.LoggingVerbosity.ERROR);
 			}
 			throw e;
 		}
@@ -369,6 +350,11 @@ public class ServerConnection {
 		}
 		return this;
 	}
+	
+	public ServerConnection addRequestHeader(HttpHeader httpHeader){
+		addRequestHeader(httpHeader.getHeaderName(), httpHeader.getHeaderValue());
+		return this;
+	}
 
 	public ServerConnection setRequestMethod(String requestMethod) {
 		if (requestMethod != null) {
@@ -425,7 +411,7 @@ public class ServerConnection {
 		return this.responseData;
 	}
 
-	public String getResponseDataAsString() {
+	public String getResponseAsString() {
 		InputStreamReader isr = new InputStreamReader(this.responseData);
 		int numCharsRead;
 		char[] charArray = new char[1024];

@@ -1,4 +1,4 @@
-package common;
+package common.http;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
+import common.KeyValuePair;
 
 public class URLBuilder {
 	// TODO: Add Javadoc; auto insert default values for missing args
@@ -62,18 +64,20 @@ public class URLBuilder {
 		URI theUri;
 		try {
 			theUri = fromUrl.toURI();
-			setProtocol(theUri.getAuthority());
+			setProtocol("https://"); // TODO: fix this!!
 			setHost(theUri.getHost());
-			setPath(theUri.getPath());
+			//setPath(theUri.getPath()); //TODO: fix this!!!!!!!
 			setPort(theUri.getPort());
 
-			String[] list = theUri.getQuery().split("&");
-			for (String str : list) {
-				String[] abc = str.trim().replaceFirst("=", "\n").split("\n");
-				if (abc.length == 2) {
-					addQueryString(abc[0], abc[1]);
-				} else {
-					System.err.println("Skipped adding query string: " + str);
+			if(theUri.getQuery() != null && !theUri.getQuery().isEmpty()){
+				String[] list = theUri.getQuery().split("&");
+				for (String str : list) {
+					String[] abc = str.trim().replaceFirst("=", "\n").split("\n");
+					if (abc.length == 2) {
+						addQueryString(abc[0], abc[1]);
+					} else {
+						System.err.println("Skipped adding query string: " + str);
+					}
 				}
 			}
 		} catch (URISyntaxException e) {
@@ -164,19 +168,19 @@ public class URLBuilder {
 	}
 
 	public URLBuilder setProtocol(String protocol) {
-		try {
+		//try {
 			String newProtocol = protocol.replaceAll("://", "");
-			@SuppressWarnings("unused")
+			//@SuppressWarnings("unused")
 			/*
 			 * This will throw a MalformedURLException if something is wrong so we can safely assume that the protocol is at fault and not
 			 * the hard coded values
 			 */
 			// DWN: Good idea, to use URL class to validate your data this way.
-			URL url = new URL(newProtocol, "example.com", "/index.html");
+			//URL url = new URL(newProtocol, "example.com", "/index.html"); //TODO: This has problems
 			this.protocol = newProtocol;
-		} catch (MalformedURLException e) {
+/*		} catch (MalformedURLException e) {
 			throw new IllegalArgumentException("Invalid protocol provided");
-		}
+		}*/
 		return this;
 	}
 
