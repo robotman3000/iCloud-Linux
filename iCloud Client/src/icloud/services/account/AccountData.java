@@ -2,6 +2,7 @@ package icloud.services.account;
 
 import java.util.HashMap;
 
+import icloud.services.BaseData;
 import icloud.services.account.objects.DSInfo;
 import icloud.services.account.objects.Device;
 import icloud.services.account.objects.QuotaStatus;
@@ -9,7 +10,7 @@ import icloud.services.account.objects.RequestInfo;
 import icloud.services.account.objects.StorageBlockInfo;
 import icloud.services.account.objects.StorageUsageInfo;
 
-public class AccountData {
+public class AccountData extends BaseData {
 
 	//TODO: Add safety checks to the getters and setters. ie don't return null instead throw an exeception
 	private RequestInfo requestInfo = new RequestInfo();

@@ -1,5 +1,6 @@
 package icloud.services.contacts;
 
+import icloud.services.BaseJson;
 import icloud.services.contacts.objects.Contact;
 import icloud.services.contacts.objects.ContactCollection;
 import icloud.services.contacts.objects.AddressBook;
@@ -8,7 +9,7 @@ import icloud.services.contacts.objects.HeaderPositions;
 
 import java.util.ArrayList;
 
-public class ContactJson {
+public class ContactJson extends BaseJson{
 
 	private String meCardId;
 	private String prefToken;

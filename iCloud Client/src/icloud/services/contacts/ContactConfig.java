@@ -1,8 +1,9 @@
 package icloud.services.contacts;
 
+import icloud.services.BaseConfig;
 import icloud.services.contacts.objects.HeaderPositions;
 
-public class ContactConfig {
+public class ContactConfig extends BaseConfig {
 	private String prefToken;
 	private String syncToken;
 

@@ -1,6 +1,8 @@
 package icloud.services.notes;
 
-public class NoteConfig {
+import icloud.services.BaseConfig;
+
+public class NoteConfig extends BaseConfig {
 
 	private String syncToken;
 

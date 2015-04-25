@@ -3,18 +3,12 @@ package icloud.user;
 import java.util.Properties;
 
 import common.CommonLogic;
-import common.SystemLogger;
-import common.SystemLogger.LoggingVerbosity;
 
 public class UserSession {
 
 	private UserData userData = new UserData();
 	private UserTokens userTokens = new UserTokens();
 	private UserConfig userConfig = new UserConfig();
-	
-	private SystemLogger loudMouth = new SystemLogger();
-	
-	private Properties urlList = new Properties();
 
 	private static final String clientBuildNumber = "14H40";
 	private final String UUID = CommonLogic.generateUUID();
@@ -23,8 +17,6 @@ public class UserSession {
 	private String password;
 	private boolean extendedLogin = false;
 	private boolean isAuthenticated = false;
-
-
 
 	public UserSession(String username, String password) {
 		this.username = username;
@@ -68,13 +60,13 @@ public class UserSession {
 		return username;
 	}
 
-	public String getServerUrl(String string) {
+/*	public String getServerUrl(String string) {
 		return urlList.getProperty(string);
 	}
 
 	public void addServerUrl(String key, String value) {
 		urlList.put(key, value);
-	}
+	}*/
 	
 	public boolean isUserAutenticated(){
 		return isAuthenticated;
@@ -87,11 +79,11 @@ public class UserSession {
 		this.isAuthenticated = newValue;
 	}
 
-	public SystemLogger getLogger() {
+/*	protected SystemLogger getLogger() {
 		return loudMouth;
 	}
 	
 	public void setLoggingLevel(LoggingVerbosity logMessages){
 		loudMouth.setSystemLogLevel(logMessages);
-	}
+	}*/
 }

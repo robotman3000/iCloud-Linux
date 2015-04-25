@@ -1,10 +1,11 @@
 package icloud.services.account;
 
+import icloud.services.BaseConfig;
 import icloud.services.account.objects.Webservices.Webservice;
 
 import java.util.HashMap;
 
-public class AccountConfig {
+public class AccountConfig extends BaseConfig {
 
 	//TODO: Add safety checks to the getters and setters. ie don't return null instead throw an exeception
 	private boolean isExtendedLogin = false;

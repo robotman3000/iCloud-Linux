@@ -1,5 +1,6 @@
 package icloud.services.account;
 
+import icloud.services.BaseJson;
 import icloud.services.account.objects.Apps;
 import icloud.services.account.objects.DSInfo;
 import icloud.services.account.objects.Device;
@@ -13,7 +14,7 @@ import java.util.HashSet;
 
 import com.google.gson.annotations.SerializedName;
 
-public class AccountJson {
+public class AccountJson extends BaseJson {
 	private Boolean isExtendedLogin;
 	private Boolean pcsServiceIdentitiesIncluded;
 	private Boolean hasMinimumDeviceForPhotosWeb;

@@ -13,7 +13,7 @@ public class Note {
 	private String folderName;
 	private String noteId;
 	private String size;
-	private Details detail = new Details();
+	private Details detail;
 	private ArrayList<Attachment> attachments;
 	private transient String uuid = UNDEF;
 
@@ -29,6 +29,9 @@ public class Note {
 		return this.noteId;
 	}
 
+	/**
+	 * @Invisible
+	 */
 	public void setNoteID(String noteID) {
 		this.noteId = noteID;
 	}
@@ -73,10 +76,13 @@ public class Note {
 		if (this.detail.content != null) {
 			return Jsoup.parse(this.detail.content).toString();
 		}
-		return null;
+		return "";
 	}
 
 	public void setContent(String content) {
+		if(this.detail == null){
+			this.detail = new Details();
+		}
 		this.detail.content = Jsoup.parse((String) content).toString();
 	}
 

@@ -9,8 +9,8 @@ import java.util.Map;
 import com.google.gson.Gson;
 
 import common.CommonLogic;
-import common.ServerConnection;
-import common.URLBuilder;
+import common.http.ServerConnection;
+import common.http.URLBuilder;
 import icloud.services.BaseManager;
 import icloud.services.contacts.objects.AddressBook;
 import icloud.services.contacts.objects.Contact;
@@ -18,14 +18,18 @@ import icloud.user.UserSession;
 
 public class ContactManager extends BaseManager {
 
-	public ContactManager(){
-		this.isInitialized = true;
-	}
+	public static final String contacts_url_default_host = "contactsws.icloud.com";
+	public static final String contacts_url_getMeCard = "/co/mecard/?";
+	public static final String contacts_url_setMeCard = "/co/mecardid/card/?";
+	public static final String contacts_url_startup = " /co/startup?";
+	public static final String contacts_url_changeset = "/co/changeset?";
+	public static final String contacts_url_groups = "/co/groups/card/?";
+	public static final String contacts_url_contacts = "/co/contats/card/?";
 	
-	public ContactManager(boolean announceConnections, boolean debugEnabled){
-		this();
-		this.announceConnections = announceConnections;
-		this.debugEnabled = debugEnabled;
+	private static ContactManager self = new ContactManager();
+	
+	private ContactManager(){
+		super();
 	}
 	
 	public void startup(UserSession user) throws Exception{
@@ -58,7 +62,7 @@ public class ContactManager extends BaseManager {
 				.setRequestHeaders(headersMap);
 		conn.connect();
 
-		String responseData = conn.getResponseDataAsString();
+		String responseData = conn.getResponseAsString();
 		parseResponse(user,
 				new Gson().fromJson(responseData, ContactJson.class));
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
@@ -99,7 +103,7 @@ public class ContactManager extends BaseManager {
 				.setRequestHeaders(headersMap);
 		conn.connect();
 
-		String responseData = conn.getResponseDataAsString();
+		String responseData = conn.getResponseAsString();
 		parseResponse(user,
 				new Gson().fromJson(responseData, ContactJson.class));
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
@@ -139,7 +143,7 @@ public class ContactManager extends BaseManager {
 				.setRequestHeaders(headersMap);
 		conn.connect();
 
-		String responseData = conn.getResponseDataAsString();
+		String responseData = conn.getResponseAsString();
 		parseResponse(user,
 				new Gson().fromJson(responseData, ContactJson.class));
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
@@ -186,7 +190,7 @@ public class ContactManager extends BaseManager {
 				.setRequestHeaders(headersMap);
 		conn.connect();
 
-		String responseData = conn.getResponseDataAsString();
+		String responseData = conn.getResponseAsString();
 		parseResponse(user,
 				new Gson().fromJson(responseData, ContactJson.class));
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
@@ -237,7 +241,7 @@ public class ContactManager extends BaseManager {
 				.setRequestHeaders(headersMap);
 		conn.connect();
 
-		String responseData = conn.getResponseDataAsString();
+		String responseData = conn.getResponseAsString();
 		parseResponse(user,
 				new Gson().fromJson(responseData, ContactJson.class));
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
@@ -289,7 +293,7 @@ public class ContactManager extends BaseManager {
 				.setRequestHeaders(headersMap);
 		conn.connect();
 
-		String responseData = conn.getResponseDataAsString();
+		String responseData = conn.getResponseAsString();
 		parseResponse(user,
 				new Gson().fromJson(responseData, ContactJson.class));
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
@@ -337,7 +341,7 @@ public class ContactManager extends BaseManager {
 				.setRequestHeaders(headersMap);
 		conn.connect();
 
-		String responseData = conn.getResponseDataAsString();
+		String responseData = conn.getResponseAsString();
 		parseResponse(user,
 				new Gson().fromJson(responseData, ContactJson.class));
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
@@ -385,7 +389,7 @@ public class ContactManager extends BaseManager {
 				.setRequestHeaders(headersMap);
 		conn.connect();
 
-		String responseData = conn.getResponseDataAsString();
+		String responseData = conn.getResponseAsString();
 		parseResponse(user,
 				new Gson().fromJson(responseData, ContactJson.class));
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
@@ -437,7 +441,7 @@ public class ContactManager extends BaseManager {
 				.setRequestHeaders(headersMap);
 		conn.connect();
 
-		String responseData = conn.getResponseDataAsString();
+		String responseData = conn.getResponseAsString();
 		parseResponse(user,
 				new Gson().fromJson(responseData, ContactJson.class));
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
@@ -486,7 +490,7 @@ public class ContactManager extends BaseManager {
 				.setRequestHeaders(headersMap);
 		conn.connect();
 
-		String responseData = conn.getResponseDataAsString();
+		String responseData = conn.getResponseAsString();
 		parseResponse(user,
 				new Gson().fromJson(responseData, ContactJson.class));
 		user.getUserTokens().updateTokens(conn.getResponseCookies());

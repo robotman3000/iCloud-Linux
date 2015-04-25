@@ -1,10 +1,11 @@
 package icloud.user;
 
+import icloud.services.BaseData;
 import icloud.services.account.AccountData;
 import icloud.services.contacts.ContactData;
 import icloud.services.notes.NoteData;
 
-public class UserData {
+public class UserData extends BaseData{
 
 	private AccountData accountData = new AccountData();
 	private NoteData noteData = new NoteData();

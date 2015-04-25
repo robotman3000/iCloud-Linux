@@ -22,11 +22,6 @@ public class NoteBook {
 		notes.put(noteUUID, note);
 	}
 
-	public void updateNote(String noteUUID, Note note) {
-		// TODO: Add body to updateNote in NoteBook
-		// this.notes.put(noteUUID, note);
-	}
-
 	public void deleteNote(String noteUUID) {
 		System.out.println("Notes Key List: " + notes.keySet());
 		System.out.println("Delete Note: " + noteUUID);
@@ -58,6 +53,5 @@ public class NoteBook {
 
 	public String toString() {
 		return notes.toString();
-
 	}
 }

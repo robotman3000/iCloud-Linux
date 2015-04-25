@@ -1,12 +1,13 @@
 package icloud.services.contacts;
 
+import icloud.services.BaseData;
 import icloud.services.contacts.objects.AddressBook;
 import icloud.services.contacts.objects.Contact;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class ContactData {
+public class ContactData extends BaseData {
 	
 	private String meCardId = "";
 	private HashMap<String, Contact> userContacts = new HashMap<String, Contact>();
