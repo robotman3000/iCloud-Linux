@@ -30,7 +30,14 @@ public class DontUseMe {
 		userA.getUsername();
 		userA.isExtendedLogin(); //May remove
 		userA.getUserTokens(); // Used to save the cookies for the validate call
-
+		userA.addServerUrl(key, value);
+		userA.getClientBuildNumber();
+		userA.getServerUrl(string);
+		userA.getUserConfig();
+		userA.getUserData();
+		userA.getUuid();
+		userA.isUserAutenticated();
+		userA.setLoggingLevel(logMessages);
 	}
 
 	@SuppressWarnings({ "unused", "null" })
@@ -138,9 +145,9 @@ public class DontUseMe {
 
 		// Note Use
 		theNote.getAttachments();
-		//theNote.getAttachmentsList();
-		//theNote.getAttachment(attachmentId);
-		//theNote.hasAttachment(attachmentId);
+		theNote.getAttachmentsList();
+		theNote.getAttachment(attachmentId);
+		theNote.hasAttachment(attachmentId);
 
 		theNote.getContent();
 		theNote.getDateModified();

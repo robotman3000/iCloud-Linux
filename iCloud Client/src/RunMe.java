@@ -7,8 +7,6 @@ import java.util.Scanner;
 import java.util.Set;
 
 import common.CommonLogic;
-import common.SystemLogger;
-import common.SystemLogger.LoggingVerbosity;
 import icloud.services.account.AccountManager;
 import icloud.services.account.objects.Device;
 import icloud.services.account.objects.QuotaStatus;
@@ -23,8 +21,7 @@ import icloud.user.UserSession;
 public class RunMe {
 
 	UserSession user;
-	SystemLogger loudMouth = new SystemLogger().setSystemLogLevel(SystemLogger.LoggingVerbosity.DEVELOPER);
-	AccountManager accountManager = new AccountManager(loudMouth);
+	AccountManager accountManager = new AccountManager();
 
 	public static void main(String[] args) {
 		if (args.length != 2) {
@@ -35,13 +32,13 @@ public class RunMe {
 		RunMe main = new RunMe();
 		main.signIn(args[0], args[1]);
 		main.interactiveUserPrint();
-		//main.interactiveNotes();
+		main.interactiveNotes();
 		main.signOut();
 	}
 
 	private void interactiveUserPrint() {
 		if (queryUserBoolean("Do you want to fetch & print the user config?")) {
-			loudMouth.log("Fetching user data", this.getClass().getName(), SystemLogger.LoggingVerbosity.INFO);
+			//loudMouth.log("Fetching user data", this.getClass().getName(), SystemLogger.LoggingVerbosity.INFO);
 			//loudMouth.log("Hi", getClass().getCanonicalName(), LoggingVerbosity.ERROR);
 			try {
 				accountManager.getDevices(user);
@@ -196,7 +193,9 @@ public class RunMe {
 				theNote.setSize("0"); // May be changed to updateSize();
 				theNote.setSubject("iCloud-Linux Demo Note");
 				theNote.setNoteID(CommonLogic.generateUUID());
-				noteManager.createNotes(user, theNote);
+				ArrayList<Note> notes = new ArrayList<Note>();
+				notes.add(theNote);
+				noteManager.createNotes(user, notes);
 				log("Created a demo note");
 				log("Please check an official Apple iCloud supported device to verify the note was created");
 			} else {
@@ -215,7 +214,9 @@ public class RunMe {
 				for(String noteBookStr : noteManager.getNotebookList(user)){
 					if(noteManager.hasNote(user, response, noteBookStr)){
 						log("Deleting selected note");
-						noteManager.deleteNotes(user, noteManager.getNote(user, response, noteBookStr));
+						ArrayList<Note> notes = new ArrayList<Note>();
+						notes.add(noteManager.getNote(user, response, noteBookStr));
+						noteManager.deleteNotes(user, notes);
 						log("Note deleted");
 						log("Please check an official Apple iCloud supported device to verify the note was deleted");
 					} else {
@@ -234,19 +235,19 @@ public class RunMe {
 
 	private void signIn(String username, String password) {
 		try {
-			loudMouth.log("Attempting to authenticate user", this.getClass().getName(), SystemLogger.LoggingVerbosity.INFO);
-			loudMouth.log("Using username: " + username, this.getClass().getName(), SystemLogger.LoggingVerbosity.INFO);
-			loudMouth.log("Using password: " + password, this.getClass().getName(), SystemLogger.LoggingVerbosity.INFO);
+			//loudMouth.log("Attempting to authenticate user", this.getClass().getName(), SystemLogger.LoggingVerbosity.INFO);
+			//loudMouth.log("Using username: " + username, this.getClass().getName(), SystemLogger.LoggingVerbosity.INFO);
+			//loudMouth.log("Using password: " + password, this.getClass().getName(), SystemLogger.LoggingVerbosity.INFO);
 			user = new UserSession(username, password);
-			SystemLogger log = user.getLogger(); 
-			log = loudMouth;
-			loudMouth.setSystemLogLevel(SystemLogger.LoggingVerbosity.DEVELOPER);
+			//SystemLogger log = user.getLogger(); 
+			//log = loudMouth;
+			//loudMouth.setSystemLogLevel(SystemLogger.LoggingVerbosity.DEVELOPER);
 			accountManager.login(user);
-			loudMouth.log("Login succeeded; User is now signed in", this.getClass().getName(), SystemLogger.LoggingVerbosity.INFO);
+			//loudMouth.log("Login succeeded; User is now signed in", this.getClass().getName(), SystemLogger.LoggingVerbosity.INFO);
 		} catch (Exception e) {
 			// TODO Catch Invalid Credintals Exeption
-			loudMouth.log("Login failed; User is not signed in", this.getClass().getName(), SystemLogger.LoggingVerbosity.ERROR);
-			loudMouth.log("Invalid login info provided", this.getClass().getName(), SystemLogger.LoggingVerbosity.ERROR);
+			//loudMouth.log("Login failed; User is not signed in", this.getClass().getName(), SystemLogger.LoggingVerbosity.ERROR);
+			//loudMouth.log("Invalid login info provided", this.getClass().getName(), SystemLogger.LoggingVerbosity.ERROR);
 			e.printStackTrace();
 		}
 	}
