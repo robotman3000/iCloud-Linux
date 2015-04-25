@@ -1,16 +1,16 @@
 package icloud.services.notes;
 
 import icloud.services.BaseManager;
-import icloud.services.URLConfig;
 import icloud.services.notes.objects.Note;
 import icloud.services.notes.objects.NoteBook;
 import icloud.user.UserSession;
 
 import java.awt.image.BufferedImage;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,357 +18,202 @@ import javax.imageio.ImageIO;
 
 import com.google.gson.Gson;
 
-import common.ServerConnection;
-import common.SystemLogger;
-import common.URLBuilder;
+import common.http.ServerConnection;
+import common.http.URLBuilder;
+import common.http.URLConfig;
 
-public class NoteManager extends BaseManager{
+public class NoteManager extends BaseManager {
 
-	//TODO: test if you can create/update/delete multipule notes at once like retrieveNotes
-	
+	// TODO: make each of the server call methods have several sets of arguments
+	public static final String notes_url_default_host = "notesws.icloud.com";
+	public static final String notes_url_startup = "/no/startup?";
+	public static final String notes_url_createnotes = "/no/createNotes?";
+	public static final String notes_url_updatenotes = "/no/updateNotes?";
+	public static final String notes_url_deletenotes = "/no/deleteNotes?";
+	public static final String notes_url_retriveAttachment = "/no/retrieveAttachment?";
+	public static final String notes_url_retrieveNotes = "/no/retrieveNotes?";
+	public static final String notes_url_changeset = "/no/changeset?";
+
 	private static final String mainNotebook = "main";
 
+	private static NoteManager self = new NoteManager();
+	
 	public NoteManager() {
-		this.isInitialized = true;
-
-	}
-
-	public NoteManager(SystemLogger logger) {
-		this();
-		setLogger(logger);
+		super();
 	}
 
 	public void startup(UserSession user) throws Exception {
-		URLBuilder urlBuilder = new URLBuilder().setHost(user.getServerUrl("notes")).setPath(
-				URLConfig.notes_url_startup).setPort(443);
-		urlBuilder.addQueryString(URLConfig.query_arg_clientBN,
-				user.getClientBuildNumber());
-		urlBuilder.addQueryString(URLConfig.query_arg_clientId,
-				user.getUuid());
-		urlBuilder.addQueryString(URLConfig.query_arg_dsid, user
-				.getUserData().getAccountData().getDsInfo().getDsid());
-		Map<String, String> headersMap = new HashMap<String, String>();
-		headersMap.put("Origin", "https://www.icloud.com");
-		headersMap.put("User-Agent", "Mozilla/5.0 Java_iCloud/1.0 LoginManager/1.0");
-		URL url = urlBuilder.buildURL();
-		ServerConnection conn = new ServerConnection().setLogger(getLogger())
-				.setRequestMethod("GET")
-				.setServerUrl(url).setPayload("{}")
-				.setRequestCookies(user.getUserTokens().getTokens()).setRequestHeaders(headersMap);
+		
+		URL startupURL = new URLBuilder(self.rootURL)
+				.setPath(NoteManager.notes_url_startup)
+				.addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
+				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
+				.addQueryString(URLConfig.query_arg_dsid, user.getUserData().getAccountData().getDsInfo().getDsid())
+				.buildURL();
+		
+		ServerConnection conn = new ServerConnection()
+				.setRequestMethod(URLConfig.GET)
+				.setServerUrl(startupURL)
+				.addRequestHeader(URLConfig.default_header_origin)
+				.addRequestHeader(URLConfig.default_header_userAgent)
+				.setPayload("{}")
+				.setRequestCookies(user.getUserTokens().getTokens());
 		conn.connect();
-
-		String responseData = conn.getResponseDataAsString();
-		parseResponse(user, responseData);
+		
+		parseResponse(user, conn.getResponseAsString());
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
-
-		/*if (debugEnabled) {
-			CommonLogic.printJson(responseData);
-		}*/
 		changeset(user);
-	}
-
-	public void retrieveNotes(UserSession user, ArrayList<Note> retrieveNotes) throws Exception{
-		
-		ArrayList<Note> sortedNotes = new ArrayList<Note>();
-		
-		for (Note note : retrieveNotes){
-			Note newNote = new Note();
-			newNote.setNoteID(note.getNoteID());
-			sortedNotes.add(newNote);
-		}
-		
-		Gson gson = new Gson();
-		NoteJson nJson = new NoteJson();
-		nJson.setNotes(sortedNotes);
-
-		Map<String, String> headersMap = new HashMap<String, String>();
-		headersMap.put("Origin", "https://www.icloud.com");
-		headersMap.put("User-Agent", "Mozilla/5.0 Java_iCloud/1.0 NoteManager/1.0");
-
-		ServerConnection conn = new ServerConnection().setLogger(getLogger());
-
-		URLBuilder httpurlBuilder = new URLBuilder().setPort(443).setHost(user.getServerUrl("notes")).setPath(
-				URLConfig.notes_url_retrieveNotes);
-		httpurlBuilder.addQueryString(URLConfig.query_arg_clientBN,
-				user.getClientBuildNumber());
-		httpurlBuilder.addQueryString(URLConfig.query_arg_clientId,
-				user.getUuid());
-		httpurlBuilder.addQueryString(URLConfig.query_arg_dsid, user
-				.getUserData().getAccountData().getDsInfo().getDsid());
-		httpurlBuilder.addQueryString(URLConfig.query_arg_syncToken, user
-				.getUserConfig().getNoteConfig().getSyncToken());
-
-		URL httpUrl = httpurlBuilder.buildURL();
-
-		conn.setServerUrl(httpUrl);
-		conn.setRequestMethod("POST");
-		conn.setRequestHeaders(headersMap);
-		conn.setRequestCookies(user.getUserTokens().getTokens());
-		conn.setPayload(gson.toJson(nJson));
-		conn.connect();
-
-		user.getUserTokens().updateTokens(conn.getResponseCookies());
-
-		String responseData = conn.getResponseDataAsString();
-		parseResponse(user, responseData);
-
-/*		if (debugEnabled) {
-			CommonLogic.printJson(responseData);
-		}*/
-
-		changeset(user);
-		
 	}
 	
-	public void createNotes(UserSession user, Note newNote) throws Exception {
+	public void retrieveNotes(UserSession user, List<Note> retrieveNotes) throws Exception {
 
-		ArrayList<Note> noteList = new ArrayList<Note>();
-		noteList.add(newNote);
+		URL retriveNotesURL = new URLBuilder(self.rootURL)
+				.setPath(NoteManager.notes_url_retrieveNotes)
+				.addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
+				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
+				.addQueryString(URLConfig.query_arg_dsid, user.getUserData().getAccountData().getDsInfo().getDsid())
+				.addQueryString(URLConfig.query_arg_syncToken, user.getUserConfig().getNoteConfig().getSyncToken())
+				.buildURL();
 
-		Gson gson = new Gson();
-		NoteJson nJson = new NoteJson();
-		nJson.setNotes(noteList);
-
-		Map<String, String> headersMap = new HashMap<String, String>();
-		headersMap.put("Origin", "https://www.icloud.com");
-		headersMap.put("User-Agent", "Mozilla/5.0 Java_iCloud/1.0 NoteManager/1.0");
-
-		ServerConnection conn = new ServerConnection().setLogger(getLogger());
-
-		URLBuilder httpurlBuilder = new URLBuilder().setPort(443).setHost(user.getServerUrl("notes")).setPath(
-				URLConfig.notes_url_createnotes);
-		httpurlBuilder.addQueryString(URLConfig.query_arg_clientBN,
-				user.getClientBuildNumber());
-		httpurlBuilder.addQueryString(URLConfig.query_arg_clientId,
-				user.getUuid());
-		httpurlBuilder.addQueryString(URLConfig.query_arg_dsid, user
-				.getUserData().getAccountData().getDsInfo().getDsid());
-		httpurlBuilder.addQueryString(URLConfig.query_arg_syncToken, user
-				.getUserConfig().getNoteConfig().getSyncToken());
-
-		URL httpUrl = httpurlBuilder.buildURL();
-
-		conn.setServerUrl(httpUrl);
-		conn.setRequestMethod("POST");
-		conn.setRequestHeaders(headersMap);
-		conn.setRequestCookies(user.getUserTokens().getTokens());
-		conn.setPayload(gson.toJson(nJson));
+		ServerConnection conn = new ServerConnection()
+				.setRequestMethod(URLConfig.POST)
+				.setServerUrl(retriveNotesURL)
+				.addRequestHeader(URLConfig.default_header_origin)
+				.addRequestHeader(URLConfig.default_header_userAgent)
+				.setPayload(self.gson.toJson(generateBody(user.getUserConfig().getNoteConfig().getSyncToken(), retrieveNotes, null)))
+				.setRequestCookies(user.getUserTokens().getTokens());
 		conn.connect();
 
+		parseResponse(user, conn.getResponseAsString());
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
-
-		String responseData = conn.getResponseDataAsString();
-		parseResponse(user, responseData);
-
-/*		if (debugEnabled) {
-			CommonLogic.printJson(responseData);
-		}*/
-
 		changeset(user);
 	}
 
-	public void updateNotes(UserSession user, Note updateNote) throws Exception {
-		ArrayList<Note> noteList = new ArrayList<Note>();
-		noteList.add(updateNote);
+	public void createNotes(UserSession user, List<Note> newNotes) throws Exception {
 
-		Gson gson = new Gson();
-		NoteJson nJson = new NoteJson();
-		nJson.setNotes(noteList);
+		URL createNotesURL = new URLBuilder(self.rootURL)
+				.setPath(NoteManager.notes_url_createnotes)
+				.addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
+				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
+				.addQueryString(URLConfig.query_arg_dsid, user.getUserData().getAccountData().getDsInfo().getDsid())
+				.addQueryString(URLConfig.query_arg_syncToken, user.getUserConfig().getNoteConfig().getSyncToken())
+				.buildURL();
 
-		Map<String, String> headersMap = new HashMap<String, String>();
-		headersMap.put("Origin", "https://www.icloud.com");
-		headersMap.put("User-Agent", "Mozilla/5.0 Java_iCloud/1.0 NoteManager/1.0");
-
-		ServerConnection conn = new ServerConnection().setLogger(getLogger());
-
-		URLBuilder httpurlBuilder = new URLBuilder().setPort(443).setHost(user.getServerUrl("notes")).setPath(
-				URLConfig.notes_url_updatenotes);
-		httpurlBuilder.addQueryString(URLConfig.query_arg_clientBN,
-				user.getClientBuildNumber());
-		httpurlBuilder.addQueryString(URLConfig.query_arg_clientId,
-				user.getUuid());
-		httpurlBuilder.addQueryString(URLConfig.query_arg_dsid, user
-		.getUserData().getAccountData().getDsInfo().getDsid());
-		httpurlBuilder.addQueryString(URLConfig.query_arg_syncToken, user
-				.getUserConfig().getNoteConfig().getSyncToken());
-		URL httpUrl = httpurlBuilder.buildURL();
-
-		conn.setServerUrl(httpUrl);
-		conn.setRequestMethod("POST");
-		conn.setRequestHeaders(headersMap);
-		conn.setRequestCookies(user.getUserTokens().getTokens());
-		conn.setPayload(gson.toJson(nJson));
+		ServerConnection conn = new ServerConnection()
+				.setRequestMethod(URLConfig.POST)		
+				.setServerUrl(createNotesURL)
+				.addRequestHeader(URLConfig.default_header_origin)
+				.addRequestHeader(URLConfig.default_header_userAgent)
+				.setPayload(self.gson.toJson(generateBody(null, newNotes, null)))
+				.setRequestCookies(user.getUserTokens().getTokens());
 		conn.connect();
 
+		parseResponse(user, conn.getResponseAsString());
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
+		changeset(user);
+	}
 
-		String responseData = conn.getResponseDataAsString();
-		parseResponse(user, responseData);
+	public void updateNotes(UserSession user, List<Note> updateNotes) throws Exception {
 
-/*		if (debugEnabled) {
-			CommonLogic.printJson(responseData);
-		}*/
+		URL updateNotesURL = new URLBuilder(self.rootURL)
+				.setPath(NoteManager.notes_url_updatenotes)
+				.addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
+				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
+				.addQueryString(URLConfig.query_arg_dsid, user.getUserData().getAccountData().getDsInfo().getDsid())
+				.addQueryString(URLConfig.query_arg_syncToken, user.getUserConfig().getNoteConfig().getSyncToken())
+				.buildURL();
 
+		ServerConnection conn = new ServerConnection()
+				.setRequestMethod(URLConfig.POST)
+				.setServerUrl(updateNotesURL)
+				.addRequestHeader(URLConfig.default_header_origin)
+				.addRequestHeader(URLConfig.default_header_userAgent)
+				.setPayload(self.gson.toJson(generateBody(null, updateNotes, null)))
+				.setRequestCookies(user.getUserTokens().getTokens());
+		conn.connect();
+
+		parseResponse(user, conn.getResponseAsString());
+		user.getUserTokens().updateTokens(conn.getResponseCookies());
 		changeset(user);
 	}
 
 	public BufferedImage retriveAttachment(UserSession user, String attachmentId) throws Exception {
-		Map<String, String> headersMap = new HashMap<String, String>();
-		headersMap.put("Origin", "https://www.icloud.com");
-		headersMap.put("User-Agent", "Mozilla/5.0 Java_iCloud/1.0 NoteManager/1.0");
+		// TODO: make this method return the interface for buffered image
 
-		ServerConnection conn = new ServerConnection().setLogger(getLogger());
+		URL retriveAttachmentURL = new URLBuilder(self.rootURL)
+				.setPath(NoteManager.notes_url_retriveAttachment)
+				.addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
+				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
+				.addQueryString(URLConfig.query_arg_dsid, user.getUserData().getAccountData().getDsInfo().getDsid())
+				.addQueryString(URLConfig.query_arg_validateToken, user.getUserTokens().getTokenValue("X-APPLE-WEBAUTH-VALIDATE"))
+				.addQueryString(URLConfig.query_arg_attachmentId, attachmentId)
+				.buildURL();
 
-		URLBuilder httpurlBuilder = new URLBuilder().setPort(443).setHost(user.getServerUrl("notes")).setPath(
-				URLConfig.notes_url_retriveAttachment);
-		httpurlBuilder.addQueryString(URLConfig.query_arg_clientBN,
-				user.getClientBuildNumber());
-		httpurlBuilder.addQueryString(URLConfig.query_arg_clientId,
-				user.getUuid());
-		httpurlBuilder.addQueryString(URLConfig.query_arg_dsid, user
-				.getUserData().getAccountData().getDsInfo().getDsid());
-		httpurlBuilder.addQueryString(URLConfig.query_arg_validateToken,
-				user.getUserTokens().getTokenValue("X-APPLE-WEBAUTH-VALIDATE"));
-		httpurlBuilder.addQueryString(URLConfig.query_arg_attachmentId,
-				attachmentId);
-
-		URL httpUrl = httpurlBuilder.buildURL();
-
-		conn.setServerUrl(httpUrl);
-		conn.setRequestMethod("GET");
-		conn.setRequestHeaders(headersMap);
-		conn.setRequestCookies(user.getUserTokens().getTokens());
+		ServerConnection conn = new ServerConnection()
+				.setRequestMethod(URLConfig.GET)
+				.setServerUrl(retriveAttachmentURL)
+				.addRequestHeader(URLConfig.default_header_origin)
+				.addRequestHeader(URLConfig.default_header_userAgent)
+				.setRequestCookies(user.getUserTokens().getTokens());
 		conn.connect();
 
 		BufferedImage ir = ImageIO.read(conn.getResponseData());
-
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
 		// parseResponse(user, responseData);
-
-/*		if (debugEnabled) {
-			// CommonLogic.printJson(responseData);
-		}*/
-
 		changeset(user);
-
 		return ir;
 	}
 
 	public void changeset(UserSession user) throws Exception {
-		Map<String, String> headersMap = new HashMap<String, String>();
-		headersMap.put("Origin", "https://www.icloud.com");
-		headersMap.put("User-Agent", "Mozilla/5.0 Java_iCloud/1.0 NoteManager/1.0");
 
-		ServerConnection conn = new ServerConnection().setLogger(getLogger());
-
-		/*
-		 * URL httpUrl = new URL(user.getServerUrl("notes") + "/no/changeset?" +
-		 * "clientBuildNumber=" + user.getClientBuildNumber() + "&clientId=" +
-		 * user.getUuid() + "&dsid=" +
-		 * user.getUserConfig().getUserProperties().getProperty("dsid") +
-		 * "&syncToken=" + user.getUserConfig().getNoteConfig().getSyncToken());
+		/* This is kept for history
+		 * 
+		 * URL httpUrl = new URL(user.getServerUrl("notes") + "/no/changeset?" + "clientBuildNumber=" + user.getClientBuildNumber() +
+		 * "&clientId=" + user.getUuid() + "&dsid=" + user.getUserConfig().getUserProperties().getProperty("dsid") + "&syncToken=" +
+		 * user.getUserConfig().getNoteConfig().getSyncToken());
 		 */
 
-		URLBuilder httpurlBuilder = new URLBuilder().setPort(443).setHost(user.getServerUrl("notes")).setPath(
-				URLConfig.notes_url_changeset);
-		httpurlBuilder.addQueryString(URLConfig.query_arg_clientBN,
-				user.getClientBuildNumber());
-		httpurlBuilder.addQueryString(URLConfig.query_arg_clientId,
-				user.getUuid());
-		httpurlBuilder.addQueryString(URLConfig.query_arg_dsid, user
-				.getUserData().getAccountData().getDsInfo().getDsid());
-		httpurlBuilder.addQueryString(URLConfig.query_arg_syncToken, user
-				.getUserConfig().getNoteConfig().getSyncToken());
+		URL changesetURL = new URLBuilder(self.rootURL)
+				.setPath(NoteManager.notes_url_changeset)
+				.addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
+				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
+				.addQueryString(URLConfig.query_arg_dsid, user.getUserData().getAccountData().getDsInfo().getDsid())
+				.addQueryString(URLConfig.query_arg_syncToken, user.getUserConfig().getNoteConfig().getSyncToken())
+				.buildURL();
 
-		URL httpUrl = httpurlBuilder.buildURL();
-
-		conn.setServerUrl(httpUrl);
-		conn.setRequestMethod("GET");
-		conn.setRequestHeaders(headersMap);
-		conn.setRequestCookies(user.getUserTokens().getTokens());
+		ServerConnection conn = new ServerConnection()
+				.setRequestMethod(URLConfig.GET)
+				.setServerUrl(changesetURL)
+				.addRequestHeader(URLConfig.default_header_origin)
+				.addRequestHeader(URLConfig.default_header_userAgent)
+				.setRequestCookies(user.getUserTokens().getTokens());
 		conn.connect();
 
-		// JsonObject userData =
-		// CommonLogic.parseJsonData(conn.getResponseData());
-		String responseData = conn.getResponseDataAsString();
-		parseResponse(user, responseData);
-
-/*		if (debugEnabled) {
-			CommonLogic.printJson(responseData);
-		}*/
-
+		parseResponse(user, conn.getResponseAsString());
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
 	}
 
-	public void deleteNotes(UserSession user, Note noteToDelete) throws Exception {
+	public void deleteNotes(UserSession user, List<Note> deleteNotes) throws Exception {
 
-		ArrayList<Note> noteList = new ArrayList<Note>();
-		noteList.add(noteToDelete);
+		URL deleteNotesURL = new URLBuilder(self.rootURL)
+				.setPath(NoteManager.notes_url_deletenotes)
+				.addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
+				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
+				.addQueryString(URLConfig.query_arg_dsid, user.getUserData().getAccountData().getDsInfo().getDsid())
+				.addQueryString(URLConfig.query_arg_syncToken, user.getUserConfig().getNoteConfig().getSyncToken())
+				.buildURL();
 
-		Gson gson = new Gson();
-		NoteJson nJson = new NoteJson();
-		nJson.setNotes(noteList);
-
-		/*
-		 * Iterator<String> it =
-		 * user.getUserData().getNoteData().getUserNotes().get(mainNotebook)
-		 * .getNoteKeys().iterator();
-		 * 
-		 * while (it.hasNext()) { String uKey = it.next(); Note note =
-		 * user.getUserData().getNoteData().getUserNotes().get(mainNotebook)
-		 * .getNote(uKey); if (note.getUuid().equalsIgnoreCase(noteId)) {
-		 * noteIdObject.addProperty("noteId", note.getNoteID());
-		 * System.out.println("deleteNote() print"); } }
-		 * 
-		 * JsonArray innerArray = new JsonArray(); innerArray.add(noteIdObject);
-		 * 
-		 * JsonObject jsonObject = new JsonObject(); jsonObject.add("notes",
-		 * innerArray);
-		 */
-
-		Map<String, String> headersMap = new HashMap<String, String>();
-		headersMap.put("Origin", "https://www.icloud.com");
-		headersMap.put("User-Agent", "Mozilla/5.0 Java_iCloud/1.0 NoteManager/1.0");
-
-		ServerConnection conn = new ServerConnection().setLogger(getLogger());
-
-		URLBuilder urlBuild = new URLBuilder();
-		urlBuild.setPort(443).setHost(user.getServerUrl("notes"));
-		urlBuild.setPath(URLConfig.notes_url_deletenotes);
-		urlBuild.addQueryString(URLConfig.query_arg_clientBN,
-				user.getClientBuildNumber());
-		urlBuild.addQueryString(URLConfig.query_arg_clientId, user.getUuid());
-		urlBuild.addQueryString(URLConfig.query_arg_dsid, user
-				.getUserData().getAccountData().getDsInfo().getDsid());
-		urlBuild.addQueryString(URLConfig.query_arg_syncToken, user
-				.getUserConfig().getNoteConfig().getSyncToken());
-		URL httpUrl = urlBuild.buildURL();
-
-		/*
-		 * URL httpUrl = new URL("https://" +
-		 * user.getUserConfig().getServersList().get("notes").get("url") +
-		 * "/no/deleteNotes?" + "clientBuildNumber=" +
-		 * user.getClientBuildNumber() + "&clientId=" + user.getUuid() +
-		 * "&dsid=" +
-		 * user.getUserConfig().getUserProperties().getProperty("dsid"));
-		 */
-
-		conn.setServerUrl(httpUrl);
-		conn.setRequestMethod("POST");
-		conn.setRequestHeaders(headersMap);
-		conn.setRequestCookies(user.getUserTokens().getTokens());
-		conn.setPayload(gson.toJson(nJson));
+		ServerConnection conn = new ServerConnection()
+				.setRequestMethod(URLConfig.POST)
+				.setServerUrl(deleteNotesURL)
+				.addRequestHeader(URLConfig.default_header_origin)
+				.addRequestHeader(URLConfig.default_header_userAgent)
+				.setPayload(self.gson.toJson(generateBody(null, deleteNotes, null)))
+				.setRequestCookies(user.getUserTokens().getTokens());
 		conn.connect();
 
+		parseResponse(user, conn.getResponseAsString());
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
-
-		String responseData = conn.getResponseDataAsString();
-		parseResponse(user, responseData);
-
-/*		if (debugEnabled) {
-			CommonLogic.printJson(responseData);
-		}*/
-
 		changeset(user);
 	}
 
@@ -405,8 +250,7 @@ public class NoteManager extends BaseManager{
 		while (it.hasNext()) {
 			Note itNote = it.next();
 			String itHashStr = Integer.toString(itNote.getNoteID().hashCode());
-			Iterator<String> noteSet = user.getUserData().getNoteData().getUserNotes()
-					.get(mainNotebook).getNoteKeys().iterator();
+			Iterator<String> noteSet = user.getUserData().getNoteData().getUserNotes().get(mainNotebook).getNoteKeys().iterator();
 			while (noteSet.hasNext()) {
 				String compareA = noteSet.next();
 				if (compareA.contentEquals(itHashStr)) {
@@ -416,6 +260,32 @@ public class NoteManager extends BaseManager{
 		}
 	}
 
+	private NoteJson generateBody(String syncToken, List<Note> notes, List<Note> deletes) {
+		NoteJson nJson = new NoteJson();
+		if (syncToken != null && !syncToken.isEmpty()) {
+			nJson.setSyncToken(syncToken);
+		}
+		nJson.setNotes(notes);
+		nJson.setDeleted((stripNotes(deletes)));
+		return nJson;
+	}
+	
+	private List<Note> stripNotes(List<Note> cleanMeNotes){
+		ArrayList<Note> sortedNotes = new ArrayList<Note>();
+
+		if (cleanMeNotes != null) {
+			if (!cleanMeNotes.isEmpty()) {
+				for (Note note : cleanMeNotes) {
+					Note newNote = new Note();
+					newNote.setNoteID(note.getNoteID());
+					sortedNotes.add(newNote);
+				}
+			}
+			return sortedNotes;
+		}
+		return null;
+	}
+	
 	public Note getNote(UserSession user, String noteID, String noteBookID) {
 		if (user.getUserData().getNoteData().getUserNotes().containsKey(noteBookID)) {
 			NoteBook noteVar = user.getUserData().getNoteData().getUserNotes().get(noteBookID);
@@ -439,23 +309,32 @@ public class NoteManager extends BaseManager{
 		return user.getUserData().getNoteData().getUserNotes().keySet();
 	}
 
-	public boolean hasNoteBook(UserSession user, String noteBookId){
-		if(user.getUserData().getNoteData().getUserNotes().containsKey(noteBookId)){
+	public boolean hasNoteBook(UserSession user, String noteBookId) {
+		if (user.getUserData().getNoteData().getUserNotes().containsKey(noteBookId)) {
 			return true;
 		}
 		return false;
 	}
-	
-	public boolean hasNote(UserSession user, String noteId, String noteBookId){
-		if(hasNoteBook(user, noteBookId)){
-			if(user.getUserData().getNoteData().getUserNotes().get(noteBookId).hasNote(noteId)){
+
+	public boolean hasNote(UserSession user, String noteId, String noteBookId) {
+		if (hasNoteBook(user, noteBookId)) {
+			if (user.getUserData().getNoteData().getUserNotes().get(noteBookId).hasNote(noteId)) {
 				return true;
 			}
 		}
 		return false;
 	}
-	
+
 	private String noteIDtoUUID(String convertID) {
 		return Integer.toString(convertID.hashCode());
+	}
+
+	public void setRootURL(String string) {
+		try {
+			self.rootURL = new URL(string);
+		} catch (MalformedURLException e) {
+			//TODO: make this use the fallback data
+			e.printStackTrace();
+		}
 	}
 }

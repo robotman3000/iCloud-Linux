@@ -1,28 +1,37 @@
 package icloud.services.account;
 
 import icloud.services.BaseManager;
-import icloud.services.URLConfig;
 import icloud.services.account.objects.Device;
 import icloud.services.account.objects.QuotaStatus;
 import icloud.services.account.objects.RequestInfo;
 import icloud.services.account.objects.StorageBlockInfo;
 import icloud.services.account.objects.StorageUsageInfo;
 import icloud.services.account.objects.Webservices.Webservice;
+import icloud.services.notes.NoteManager;
 import icloud.user.UserSession;
 
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 
 import com.google.gson.Gson;
 
-import common.ServerConnection;
-import common.SystemLogger;
-import common.URLBuilder;
+import common.http.ServerConnection;
+import common.http.URLBuilder;
+import common.http.URLConfig;
 
-public class AccountManager extends BaseManager {
+public class AccountManager extends BaseManager{
 
+	private static final String account_url_default_host = "setup.icloud.com";
+	private static final String account_url_login = "/setup/ws/1/login?";
+	private static final String account_url_logout = "/setup/ws/1/logout?";
+	private static final String account_url_validate = "/setup/ws/1/validate?";
+	private static final String account_url_getDevices = "/setup/web/device/getDevices?";
+	private static final String account_url_getFamilyDetails = "/setup/web/family/getFamilyDetails?";
+	private static final String account_url_getStorageUsageInfo = "/setup/ws/1/storageUsageInfo?";
+	
+	private static AccountManager self = new AccountManager();
 	// TODO: Add all of the data retrieval methods to AccountManager
 	// TODO: Add safety checks to the getters and setters. ie dont return null instead throw an exeception
 
@@ -34,23 +43,22 @@ public class AccountManager extends BaseManager {
 		
 		URL httpUrl = new URLBuilder()
 				.setProtocol(URLConfig.default_protocol)
-				.setHost(URLConfig.account_url_default_host)
+				.setHost(AccountManager.account_url_default_host)
 				.setPort(URLConfig.default_port)
-				.setPath(URLConfig.account_url_login)
+				.setPath(AccountManager.account_url_login)
 				.addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
 				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
 				.buildURL();
 		
 		ServerConnection conn = new ServerConnection()
-				.setLogger(logger)
 				.setServerUrl(httpUrl)
 				.setRequestMethod(URLConfig.POST)
-				.addRequestHeader("origin", URLConfig.default_header_origin)
-				.addRequestHeader("User-Agent", URLConfig.default_header_userAgent)
+				.addRequestHeader(URLConfig.default_header_origin)
+				.addRequestHeader(URLConfig.default_header_userAgent)
 				.setPayload(generateQuery(user));
 		conn.connect();
 
-		String responseData = /*request.getBody();*/conn.getResponseDataAsString();
+		String responseData = conn.getResponseAsString();
 		parseResponse(user, new Gson().fromJson(responseData, AccountJson.class));
 		//System.out.println(responseData);
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
@@ -63,34 +71,27 @@ public class AccountManager extends BaseManager {
 
 	public void logout(UserSession user) throws Exception {
 		// TODO: Make all magic values be generated or read from a config file
-
 		String valCookie = user.getUserTokens().getTokenValue("X-APPLE-WEBAUTH-VALIDATE");
 		
-		URL httpUrl = new URLBuilder()
-				.setPath(URLConfig.account_url_logout)
-				.setProtocol(URLConfig.default_protocol)
-				.setPort(URLConfig.default_port)
-				.setHost(URLConfig.account_url_default_host)
+		URL httpUrl = new URLBuilder(self.rootURL)
+				.setPath(AccountManager.account_url_logout)
 				.addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
 				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
 				.addQueryString(URLConfig.query_arg_dsid, user.getUserConfig().getUserProperties().getProperty("dsid"))
 				.addQueryString(URLConfig.query_arg_token, valCookie)
 				.buildURL();
-
-		Map<String, String> headersMap = new HashMap<String, String>();
-		headersMap.put("origin", URLConfig.default_header_origin);
-		headersMap.put("User-Agent", URLConfig.default_header_userAgent);
 		
-		ServerConnection conn = new ServerConnection().setLogger(logger)
+		ServerConnection conn = new ServerConnection()
 				.setServerUrl(httpUrl)
 				.setRequestMethod(URLConfig.POST)
-				.setRequestHeaders(headersMap)
+				.addRequestHeader(URLConfig.default_header_origin)
+				.addRequestHeader(URLConfig.default_header_userAgent)
 				.setRequestCookies(user.getUserTokens().getTokens())
 				.setPayload("{}");
 		conn.connect();
 		
-		@SuppressWarnings("unused")
-		String accountServer = user.getServerUrl("account");
+
+		//String accountServer = user.getServerUrl("account");
 		
 /*		if (debugEnabled) {
 			CommonLogic.printJson(conn.getResponseDataAsString());
@@ -99,28 +100,23 @@ public class AccountManager extends BaseManager {
 
 	public void validate(UserSession user) throws Exception {
 
-		URL url = new URLBuilder()
-				.setPath(URLConfig.account_url_validate)
-				.setProtocol(URLConfig.default_protocol)
-				.setPort(URLConfig.default_port)
-				.setHost(URLConfig.account_url_default_host)
+		URL url = new URLBuilder(self.rootURL)
+				.setPath(AccountManager.account_url_validate)
 				.addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
 				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
 				.buildURL();
 
-		Map<String, String> headersMap = new HashMap<String, String>();
-		headersMap.put("origin", URLConfig.default_header_origin);
-		headersMap.put("User-Agent", URLConfig.default_header_userAgent);
 
-		ServerConnection conn = new ServerConnection().setLogger(logger)
+		ServerConnection conn = new ServerConnection()
 				.setRequestMethod(URLConfig.POST)
 				.setServerUrl(url)
 				.setPayload("{}")
 				.setRequestCookies(user.getUserTokens().getTokens())
-				.setRequestHeaders(headersMap);
+				.addRequestHeader(URLConfig.default_header_origin)
+				.addRequestHeader(URLConfig.default_header_userAgent);
 		conn.connect();
 
-		String responseData = conn.getResponseDataAsString();
+		String responseData = conn.getResponseAsString();
 		parseResponse(user, new Gson().fromJson(responseData, AccountJson.class));
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
 
@@ -131,30 +127,23 @@ public class AccountManager extends BaseManager {
 
 	public void getDevices(UserSession user) throws Exception {
 
-		URL url = new URLBuilder()
-				.setPath(URLConfig.account_url_getDevices)
-				.setPort(URLConfig.default_port)
-				.setProtocol(URLConfig.default_protocol)
-				.setHost(URLConfig.account_url_default_host)
+		URL url = new URLBuilder(self.rootURL)
+				.setPath(AccountManager.account_url_getDevices)
 				.addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
 				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
 				.addQueryString("dsid", user.getUserData().getAccountData().getDsInfo().getDsid())
 				.buildURL();
 
-		Map<String, String> headersMap = new HashMap<String, String>();
-		headersMap.put("origin", URLConfig.default_header_origin);
-		headersMap.put("User-Agent", URLConfig.default_header_userAgent);
-
 		ServerConnection conn = new ServerConnection()
-				.setLogger(logger)
 				.setRequestMethod(URLConfig.GET)
 				.setServerUrl(url)
 				.setPayload("{}")
 				.setRequestCookies(user.getUserTokens().getTokens())
-				.setRequestHeaders(headersMap);
+				.addRequestHeader(URLConfig.default_header_origin)
+				.addRequestHeader(URLConfig.default_header_userAgent);
 		conn.connect();
 
-		String responseData = conn.getResponseDataAsString();
+		String responseData = conn.getResponseAsString();
 		parseResponse(user, new Gson().fromJson(responseData, AccountJson.class));
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
 
@@ -170,17 +159,23 @@ public class AccountManager extends BaseManager {
 			// System.out.println("Connecting to: Validate Server");
 		}*/
 
-		URL url = new URLBuilder().setPath(URLConfig.account_url_getFamilyDetails).setPort(URLConfig.default_port).setProtocol(URLConfig.default_protocol).setHost(URLConfig.account_url_default_host).addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
-				.addQueryString(URLConfig.query_arg_clientId, user.getUuid()).addQueryString("dsid", user.getUserData().getAccountData().getDsInfo().getDsid()).buildURL();
-
-		Map<String, String> headersMap = new HashMap<String, String>();
-		headersMap.put("origin", URLConfig.default_header_origin);
-		headersMap.put("User-Agent", URLConfig.default_header_userAgent);
-
-		ServerConnection conn = new ServerConnection().setLogger(logger).setRequestMethod(URLConfig.GET).setServerUrl(url).setPayload("{}").setRequestCookies(user.getUserTokens().getTokens()).setRequestHeaders(headersMap);
+		URL url = new URLBuilder(self.rootURL)
+				.setPath(AccountManager.account_url_getFamilyDetails)
+				.addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
+				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
+				.addQueryString("dsid", user.getUserData().getAccountData().getDsInfo().getDsid())
+				.buildURL();
+		
+		ServerConnection conn = new ServerConnection()
+				.setRequestMethod(URLConfig.GET)
+				.setServerUrl(url)
+				.setPayload("{}")
+				.setRequestCookies(user.getUserTokens().getTokens())
+				.addRequestHeader(URLConfig.default_header_origin)
+				.addRequestHeader(URLConfig.default_header_userAgent);
 		conn.connect();
 
-		String responseData = conn.getResponseDataAsString();
+		String responseData = conn.getResponseAsString();
 		parseResponse(user, new Gson().fromJson(responseData, AccountJson.class));
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
 
@@ -196,17 +191,23 @@ public class AccountManager extends BaseManager {
 			// System.out.println("Connecting to: Validate Server");
 		}*/
 
-		URL url = new URLBuilder().setPath(URLConfig.account_url_getStorageUsageInfo).setPort(URLConfig.default_port).setProtocol(URLConfig.default_protocol).setHost(URLConfig.account_url_default_host).addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
-				.addQueryString(URLConfig.query_arg_clientId, user.getUuid()).addQueryString("dsid", user.getUserData().getAccountData().getDsInfo().getDsid()).buildURL();
+		URL url = new URLBuilder(self.rootURL)
+				.setPath(AccountManager.account_url_getStorageUsageInfo)
+				.addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
+				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
+				.addQueryString("dsid", user.getUserData().getAccountData().getDsInfo().getDsid())
+				.buildURL();
 
-		Map<String, String> headersMap = new HashMap<String, String>();
-		headersMap.put("origin", URLConfig.default_header_origin);
-		headersMap.put("User-Agent", URLConfig.default_header_userAgent);
-
-		ServerConnection conn = new ServerConnection().setLogger(logger).setRequestMethod(URLConfig.POST).setServerUrl(url).setPayload("{}").setRequestCookies(user.getUserTokens().getTokens()).setRequestHeaders(headersMap);
+		ServerConnection conn = new ServerConnection()
+				.setRequestMethod(URLConfig.POST)
+				.setServerUrl(url)
+				.setPayload("{}")
+				.setRequestCookies(user.getUserTokens().getTokens())
+				.addRequestHeader(URLConfig.default_header_origin)
+				.addRequestHeader(URLConfig.default_header_userAgent);
 		conn.connect();
 
-		String responseData = conn.getResponseDataAsString();
+		String responseData = conn.getResponseAsString();
 		parseResponse(user, new Gson().fromJson(responseData, AccountJson.class));
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
 
@@ -241,8 +242,8 @@ public class AccountManager extends BaseManager {
 		}
 
 		if (aJson.webservices != null && aJson.webservices.getWebservices() != null) {
+			configureUrls(aJson.webservices.getWebservices());
 			for (Webservice webService : aJson.webservices.getWebservices()) {
-				user.addServerUrl(webService.getName(), webService.getUrl());
 				aConf.addWebservice(webService);
 			}
 		}
@@ -284,57 +285,65 @@ public class AccountManager extends BaseManager {
 		}
 	}
 
-	private String generateQuery(UserSession user) {
-		return "{\"apple_id\":" + "\"" + user.getUsername() + "\"" + ",\"password\":" + "\"" + user.getPassword() + "\"" + ",\"extended_login\":" + user.isExtendedLogin() + "}";
+	private void configureUrls(List<Webservice> webServices) {
+		for (Webservice service : webServices) {
+			// We use an "if" statement here instead of switch for java 1.6 compatibility
+			if (service.getName().equalsIgnoreCase("reminders")) { // iCloud Reminders
+
+			} else if (service.getName().equalsIgnoreCase("mail")) { // iCloud Mail
+
+			} else if (service.getName().equalsIgnoreCase("iworkexportws")) {
+
+			} else if (service.getName().equalsIgnoreCase("drivews")) { // iCloud Drive
+
+			} else if (service.getName().equalsIgnoreCase("settings")) { // iCloud Settings
+
+			} else if (service.getName().equalsIgnoreCase("keyvalue")) { // Keyvalue Services
+
+			} else if (service.getName().equalsIgnoreCase("cksharews")) {
+
+			} else if (service.getName().equalsIgnoreCase("push")) { // iCloud Push Services
+
+			} else if (service.getName().equalsIgnoreCase("contacts")) { // iCloud Contacts
+
+			} else if (service.getName().equalsIgnoreCase("findme")) { // iCloud Find my iPhone
+
+			} else if (service.getName().equalsIgnoreCase("photos")) { // iCloud Photo Library
+
+			} else if (service.getName().equalsIgnoreCase("ubiquity")) {
+
+			} else if (service.getName().equalsIgnoreCase("ckdatabasews")) {
+
+			} else if (service.getName().equalsIgnoreCase("iwmb")) {
+
+			} else if (service.getName().equalsIgnoreCase("docws")) {
+
+			} else if (service.getName().equalsIgnoreCase("iworkthumbnailws")) {
+
+			} else if (service.getName().equalsIgnoreCase("account")) { // iCloud Sign in and out
+				new AccountManager().setRootURL(service.getUrl());
+			} else if (service.getName().equalsIgnoreCase("streams")) {
+
+			} else if (service.getName().equalsIgnoreCase("notes")) { // iCloud Notes
+				new NoteManager().setRootURL(service.getUrl());
+			} else if (service.getName().equalsIgnoreCase("calendar")) { // iCloud Calendars
+
+			}
+		}
 	}
 
-	@SuppressWarnings("unused")
-	private void oldParseResponse() {
-
-		// aData.setRequestInfo(aJson.requestInfo);
-
-		// Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		// JsonParser jp = new JsonParser();
-		// JsonElement je = jp.parse(gson.toJson(aJson));
-		//
-		// JsonObject userData = je.getAsJsonObject();
-		// JsonElement webServices = userData.get("webservices");
-		// JsonObject webServices2 = webServices.getAsJsonObject();
-		//
-		// // TODO: Make the code not assume that things will exist
-		// String[] webServiceStrings = { "reminders", "mail", "drivews",
-		// "settings", "keyvalue", "push", "contacts", "findme", "photos",
-		// "ubiquity", "iwmb", "ckdatabasews", "docws", "account",
-		// "streams", "notes", "calendar" };
-		// // String[] memberStrings = { "status", "url", "pcsRequired" };
-		// String[] memberStrings = { "url" };
-		// for (String str : webServiceStrings) {
-		// JsonElement obj = webServices2.get(str);
-		// JsonObject jelement = obj.getAsJsonObject();
-		// // Map<String, String> map1 = new HashMap<String, String>();
-		// for (String mstr : memberStrings) {
-		// if (jelement.has(mstr)) {
-		// JsonElement json = jelement.get(mstr);
-		// user.addServerUrl(str, json.getAsString());
-		// // map1.put(mstr, json.getAsString());
-		// }
-		// }
-		// }
-		//
-		// JsonElement jselement = userData.get("dsInfo");
-		// JsonObject dsInfo = jselement.getAsJsonObject();
-		// String[] dsInfoStrings = { "lastName", "appleId", "dsid",
-		// "languageCode", "fullName", "firstName" };
-		//
-		// for (String str : dsInfoStrings) {
-		// if (dsInfo.has(str)) {
-		// JsonElement var = dsInfo.get(str);
-		// user.getUserConfig().getUserProperties()
-		// .put(str, var.getAsString());
-		//
-		// }
-		// }
-
+	@Override
+	protected void setRootURL(String newUrl){
+		try {
+			self.rootURL = new URL(newUrl);
+		} catch (MalformedURLException e) {
+			//TODO: make this use the fallback data
+			e.printStackTrace();
+		}
+	}
+	
+	private String generateQuery(UserSession user) {
+		return "{\"apple_id\":" + "\"" + user.getUsername() + "\"" + ",\"password\":" + "\"" + user.getPassword() + "\"" + ",\"extended_login\":" + user.isExtendedLogin() + "}";
 	}
 
 	public boolean isPrimaryEmailVerified(UserSession user) {
