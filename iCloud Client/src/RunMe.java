@@ -185,10 +185,11 @@ public class RunMe {
 				Note theNote = new Note();
 				Calendar currCalendar = Calendar.getInstance();
 				Date currDate = currCalendar.getTime();
-				String date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX").format(currDate);
+				String date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(currDate);
+				String test = new StringBuilder().append("-04:00").toString();
 				
-				theNote.setContent("This demo note was created by iCloud-Linux at: " + date);
-				theNote.setDateModified(date);
+				theNote.setContent("This demo note was created by iCloud-Linux at: " + test);
+				theNote.setDateModified(test);
 				theNote.setFolderName("/");
 				theNote.setSize("0"); // May be changed to updateSize();
 				theNote.setSubject("iCloud-Linux Demo Note");

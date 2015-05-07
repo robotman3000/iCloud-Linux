@@ -89,7 +89,7 @@ public class ServerConnection {
 		CookieManager manager = new CookieManager();
 		manager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
 		CookieHandler.setDefault(manager);
-		CookieStore cookieJar = manager.getCookieStore();
+		
 
 		URL httpurl;
 		HttpURLConnection httpconnection;
@@ -151,6 +151,7 @@ public class ServerConnection {
 				logger.log("Headers: " + httpconnection.getRequestProperties(), this.getClass().getName(), SystemLogger.LoggingVerbosity.DEVELOPER);
 			}*/
 		}
+		CookieStore cookieJar = manager.getCookieStore();
 		if (requestCookies != null) {
 			Iterator<HttpCookie> iterator = requestCookies.iterator();
 			while (iterator.hasNext()) {
