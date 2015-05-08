@@ -1,20 +1,22 @@
 package icloud.services.contacts;
 
+import icloud.services.BaseManager;
+import icloud.services.contacts.objects.AddressBook;
+import icloud.services.contacts.objects.Contact;
+import icloud.user.UserSession;
+
+import java.net.HttpCookie;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 import com.google.gson.Gson;
 
 import common.CommonLogic;
 import common.http.ServerConnection;
 import common.http.URLBuilder;
-import icloud.services.BaseManager;
-import icloud.services.contacts.objects.AddressBook;
-import icloud.services.contacts.objects.Contact;
-import icloud.user.UserSession;
+import common.http.URLConfig;
 
 public class ContactManager extends BaseManager {
 
@@ -24,42 +26,34 @@ public class ContactManager extends BaseManager {
 	public static final String contacts_url_startup = " /co/startup?";
 	public static final String contacts_url_changeset = "/co/changeset?";
 	public static final String contacts_url_groups = "/co/groups/card/?";
-	public static final String contacts_url_contacts = "/co/contats/card/?";
+	public static final String contacts_url_contacts = "/co/contacts/card/?";
 	
 	private static ContactManager self = new ContactManager();
 	
-	private ContactManager(){
+	public ContactManager(){
 		super();
 	}
 	
 	public void startup(UserSession user) throws Exception{
-		
-		if (announceConnections) {
-			// System.out.println("Connecting to: Validate Server");
-		}
 
-		URL url = new URLBuilder()
-				.setPath(UserSession.contacts_url_startup)
-				.setPort(UserSession.default_port)
-				.setProtocol(UserSession.default_protocol)
-				.setHost(UserSession.contacts_url_default_host)
-				.addQueryString(UserSession.query_arg_clientBN, user.getClientBuildNumber())
-				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
-				.addQueryString("dsid", user.getUserData().getAccountData().getDsInfo().getDsid())
-				.addQueryString(UserSession.query_arg_clientVersion, "2.1")
-				.addQueryString(UserSession.query_arg_locale, user.getUserData().getAccountData().getDsInfo().getLocale())
-				.addQueryString(UserSession.query_arg_order, "first,last") // this magic value might be gotten with the keyvalue server
+		URL url = new URLBuilder(self.rootURL)
+				.setPath(contacts_url_startup)
+				.addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
+				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
+				.addQueryString(URLConfig.query_arg_clientVersion, "2.1")
+				.addQueryString(URLConfig.query_arg_dsid, user.getUserData().getAccountData().getDsInfo().getDsid())
+				.addQueryString(URLConfig.query_arg_locale, "en_US"/*user.getUserData().getAccountData().getDsInfo().getLocale()*/)
+				.addQueryString(URLConfig.query_arg_order, "last,first") // this magic value might be gotten with the keyvalue server // TODO: Show daddy
 				.buildURL();
 
-		Map<String, String> headersMap = new HashMap<String, String>();
-		headersMap.put("origin", UserSession.default_header_origin);
-		headersMap.put("User-Agent", UserSession.default_header_userAgent);
-
-		ServerConnection conn = new ServerConnection(debugEnabled)
-				.setRequestMethod(UserSession.GET).setServerUrl(url)
-				.setPayload("{}")
+		ServerConnection conn = new ServerConnection()
+				.setRequestMethod(URLConfig.GET)
+				.setServerUrl(url)
+				//.setPayload("")
+				.addRequestHeader(URLConfig.default_header_origin)
+				.addRequestHeader(URLConfig.default_header_userAgent)
 				.setRequestCookies(user.getUserTokens().getTokens())
-				.setRequestHeaders(headersMap);
+				.addRequestCookie(new HttpCookie("X-APPLE-WEB-ID", CommonLogic.SHA1(user.getUserData().getAccountData().getDsInfo().getDsid()).toUpperCase()));
 		conn.connect();
 
 		String responseData = conn.getResponseAsString();
@@ -68,79 +62,55 @@ public class ContactManager extends BaseManager {
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
 
 		changeset(user);
-		if (debugEnabled) {
-			CommonLogic.printJson(responseData);
-		}
 	}
 	
 	public void changeset(UserSession user) throws Exception{
-		
-		if (announceConnections) {
-			// System.out.println("Connecting to: Validate Server");
-		}
 
-		URL url = new URLBuilder()
-				.setPath(UserSession.contacts_url_changeset)
-				.setPort(UserSession.default_port)
-				.setProtocol(UserSession.default_protocol)
-				.setHost(UserSession.contacts_url_default_host)
-				.addQueryString(UserSession.query_arg_clientBN, user.getClientBuildNumber())
-				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
-				.addQueryString("dsid", user.getUserData().getAccountData().getDsInfo().getDsid())
-				.addQueryString(UserSession.query_arg_clientVersion, "2.1")
-				.addQueryString(UserSession.query_arg_prefToken, user.getUserConfig().getContactConfig().getPrefToken())
-				.addQueryString(UserSession.query_arg_syncToken, user.getUserConfig().getContactConfig().getSyncToken())
+		URL url = new URLBuilder(self.rootURL)
+				.setPath(contacts_url_changeset)
+				.addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
+				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
+				.addQueryString(URLConfig.query_arg_dsid, user.getUserData().getAccountData().getDsInfo().getDsid())
+				.addQueryString(URLConfig.query_arg_clientVersion, "2.1")
+				.addQueryString(URLConfig.query_arg_prefToken, user.getUserConfig().getContactConfig().getPrefToken())
+				.addQueryString(URLConfig.query_arg_syncToken, user.getUserConfig().getContactConfig().getSyncToken())
 				.buildURL();
 
-		Map<String, String> headersMap = new HashMap<String, String>();
-		headersMap.put("origin", UserSession.default_header_origin);
-		headersMap.put("User-Agent", UserSession.default_header_userAgent);
-
-		ServerConnection conn = new ServerConnection(debugEnabled)
-				.setRequestMethod(UserSession.POST).setServerUrl(url)
-				.setPayload("{}")
+		ServerConnection conn = new ServerConnection()
+				.setRequestMethod(URLConfig.POST).setServerUrl(url)
+				.setPayload("")
 				.setRequestCookies(user.getUserTokens().getTokens())
-				.setRequestHeaders(headersMap);
+				.addRequestHeader(URLConfig.default_header_origin)
+				.addRequestHeader("Referer", "https://www.icloud.com/applications/contacts/current/en-us/index.html")
+				.addRequestHeader("Host", self.rootURL.toString())
+				.addRequestHeader(URLConfig.default_header_userAgent)
+				.addRequestCookie(new HttpCookie("X-APPLE-WEB-ID", CommonLogic.SHA1(user.getUserData().getAccountData().getDsInfo().getDsid()).toUpperCase()));
 		conn.connect();
 
 		String responseData = conn.getResponseAsString();
 		parseResponse(user,
 				new Gson().fromJson(responseData, ContactJson.class));
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
-
-		if (debugEnabled) {
-			CommonLogic.printJson(responseData);
-		}
 	}
 	
 	public void getMeCard(UserSession user) throws Exception{
 		
-		if (announceConnections) {
-			// System.out.println("Connecting to: Validate Server");
-		}
-
-		URL url = new URLBuilder()
-				.setPath(UserSession.contacts_url_getMeCard)
-				.setPort(UserSession.default_port)
-				.setProtocol(UserSession.default_protocol)
-				.setHost(UserSession.contacts_url_default_host)
-				.addQueryString(UserSession.query_arg_clientBN,
+		URL url = new URLBuilder(self.rootURL)
+				.setPath(contacts_url_getMeCard)
+				.addQueryString(URLConfig.query_arg_clientBN,
 						user.getClientBuildNumber())
-				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
+				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
 				.addQueryString(
 						"dsid",
 						user.getUserData().getAccountData().getDsInfo()
 								.getDsid()).buildURL();
 
-		Map<String, String> headersMap = new HashMap<String, String>();
-		headersMap.put("origin", UserSession.default_header_origin);
-		headersMap.put("User-Agent", UserSession.default_header_userAgent);
-
-		ServerConnection conn = new ServerConnection(debugEnabled)
-				.setRequestMethod(UserSession.GET).setServerUrl(url)
+		ServerConnection conn = new ServerConnection()
+				.setRequestMethod(URLConfig.GET).setServerUrl(url)
 				.setPayload("{}")
 				.setRequestCookies(user.getUserTokens().getTokens())
-				.setRequestHeaders(headersMap);
+				.addRequestHeader(URLConfig.default_header_origin)
+				.addRequestHeader(URLConfig.default_header_userAgent);
 		conn.connect();
 
 		String responseData = conn.getResponseAsString();
@@ -148,46 +118,33 @@ public class ContactManager extends BaseManager {
 				new Gson().fromJson(responseData, ContactJson.class));
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
 
-		changeset(user);
-		if (debugEnabled) {
-			CommonLogic.printJson(responseData);
-		}
+		//changeset(user);
 		
 	}
 
 	public void setMeCard(UserSession user, Contact newMeCard) throws Exception{
-		
-		if (announceConnections) {
-			// System.out.println("Connecting to: Validate Server");
-		}
 
 		ContactJson cJson = new ContactJson();
 		cJson.setMeCardId(newMeCard.getContactId());
 		Gson gson = new Gson();
 		
-		URL url = new URLBuilder()
-				.setPath(UserSession.contacts_url_setMeCard)
-				.setPort(UserSession.default_port)
-				.setProtocol(UserSession.default_protocol)
-				.setHost(UserSession.contacts_url_default_host)
-				.addQueryString(UserSession.query_arg_clientBN, user.getClientBuildNumber())
-				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
+		URL url = new URLBuilder(self.rootURL)
+				.setPath(contacts_url_setMeCard)
+				.addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
+				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
 				.addQueryString("dsid", user.getUserData().getAccountData().getDsInfo().getDsid())
-				.addQueryString(UserSession.query_arg_clientVersion, "2.1")
-				.addQueryString(UserSession.query_arg_prefToken, user.getUserConfig().getContactConfig().getPrefToken())
-				.addQueryString(UserSession.query_arg_syncToken, user.getUserConfig().getContactConfig().getSyncToken())
-				.addQueryString(UserSession.query_arg_method, UserSession.PUT)
+				.addQueryString(URLConfig.query_arg_clientVersion, "2.1")
+				.addQueryString(URLConfig.query_arg_prefToken, user.getUserConfig().getContactConfig().getPrefToken())
+				.addQueryString(URLConfig.query_arg_syncToken, user.getUserConfig().getContactConfig().getSyncToken())
+				.addQueryString(URLConfig.query_arg_method, URLConfig.PUT)
 				.buildURL();
 
-		Map<String, String> headersMap = new HashMap<String, String>();
-		headersMap.put("origin", UserSession.default_header_origin);
-		headersMap.put("User-Agent", UserSession.default_header_userAgent);
-
-		ServerConnection conn = new ServerConnection(debugEnabled)
-				.setRequestMethod(UserSession.POST).setServerUrl(url)
+		ServerConnection conn = new ServerConnection()
+				.setRequestMethod(URLConfig.POST).setServerUrl(url)
 				.setPayload(gson.toJson(cJson))
 				.setRequestCookies(user.getUserTokens().getTokens())
-				.setRequestHeaders(headersMap);
+				.addRequestHeader(URLConfig.default_header_origin)
+				.addRequestHeader(URLConfig.default_header_userAgent);
 		conn.connect();
 
 		String responseData = conn.getResponseAsString();
@@ -196,17 +153,10 @@ public class ContactManager extends BaseManager {
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
 
 		changeset(user);
-		if (debugEnabled) {
-			CommonLogic.printJson(responseData);
-		}
 	}
 	
 	public void createGroup(UserSession user, AddressBook newGroup) throws Exception{
 		
-		if (announceConnections) {
-			// System.out.println("Connecting to: Validate Server");
-		}
-
 		ArrayList<AddressBook> groups = new ArrayList<AddressBook>();
 		AddressBook newOne = new AddressBook();
 		newOne.setGroupId(newGroup.getGroupId());
@@ -216,29 +166,23 @@ public class ContactManager extends BaseManager {
 		cJson.setGroups(groups);
 		Gson gson = new Gson();
 		
-		URL url = new URLBuilder()
-				.setPath(UserSession.contacts_url_groups)
-				.setPort(UserSession.default_port)
-				.setProtocol(UserSession.default_protocol)
-				.setHost(UserSession.contacts_url_default_host)
-				.addQueryString(UserSession.query_arg_clientBN, user.getClientBuildNumber())
-				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
-				.addQueryString(UserSession.query_arg_dsid, user.getUserData().getAccountData().getDsInfo().getDsid())
-				.addQueryString(UserSession.query_arg_clientVersion, "2.1")
-				.addQueryString(UserSession.query_arg_prefToken, user.getUserConfig().getContactConfig().getPrefToken())
-				.addQueryString(UserSession.query_arg_syncToken, user.getUserConfig().getContactConfig().getSyncToken())
+		URL url = new URLBuilder(self.rootURL)
+				.setPath(contacts_url_groups)
+				.addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
+				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
+				.addQueryString(URLConfig.query_arg_dsid, user.getUserData().getAccountData().getDsInfo().getDsid())
+				.addQueryString(URLConfig.query_arg_clientVersion, "2.1")
+				.addQueryString(URLConfig.query_arg_prefToken, user.getUserConfig().getContactConfig().getPrefToken())
+				.addQueryString(URLConfig.query_arg_syncToken, user.getUserConfig().getContactConfig().getSyncToken())
 				.buildURL();
 
-		Map<String, String> headersMap = new HashMap<String, String>();
-		headersMap.put("origin", UserSession.default_header_origin);
-		headersMap.put("User-Agent", UserSession.default_header_userAgent);
-
-		ServerConnection conn = new ServerConnection(debugEnabled)
-				.setRequestMethod(UserSession.POST)
+		ServerConnection conn = new ServerConnection()
+				.setRequestMethod(URLConfig.POST)
 				.setServerUrl(url)
 				.setPayload(gson.toJson(cJson))
 				.setRequestCookies(user.getUserTokens().getTokens())
-				.setRequestHeaders(headersMap);
+				.addRequestHeader(URLConfig.default_header_origin)
+				.addRequestHeader(URLConfig.default_header_userAgent);
 		conn.connect();
 
 		String responseData = conn.getResponseAsString();
@@ -247,16 +191,9 @@ public class ContactManager extends BaseManager {
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
 
 		changeset(user);
-		if (debugEnabled) {
-			CommonLogic.printJson(responseData);
-		}
 	}
 	
 	public void deleteGroup(UserSession user, AddressBook deleteGroup) throws Exception{
-		
-		if (announceConnections) {
-			// System.out.println("Connecting to: Validate Server");
-		}
 
 		ArrayList<AddressBook> groups = new ArrayList<AddressBook>();
 		AddressBook newOne = new AddressBook();
@@ -267,30 +204,24 @@ public class ContactManager extends BaseManager {
 		cJson.setGroups(groups);
 		Gson gson = new Gson();
 		
-		URL url = new URLBuilder()
-				.setPath(UserSession.contacts_url_groups)
-				.setPort(UserSession.default_port)
-				.setProtocol(UserSession.default_protocol)
-				.setHost(UserSession.contacts_url_default_host)
-				.addQueryString(UserSession.query_arg_clientBN, user.getClientBuildNumber())
-				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
-				.addQueryString(UserSession.query_arg_dsid, user.getUserData().getAccountData().getDsInfo().getDsid())
-				.addQueryString(UserSession.query_arg_clientVersion, "2.1")
-				.addQueryString(UserSession.query_arg_prefToken, user.getUserConfig().getContactConfig().getPrefToken())
-				.addQueryString(UserSession.query_arg_syncToken, user.getUserConfig().getContactConfig().getSyncToken())
-				.addQueryString(UserSession.query_arg_method, UserSession.DELETE)
+		URL url = new URLBuilder(self.rootURL)
+				.setPath(contacts_url_groups)
+				.addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
+				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
+				.addQueryString(URLConfig.query_arg_dsid, user.getUserData().getAccountData().getDsInfo().getDsid())
+				.addQueryString(URLConfig.query_arg_clientVersion, "2.1")
+				.addQueryString(URLConfig.query_arg_prefToken, user.getUserConfig().getContactConfig().getPrefToken())
+				.addQueryString(URLConfig.query_arg_syncToken, user.getUserConfig().getContactConfig().getSyncToken())
+				.addQueryString(URLConfig.query_arg_method, URLConfig.DELETE)
 				.buildURL();
 
-		Map<String, String> headersMap = new HashMap<String, String>();
-		headersMap.put("origin", UserSession.default_header_origin);
-		headersMap.put("User-Agent", UserSession.default_header_userAgent);
-
-		ServerConnection conn = new ServerConnection(debugEnabled)
-				.setRequestMethod(UserSession.POST)
+		ServerConnection conn = new ServerConnection()
+				.setRequestMethod(URLConfig.POST)
 				.setServerUrl(url)
 				.setPayload(gson.toJson(cJson))
 				.setRequestCookies(user.getUserTokens().getTokens())
-				.setRequestHeaders(headersMap);
+				.addRequestHeader(URLConfig.default_header_origin)
+				.addRequestHeader(URLConfig.default_header_userAgent);
 		conn.connect();
 
 		String responseData = conn.getResponseAsString();
@@ -299,46 +230,33 @@ public class ContactManager extends BaseManager {
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
 
 		changeset(user);
-		if (debugEnabled) {
-			CommonLogic.printJson(responseData);
-		}
 	}
 	
 	public void updateGroup(UserSession user, AddressBook updateGroup) throws Exception{
-		
-		if (announceConnections) {
-			// System.out.println("Connecting to: Validate Server");
-		}
 
 		ArrayList<AddressBook> groups = new ArrayList<AddressBook>();
 		ContactJson cJson = new ContactJson();
 		cJson.setGroups(groups);
 		Gson gson = new Gson();
 		
-		URL url = new URLBuilder()
-				.setPath(UserSession.contacts_url_groups)
-				.setPort(UserSession.default_port)
-				.setProtocol(UserSession.default_protocol)
-				.setHost(UserSession.contacts_url_default_host)
-				.addQueryString(UserSession.query_arg_clientBN, user.getClientBuildNumber())
-				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
-				.addQueryString(UserSession.query_arg_dsid, user.getUserData().getAccountData().getDsInfo().getDsid())
-				.addQueryString(UserSession.query_arg_clientVersion, "2.1")
-				.addQueryString(UserSession.query_arg_prefToken, user.getUserConfig().getContactConfig().getPrefToken())
-				.addQueryString(UserSession.query_arg_syncToken, user.getUserConfig().getContactConfig().getSyncToken())
-				.addQueryString(UserSession.query_arg_method, UserSession.PUT)
+		URL url = new URLBuilder(self.rootURL)
+				.setPath(contacts_url_groups)
+				.addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
+				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
+				.addQueryString(URLConfig.query_arg_dsid, user.getUserData().getAccountData().getDsInfo().getDsid())
+				.addQueryString(URLConfig.query_arg_clientVersion, "2.1")
+				.addQueryString(URLConfig.query_arg_prefToken, user.getUserConfig().getContactConfig().getPrefToken())
+				.addQueryString(URLConfig.query_arg_syncToken, user.getUserConfig().getContactConfig().getSyncToken())
+				.addQueryString(URLConfig.query_arg_method, URLConfig.PUT)
 				.buildURL();
 
-		Map<String, String> headersMap = new HashMap<String, String>();
-		headersMap.put("origin", UserSession.default_header_origin);
-		headersMap.put("User-Agent", UserSession.default_header_userAgent);
-
-		ServerConnection conn = new ServerConnection(debugEnabled)
-				.setRequestMethod(UserSession.POST)
+		ServerConnection conn = new ServerConnection()
+				.setRequestMethod(URLConfig.POST)
 				.setServerUrl(url)
 				.setPayload(gson.toJson(cJson))
 				.setRequestCookies(user.getUserTokens().getTokens())
-				.setRequestHeaders(headersMap);
+				.addRequestHeader(URLConfig.default_header_origin)
+				.addRequestHeader(URLConfig.default_header_userAgent);
 		conn.connect();
 
 		String responseData = conn.getResponseAsString();
@@ -347,46 +265,33 @@ public class ContactManager extends BaseManager {
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
 
 		changeset(user);
-		if (debugEnabled) {
-			CommonLogic.printJson(responseData);
-		}
 	}
 	
 	public void createContact(UserSession user, Contact newContact) throws Exception{
 		
-		if (announceConnections) {
-			// System.out.println("Connecting to: Validate Server");
-		}
-
 		ArrayList<Contact> contacts = new ArrayList<Contact>();
 		ContactJson cJson = new ContactJson();
 		contacts.add(newContact);
 		cJson.setContacts(contacts);
 		Gson gson = new Gson();
 		
-		URL url = new URLBuilder()
-				.setPath(UserSession.contacts_url_groups)
-				.setPort(UserSession.default_port)
-				.setProtocol(UserSession.default_protocol)
-				.setHost(UserSession.contacts_url_default_host)
-				.addQueryString(UserSession.query_arg_clientBN, user.getClientBuildNumber())
-				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
-				.addQueryString(UserSession.query_arg_dsid, user.getUserData().getAccountData().getDsInfo().getDsid())
-				.addQueryString(UserSession.query_arg_clientVersion, "2.1")
-				.addQueryString(UserSession.query_arg_prefToken, user.getUserConfig().getContactConfig().getPrefToken())
-				.addQueryString(UserSession.query_arg_syncToken, user.getUserConfig().getContactConfig().getSyncToken())
+		URL url = new URLBuilder(self.rootURL)
+				.setPath(contacts_url_contacts)
+				.addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
+				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
+				.addQueryString(URLConfig.query_arg_dsid, user.getUserData().getAccountData().getDsInfo().getDsid())
+				.addQueryString(URLConfig.query_arg_clientVersion, "2.1")
+				.addQueryString(URLConfig.query_arg_prefToken, user.getUserConfig().getContactConfig().getPrefToken())
+				.addQueryString(URLConfig.query_arg_syncToken, user.getUserConfig().getContactConfig().getSyncToken())
 				.buildURL();
-
-		Map<String, String> headersMap = new HashMap<String, String>();
-		headersMap.put("origin", UserSession.default_header_origin);
-		headersMap.put("User-Agent", UserSession.default_header_userAgent);
-
-		ServerConnection conn = new ServerConnection(debugEnabled)
-				.setRequestMethod(UserSession.POST)
+		
+		ServerConnection conn = new ServerConnection()
+				.setRequestMethod(URLConfig.POST)
 				.setServerUrl(url)
 				.setPayload(gson.toJson(cJson))
 				.setRequestCookies(user.getUserTokens().getTokens())
-				.setRequestHeaders(headersMap);
+				.addRequestHeader(URLConfig.default_header_origin)
+				.addRequestHeader(URLConfig.default_header_userAgent);
 		conn.connect();
 
 		String responseData = conn.getResponseAsString();
@@ -395,17 +300,10 @@ public class ContactManager extends BaseManager {
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
 
 		changeset(user);
-		if (debugEnabled) {
-			CommonLogic.printJson(responseData);
-		}
 	}
 
 	public void deleteContact(UserSession user, Contact deleteContact) throws Exception{
 		
-		if (announceConnections) {
-			// System.out.println("Connecting to: Validate Server");
-		}
-
 		ArrayList<Contact> contacts = new ArrayList<Contact>();
 		ContactJson cJson = new ContactJson();
 		Contact newContact = new Contact();
@@ -415,30 +313,24 @@ public class ContactManager extends BaseManager {
 		cJson.setContacts(contacts);
 		Gson gson = new Gson();
 		
-		URL url = new URLBuilder()
-				.setPath(UserSession.contacts_url_groups)
-				.setPort(UserSession.default_port)
-				.setProtocol(UserSession.default_protocol)
-				.setHost(UserSession.contacts_url_default_host)
-				.addQueryString(UserSession.query_arg_clientBN, user.getClientBuildNumber())
-				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
-				.addQueryString(UserSession.query_arg_dsid, user.getUserData().getAccountData().getDsInfo().getDsid())
-				.addQueryString(UserSession.query_arg_clientVersion, "2.1")
-				.addQueryString(UserSession.query_arg_prefToken, user.getUserConfig().getContactConfig().getPrefToken())
-				.addQueryString(UserSession.query_arg_syncToken, user.getUserConfig().getContactConfig().getSyncToken())
-				.addQueryString(UserSession.query_arg_method, UserSession.DELETE)
+		URL url = new URLBuilder(self.rootURL)
+				.setPath(contacts_url_contacts)
+				.addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
+				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
+				.addQueryString(URLConfig.query_arg_dsid, user.getUserData().getAccountData().getDsInfo().getDsid())
+				.addQueryString(URLConfig.query_arg_clientVersion, "2.1")
+				.addQueryString(URLConfig.query_arg_prefToken, user.getUserConfig().getContactConfig().getPrefToken())
+				.addQueryString(URLConfig.query_arg_syncToken, user.getUserConfig().getContactConfig().getSyncToken())
+				.addQueryString(URLConfig.query_arg_method, URLConfig.DELETE)
 				.buildURL();
 
-		Map<String, String> headersMap = new HashMap<String, String>();
-		headersMap.put("origin", UserSession.default_header_origin);
-		headersMap.put("User-Agent", UserSession.default_header_userAgent);
-
-		ServerConnection conn = new ServerConnection(debugEnabled)
-				.setRequestMethod(UserSession.POST)
+		ServerConnection conn = new ServerConnection()
+				.setRequestMethod(URLConfig.POST)
 				.setServerUrl(url)
 				.setPayload(gson.toJson(cJson))
 				.setRequestCookies(user.getUserTokens().getTokens())
-				.setRequestHeaders(headersMap);
+				.addRequestHeader(URLConfig.default_header_origin)
+				.addRequestHeader(URLConfig.default_header_userAgent);
 		conn.connect();
 
 		String responseData = conn.getResponseAsString();
@@ -447,16 +339,9 @@ public class ContactManager extends BaseManager {
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
 
 		changeset(user);
-		if (debugEnabled) {
-			CommonLogic.printJson(responseData);
-		}
 	}
 	
 	public void updateContact(UserSession user, Contact updateContact) throws Exception{
-		
-		if (announceConnections) {
-			// System.out.println("Connecting to: Validate Server");
-		}
 
 		ArrayList<Contact> contacts = new ArrayList<Contact>();
 		ContactJson cJson = new ContactJson();
@@ -464,30 +349,24 @@ public class ContactManager extends BaseManager {
 		cJson.setContacts(contacts);
 		Gson gson = new Gson();
 		
-		URL url = new URLBuilder()
-				.setPath(UserSession.contacts_url_groups)
-				.setPort(UserSession.default_port)
-				.setProtocol(UserSession.default_protocol)
-				.setHost(UserSession.contacts_url_default_host)
-				.addQueryString(UserSession.query_arg_clientBN, user.getClientBuildNumber())
-				.addQueryString(UserSession.query_arg_clientId, user.getUuid())
-				.addQueryString(UserSession.query_arg_dsid, user.getUserData().getAccountData().getDsInfo().getDsid())
-				.addQueryString(UserSession.query_arg_clientVersion, "2.1")
-				.addQueryString(UserSession.query_arg_prefToken, user.getUserConfig().getContactConfig().getPrefToken())
-				.addQueryString(UserSession.query_arg_syncToken, user.getUserConfig().getContactConfig().getSyncToken())
-				.addQueryString(UserSession.query_arg_method, UserSession.PUT)
+		URL url = new URLBuilder(self.rootURL)
+				.setPath(contacts_url_contacts)
+				.addQueryString(URLConfig.query_arg_clientBN, user.getClientBuildNumber())
+				.addQueryString(URLConfig.query_arg_clientId, user.getUuid())
+				.addQueryString(URLConfig.query_arg_dsid, user.getUserData().getAccountData().getDsInfo().getDsid())
+				.addQueryString(URLConfig.query_arg_clientVersion, "2.1")
+				.addQueryString(URLConfig.query_arg_prefToken, user.getUserConfig().getContactConfig().getPrefToken())
+				.addQueryString(URLConfig.query_arg_syncToken, user.getUserConfig().getContactConfig().getSyncToken())
+				.addQueryString(URLConfig.query_arg_method, URLConfig.PUT)
 				.buildURL();
 
-		Map<String, String> headersMap = new HashMap<String, String>();
-		headersMap.put("origin", UserSession.default_header_origin);
-		headersMap.put("User-Agent", UserSession.default_header_userAgent);
-
-		ServerConnection conn = new ServerConnection(debugEnabled)
-				.setRequestMethod(UserSession.POST)
+		ServerConnection conn = new ServerConnection()
+				.setRequestMethod(URLConfig.POST)
 				.setServerUrl(url)
 				.setPayload(gson.toJson(cJson))
 				.setRequestCookies(user.getUserTokens().getTokens())
-				.setRequestHeaders(headersMap);
+				.addRequestHeader(URLConfig.default_header_origin)
+				.addRequestHeader(URLConfig.default_header_userAgent);
 		conn.connect();
 
 		String responseData = conn.getResponseAsString();
@@ -496,9 +375,6 @@ public class ContactManager extends BaseManager {
 		user.getUserTokens().updateTokens(conn.getResponseCookies());
 
 		changeset(user);
-		if (debugEnabled) {
-			CommonLogic.printJson(responseData);
-		}
 	}
 
 	private void parseResponse(UserSession user, ContactJson contactJson){
@@ -506,16 +382,48 @@ public class ContactManager extends BaseManager {
 		ContactData cData = user.getUserData().getContactData();
 		
 		//TODO: add null checks
-		cData.setMeCardId(contactJson.getMeCardId());
-		cConfig.setPrefToken(contactJson.getPrefToken());
-		cConfig.setSyncToken(contactJson.getSyncToken());
-		cConfig.setHeaderPositions(contactJson.getHeaderPositions());
+		if (contactJson.getMeCardId() != null){
+			cData.setMeCardId(contactJson.getMeCardId());
+		}
 		
-		parseContacts(user, contactJson);
+		if (contactJson.getPrefToken() != null){
+			cConfig.setPrefToken(contactJson.getPrefToken());
+		}
 		
-		parseGroups(user, contactJson);
+		if(contactJson.getSyncToken() != null){
+			cConfig.setSyncToken(contactJson.getSyncToken());
+/*			System.out.println("Before: " + contactJson.getSyncToken());
+			String[] syncToken1 = contactJson.getSyncToken().split("@");
+			StringBuilder str = new StringBuilder();
+			for(String section : syncToken1){
+				if(section.startsWith("S=")){
+					String str1 = section.replaceFirst("S=", "");
+					int int1 = Integer.parseInt(str1);
+					int1++;
+					str.append("S=" + int1);
+				} else {
+					str.append(section + "@");
+				}
+			}
+			cConfig.setSyncToken(contactJson.getSyncToken() str.toString());
+			System.out.println("After: " + str.toString());*/
+		}
 		
-		parseDeletes(user, contactJson);
+		if(contactJson.getHeaderPositions() != null){
+			cConfig.setHeaderPositions(contactJson.getHeaderPositions());
+		}
+		
+		if (contactJson.getContacts() != null){
+			parseContacts(user, contactJson);
+		}
+		
+		if(contactJson.getGroups() != null){
+			parseGroups(user, contactJson);
+		}
+		
+		if(contactJson.getDeletes() != null){
+			parseDeletes(user, contactJson);
+		}
 	}
 	
 	//TODO: make one parse method that uses generics
@@ -563,6 +471,16 @@ public class ContactManager extends BaseManager {
 			}
 		}
 		
+	}
+
+	@Override
+	public void setRootURL(String newUrl) {
+		try {
+			self.rootURL = new URL(newUrl);
+		} catch (MalformedURLException e) {
+			//TODO: make this use the fallback data
+			e.printStackTrace();
+		}
 	}
 	
 	// These are server calls 

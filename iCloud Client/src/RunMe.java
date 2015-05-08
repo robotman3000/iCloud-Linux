@@ -13,6 +13,8 @@ import icloud.services.account.objects.QuotaStatus;
 import icloud.services.account.objects.RequestInfo;
 import icloud.services.account.objects.StorageBlockInfo;
 import icloud.services.account.objects.StorageUsageInfo;
+import icloud.services.contacts.ContactManager;
+import icloud.services.contacts.objects.Contact;
 import icloud.services.notes.NoteManager;
 import icloud.services.notes.objects.Attachment;
 import icloud.services.notes.objects.Note;
@@ -33,6 +35,7 @@ public class RunMe {
 		main.signIn(args[0], args[1]);
 		main.interactiveUserPrint();
 		main.interactiveNotes();
+		main.interactiveContacts();
 		main.signOut();
 	}
 
@@ -186,7 +189,7 @@ public class RunMe {
 				Calendar currCalendar = Calendar.getInstance();
 				Date currDate = currCalendar.getTime();
 				String date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(currDate);
-				String test = new StringBuilder().append("-04:00").toString();
+				String test = new StringBuilder(date).append("-04:00").toString();
 				
 				theNote.setContent("This demo note was created by iCloud-Linux at: " + test);
 				theNote.setDateModified(test);
@@ -234,6 +237,31 @@ public class RunMe {
 		}
 	}
 
+	private void interactiveContacts() {
+		ContactManager contactMan = new ContactManager();
+		try {
+			//contactMan.getMeCard(user);
+			contactMan.startup(user);
+			//contactMan.createContact(user, new Contact());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(queryUserBoolean("Do you want to print the users contacts?")){
+			log("Will print contacts");
+	
+			boolean fetchAttachments = false;
+			if(queryUserBoolean("Do you want to fetch the Image contained in each Contact?")){
+				fetchAttachments = true;
+				log("Will fetch images contained in the contacts");
+			} else {
+				log("Will not fetch images contained in the contacts");
+			}
+			
+			
+		}
+	}
+	
 	private void signIn(String username, String password) {
 		try {
 			//loudMouth.log("Attempting to authenticate user", this.getClass().getName(), SystemLogger.LoggingVerbosity.INFO);

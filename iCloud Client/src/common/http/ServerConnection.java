@@ -210,13 +210,17 @@ public class ServerConnection {
 		try {
 			is = httpconnection.getInputStream();
 		} catch (IOException e) {
+			setResponseMessage(httpconnection.getResponseMessage());
+			setResponseHeaders(httpconnection.getHeaderFields());
+			setResponseCode(httpconnection.getResponseCode());
 			setResponseErrorStream(CommonLogic.convertStreamToString(httpconnection.getErrorStream()));
 			if (printExceptions) {
 				//System.err.println("Server Sent Error Message: " + CommonLogic.convertStreamToString(httpconnection.getErrorStream()));
 				Gson gson = new GsonBuilder().setPrettyPrinting().create();
 				//logger.log(logger.getSeperator(), this.getClass().getName(), SystemLogger.LoggingVerbosity.ERROR);
 				System.err.println("ServerConnection Object\n" + gson.toJson(this));
-				e.printStackTrace();
+				//System.err.println("HttpURLConnection Object\n" + gson.toJson(httpconnection));
+				//e.printStackTrace();
 				//logger.log(logger.getSeperator(), this.getClass().getName(), SystemLogger.LoggingVerbosity.ERROR);
 			}
 			throw e;

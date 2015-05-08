@@ -7,6 +7,7 @@ import icloud.services.account.objects.RequestInfo;
 import icloud.services.account.objects.StorageBlockInfo;
 import icloud.services.account.objects.StorageUsageInfo;
 import icloud.services.account.objects.Webservices.Webservice;
+import icloud.services.contacts.ContactManager;
 import icloud.services.notes.NoteManager;
 import icloud.user.UserSession;
 
@@ -305,7 +306,7 @@ public class AccountManager extends BaseManager{
 			} else if (service.getName().equalsIgnoreCase("push")) { // iCloud Push Services
 
 			} else if (service.getName().equalsIgnoreCase("contacts")) { // iCloud Contacts
-
+				new ContactManager().setRootURL(service.getUrl());
 			} else if (service.getName().equalsIgnoreCase("findme")) { // iCloud Find my iPhone
 
 			} else if (service.getName().equalsIgnoreCase("photos")) { // iCloud Photo Library
@@ -329,16 +330,6 @@ public class AccountManager extends BaseManager{
 			} else if (service.getName().equalsIgnoreCase("calendar")) { // iCloud Calendars
 
 			}
-		}
-	}
-
-	@Override
-	protected void setRootURL(String newUrl){
-		try {
-			self.rootURL = new URL(newUrl);
-		} catch (MalformedURLException e) {
-			//TODO: make this use the fallback data
-			e.printStackTrace();
 		}
 	}
 	
@@ -452,6 +443,16 @@ public class AccountManager extends BaseManager{
 
 	public RequestInfo getUserLocale(UserSession user) {
 		return user.getUserData().getAccountData().getRequestInfo();
+	}
+
+	@Override
+	protected void setRootURL(String newUrl) {
+		try {
+			self.rootURL = new URL(newUrl);
+		} catch (MalformedURLException e) {
+			//TODO: make this use the fallback data
+			e.printStackTrace();
+		}
 	}
 
 }

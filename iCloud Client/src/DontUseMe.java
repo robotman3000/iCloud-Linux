@@ -30,14 +30,11 @@ public class DontUseMe {
 		userA.getUsername();
 		userA.isExtendedLogin(); //May remove
 		userA.getUserTokens(); // Used to save the cookies for the validate call
-		userA.addServerUrl(key, value);
 		userA.getClientBuildNumber();
-		userA.getServerUrl(string);
 		userA.getUserConfig();
 		userA.getUserData();
 		userA.getUuid();
 		userA.isUserAutenticated();
-		userA.setLoggingLevel(logMessages);
 	}
 
 	@SuppressWarnings({ "unused", "null" })
@@ -55,7 +52,6 @@ public class DontUseMe {
 		
 		// Declare Managers
 		AccountManager accountManager = new AccountManager();
-		AccountManager accountManager2 = new AccountManager(announceConnections, debugEnabled);
 
 		// AccountManager Use
 		accountManager.login(user);
@@ -145,9 +141,9 @@ public class DontUseMe {
 
 		// Note Use
 		theNote.getAttachments();
-		theNote.getAttachmentsList();
+/*		theNote.getAttachmentsList();
 		theNote.getAttachment(attachmentId);
-		theNote.hasAttachment(attachmentId);
+		theNote.hasAttachment(attachmentId);*/
 
 		theNote.getContent();
 		theNote.getDateModified();
@@ -172,15 +168,13 @@ public class DontUseMe {
 
 		// Declare NoteManager
 		NoteManager noteManager = new NoteManager();
-		NoteManager noteManager2 = new NoteManager(announceConnections,
-				debugEnabled);
 
 		// NoteManager Use
 		noteManager.startup(user);//
 		noteManager.changeset(user);//
-		noteManager.createNotes(user, theNote);//
-		noteManager.deleteNotes(user, theNote);//
-		noteManager.updateNotes(user, theNote);//
+		//noteManager.createNotes(user, theNote);//
+		//noteManager.deleteNotes(user, theNote);//
+		//noteManager.updateNotes(user, theNote);//
 		noteManager.retriveAttachment(user, attachmentId);//
 		noteManager.retrieveNotes(user, retrieveNotes);
 
@@ -221,7 +215,6 @@ public class DontUseMe {
 	//	theContact.set();/* any contact properties */
 		// Declare Managers
 		ContactManager contactManager = new ContactManager();
-		ContactManager contactManager2 = new ContactManager(announceConnections, debugEnabled);
 
 		// Contact Manager Use
 /*		contactManager.startup(user);

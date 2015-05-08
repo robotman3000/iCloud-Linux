@@ -119,7 +119,7 @@ public class URLBuilder {
 			throw new MalformedURLException("The host can't be null");
 		}
 
-		if (port != -1) {
+	    if (port != -1) {
 			str.append(":" + port);
 		}
 

@@ -10,7 +10,7 @@ public class UserSession {
 	private UserTokens userTokens = new UserTokens();
 	private UserConfig userConfig = new UserConfig();
 
-	private static final String clientBuildNumber = "14H40";
+	private static final String clientBuildNumber = "15B.8196069"/*"14H40"*/;
 	private final String UUID = CommonLogic.generateUUID();
 
 	private String username;
