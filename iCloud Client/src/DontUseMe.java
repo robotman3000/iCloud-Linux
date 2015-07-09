@@ -1,18 +1,18 @@
 import java.util.ArrayList;
 
-import icloud.services.account.AccountManager;
-import icloud.services.account.objects.Device;
-import icloud.services.account.objects.QuotaStatus;
-import icloud.services.account.objects.RequestInfo;
-import icloud.services.account.objects.StorageBlockInfo;
-import icloud.services.contacts.ContactManager;
-import icloud.services.contacts.objects.Photo;
-import icloud.services.contacts.objects.Contact;
-import icloud.services.contacts.objects.AddressBook;
-import icloud.services.notes.NoteManager;
-import icloud.services.notes.objects.Attachment;
-import icloud.services.notes.objects.Note;
-import icloud.user.UserSession;
+import old.icloud.services.account.AccountManager;
+import old.icloud.services.account.objects.Device;
+import old.icloud.services.account.objects.QuotaStatus;
+import old.icloud.services.account.objects.RequestInfo;
+import old.icloud.services.account.objects.StorageBlockInfo;
+import old.icloud.services.contacts.ContactManager;
+import old.icloud.services.contacts.objects.AddressBook;
+import old.icloud.services.contacts.objects.Contact;
+import old.icloud.services.contacts.objects.Photo;
+import old.icloud.services.notes.NoteManager;
+import old.icloud.services.notes.objects.Attachment;
+import old.icloud.services.notes.objects.Note;
+import icloud.UserSession;
 
 public class DontUseMe {
 
@@ -35,7 +35,7 @@ public class DontUseMe {
 		userA.getServerUrl(string);
 		userA.getUserConfig();
 		userA.getUserData();
-		userA.getUuid();
+		userA.getSessionID();
 		userA.isUserAutenticated();
 		userA.setLoggingLevel(logMessages);
 	}

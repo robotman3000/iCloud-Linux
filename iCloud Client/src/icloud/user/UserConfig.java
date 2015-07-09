@@ -1,11 +1,11 @@
 package icloud.user;
 
-import icloud.services.BaseConfig;
-import icloud.services.account.AccountConfig;
-import icloud.services.contacts.ContactConfig;
-import icloud.services.notes.NoteConfig;
-
 import java.util.Properties;
+
+import old.icloud.services.BaseConfig;
+import old.icloud.services.account.AccountConfig;
+import old.icloud.services.contacts.ContactConfig;
+import old.icloud.services.notes.NoteConfig;
 
 public class UserConfig extends BaseConfig{
 
