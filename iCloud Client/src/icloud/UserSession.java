@@ -1,97 +1,94 @@
 package icloud;
 
-import icloud.json.BuildInfo;
-import icloud.user.UserConfig;
-import icloud.user.UserData;
-import icloud.user.UserTokens;
-
+import java.net.HttpCookie;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
-import com.google.gson.Gson;
+import com.mashape.unirest.http.Headers;
 import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.Unirest;
-
-import common.CommonLogic;
 
 public class UserSession {
 
-	private UserData userData = new UserData();
-	private UserTokens userTokens = new UserTokens();
-	private UserConfig userConfig = new UserConfig();
-
-	private String clientBuildNumber = "14H40"; // Has a default value as a failsafe
-	private final String UUID = CommonLogic.generateUUID();
-	private Map<String, String> sessionConfig = new HashMap<String, String>();
-	private Credentials authInfo;
-
-	private boolean isAuthenticated = false;
-
-	protected UserSession(Credentials authInfo) {
-		this.authInfo = authInfo;
-	}
+	private final Credentials authTokens;
+	private final HashMap<SessionConfKeys, String> sessionConfig = new HashMap<SessionConfKeys, String>();
 	
-	public UserTokens getUserTokens() {
-		return userTokens;
+	protected UserSession(String buildNum, Credentials authKeys, HttpResponse<String> authResponse) {
+		authTokens = authKeys;
+		sessionConfig.put(SessionConfKeys.buildNumber, buildNum);
+		parseBody(authResponse.getBody());
+		makeCookies(authResponse.getHeaders());
+		
 	}
 
-	public UserData getUserData() {
-		return userData;
-	}
-
-	public UserConfig getUserConfig() {
-		return userConfig;
-	}
-
-	public boolean isUserAutenticated() {
-		return isAuthenticated;
-	}
-
-	/**
-	 * Only for use by AccoutManager
-	 */
-	protected void setAuthenticated(boolean newValue) {
-		this.isAuthenticated = newValue;
-	}
-	
-	
-	protected void parseBuildInfo(BuildInfo buildInfo) throws CloudException {
-		//TODO: Add logic to parse all the buildinfo
-		if (buildInfo.buildNumber == null) {
-			throw new CloudException("Error obtaining Build Number");
-		} else {
-			this.clientBuildNumber = buildInfo.buildNumber;
+	private void makeCookies(Headers headers) {
+		for (String str : headers.keySet()){
+			if(str.equalsIgnoreCase("set-cookie")){
+				List<String> cookies = headers.get(str);
+				Set<HttpCookie> cookieSet = new HashSet<HttpCookie>();
+				for(String cookieA : cookies){
+					for (HttpCookie cookieB : HttpCookie.parse(cookieA)){
+						cookieSet.add(cookieB);
+					}
+				}
+				authTokens.updateTokens(cookieSet);
+				//HttpCookie.parse(header);
+				/*for(String cookie : cookies){
+					HttpCookie cookie2;
+					int index2 = 0;
+					splitLoop:
+					for(int index = 0; index < cookie.length(); index++){
+						if(String.valueOf(cookie.charAt(index)) == ";"){
+							String[] var = cookie.substring(0, index).split("="); // Split the cookie name and its value
+							index2 = index;
+							cookie2 = new HttpCookie(var[0], var[1]);
+							break splitLoop;
+						}
+					}
+					String[] cookiePeices = cookie.substring(index2, cookie.length() - 1).split(";");
+					for (String cookieChip : cookiePeices){
+						if(cookieChip.contains("HttpOnly")){
+							cookie2.setDomain(pattern);
+							cookie2.setHttpOnly(httpOnly);
+							cookie2.setMaxAge(expiry);
+							cookie2.p
+						} else if(cookieChip.contains("")){
+							
+						} else if(cookieChip.contains("")){
+							
+						} else if(cookieChip.contains("")){
+							
+						}
+						cookie2.setSecure(flag);
+					}
+				}*/
+			}
 		}
 	}
+
+	private void parseBody(String body) {
+		//SessionBody theBody = new Gson().fromJson(body, SessionBody.class);
+		// TODO: Parse any useful data from theBody
+	}
 	
-	protected Map<String, String> getSessionConfig(){
+	protected HashMap<SessionConfKeys, String> getSessionConfig(){
 		return sessionConfig;
 	}
 	
-	public String getClientBuildNumber() {
-		return clientBuildNumber;
+	public String getUsername(){
+		return authTokens.getUsername();
 	}
 	
-	public String getSessionID() {
-		return UUID;
+	public String getPassword(){
+		return authTokens.getPassword();
+	}
+
+	public boolean isExtendedLogin(){
+		return authTokens.isExtendedLogin();
 	}
 	
-	public boolean isExtendedLogin() {
-		return this.authInfo.isExtendedLogin();
+	public Credentials getCredentials(){
+		return authTokens;
 	}
-
-	public String getPassword() {
-		return this.authInfo.getPassword();
-	}
-
-	public String getUsername() {
-		return this.authInfo.getUsername();
-	}
-
 }

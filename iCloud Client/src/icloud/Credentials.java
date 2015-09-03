@@ -1,25 +1,23 @@
 package icloud;
 
 import java.net.HttpCookie;
+import java.util.HashSet;
 import java.util.Set;
 
 public class Credentials {
 
-	private String username;
-	private String password;
-	private boolean extendedLogin = false;
-	private Set<HttpCookie> accessTokens;
+	// TODO: Should "onAuth" events be put in this class
+	private final String username;
+	private final String password;
+	private final boolean extendedLogin;
+	private Set<HttpCookie> sessionTokens = new HashSet<HttpCookie>();
 	
-	public Credentials(String username, String password, boolean doExtendedLogin){
-		if (username == null || password == null || username.isEmpty() || password.isEmpty()){
-			throw new IllegalArgumentException("Invalid Args Provided");
-		}
+	public Credentials(String username, String password, boolean extendedLogin) {
 		this.username = username;
 		this.password = password;
-		this.extendedLogin = doExtendedLogin;
-		System.out.println("abc");
+		this.extendedLogin = extendedLogin;
 	}
-	
+
 	public String getUsername() {
 		return username;
 	}
@@ -32,12 +30,22 @@ public class Credentials {
 		return extendedLogin;
 	}
 
-	protected boolean updateAccessTokens(Set<HttpCookie> accessTokens){
-		
-		return true; //TODO: Return true on success and false on failior
+	public Set<HttpCookie> getTokens(){
+		return sessionTokens;
 	}
 	
-	public Set<HttpCookie> getAccessTokens() {
-		return accessTokens;
+	public void updateTokens(Set<HttpCookie> newTokens){
+		sessionTokens = new HashSet<HttpCookie>(newTokens);
 	}
+
+	public String getTokenValue(String string) {
+		for(HttpCookie cookie : sessionTokens){
+			if (cookie.getName().equalsIgnoreCase(string)){
+				return cookie.getValue();
+			}
+		}
+		return "";
+	}
+	
+	// TODO: Add methods to query and get a specific cookie or set of cookies
 }
