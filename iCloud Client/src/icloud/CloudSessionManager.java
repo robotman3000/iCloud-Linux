@@ -7,10 +7,13 @@ import icloud.request.event.RequestRecievedEvent;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import com.google.gson.Gson;
 import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+import common.http.URLBuilder;
 
 import apps.note.NoteSessionData;
 
@@ -27,9 +30,13 @@ public class CloudSessionManager {
 		
 		JsonBody body = theRequest.toJson();
 		URL url = theRequest.getURL();
+		Map<String, Object> queryStrings = theRequest.getQueryStrings();
 		
 		// Use Gson to convert the JsonBody to a string
-		// Make the request using Unirest
+		if(theRequest.isPostReq()){
+			// TODO: Finish this request line
+			Unirest.post(url.toString()).queryString(queryStrings);
+		}
 		theRequest.handleCloudEvent(new RequestMadeEvent());
 		// Get response back and save it
 		theRequest.handleCloudEvent(new RequestRecievedEvent());
@@ -37,7 +44,7 @@ public class CloudSessionManager {
 		//     Get the usersession NoteSessionData with the given key
 			   UserSession uSession = sessions.get(sessionKey);
 			   
-		       theRequest.parseResponse(new NoteSessionData() /* this object is stored inside usersession*/ /*, The Response Object, */ /*The Config Map*/);
+		       theRequest.parseResponse(uSession.getNoteSessionData(), null/*The Response Object /*The Config Map*/);
 		       
 		// Else
 		//     The error object is created it will contain the exception
@@ -46,8 +53,13 @@ public class CloudSessionManager {
 		       
 	}
 	
+	private String makeURLStr(URL url, Map<String, String> queryStrings) {
+		URLBuilder theUrl = new URLBuilder(url);
+		theUrl.setQueryStringMap(queryStrings);
+		return theUrl.toString();
+	}
 	protected void initNewSession(HttpResponse<String> authResponse, String buildNum, UUID sessionKey, Credentials authKeys) {
-		sessions.put(sessionKey, new UserSession(buildNum, authKeys, authResponse));
+		sessions.put(sessionKey, new UserSession(buildNum, authKeys, authResponse, sessionKey));
 	}
 	
 	protected UserSession getSession(UUID sessionID) {

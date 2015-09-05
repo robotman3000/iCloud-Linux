@@ -1,5 +1,6 @@
 package icloud;
 
+import java.io.IOException;
 import java.util.UUID;
 
 import org.jsoup.Jsoup;
@@ -46,21 +47,25 @@ public class CloudAuthenticator {
 	}
 
 	private static HttpResponse<String> doDeAuth(Credentials authKeys, String buildNum, UUID sessionID) {
+		HttpResponse<String> resp = null;
 		try {
-			return Unirest.post(LOGOUT_URL)
+			Unirest.post(LOGOUT_URL)
 			.queryString("clientBuildNumber", buildNum)
 			.queryString("clientId", sessionID.toString())
 			.queryString("dsid", CloudSessionManager.getInstance().getSession(sessionID).getSessionConfig().get(SessionConfKeys.dsinfo_dsid))
 			.queryString("token", CloudSessionManager.getInstance().getSession(sessionID).getCredentials().getTokenValue("X-APPLE-WEBAUTH-VALIDATE"))
 			.header("origin", "https://www.icloud.com")
 			.body("{}").asString();
+			Unirest.shutdown();
 		} catch (UnirestException e) {
 			// TODO: Trigger a "failed" event and put the exception obj inside
 			//throw new AuthenticationException("Failed to authenticate user", e);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
 		}
 		
-		// This is to make the compiler happy
-		return null;
+		return resp;
 	}
 	
 	private static String getBuildNumber() {
