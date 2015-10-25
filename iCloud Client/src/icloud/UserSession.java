@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.http.nio.entity.NStringEntity;
+
 import apps.note.NoteSessionData;
 
 import com.google.gson.Gson;
@@ -21,7 +23,7 @@ public class UserSession {
 	private final UUID sessionKey;
 	private final HashMap<SessionConfKeys, String> sessionConfig = new HashMap<SessionConfKeys, String>();
 
-	private NoteSessionData nData = new NoteSessionData(); 
+	private NoteSessionData nData = null;
 	
 	protected UserSession(String buildNum, Credentials authKeys,
 			HttpResponse<String> authResponse, UUID sessionKey) {
@@ -33,7 +35,7 @@ public class UserSession {
 
 	}
 
-	private void makeCookies(Headers headers) {
+	private synchronized void makeCookies(Headers headers) {
 		for (String str : headers.keySet()) {
 			if (str.equalsIgnoreCase("set-cookie")) {
 				List<String> cookies = headers.get(str);
@@ -69,7 +71,7 @@ public class UserSession {
 		}
 	}
 
-	private void parseBody(String body) {
+	private synchronized void parseBody(String body) {
 		SessionBody theData = new Gson().fromJson(body, SessionBody.class);
 		this.sessionConfig.put(SessionConfKeys.dsinfo_appleId,
 				theData.dsInfo.getAppleId());
@@ -129,7 +131,10 @@ public class UserSession {
 	}
 
 	
-	public SessionData getNoteSessionData() {
+	public synchronized SessionData getNoteSessionData() {
+		if (nData == null){
+			nData = new NoteSessionData(sessionConfig, authTokens, sessionKey);
+		}
 		return nData;
 	}
 

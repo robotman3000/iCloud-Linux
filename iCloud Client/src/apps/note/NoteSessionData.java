@@ -4,13 +4,23 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
+import icloud.Credentials;
+import icloud.SessionConfKeys;
 import icloud.SessionData;
 
 public class NoteSessionData extends SessionData {
-
+	
 	private Map<String, Note> notes = new HashMap<String, Note>();
 
+	public NoteSessionData(HashMap<SessionConfKeys, String> sessionConfig, Credentials authTokens, UUID sessionKey) {
+		super(sessionConfig, authTokens, sessionKey);
+		// TODO Auto-generated constructor stub
+		
+	}
+
+	
 	public Set<String> getNoteKeys() {
 		return notes.keySet();
 	}
@@ -24,11 +34,11 @@ public class NoteSessionData extends SessionData {
 	}
 
 	public void deleteNote(String noteUUID) {
-		System.out.println("Notes Key List: " + notes.keySet());
-		System.out.println("Delete Note: " + noteUUID);
-		System.out.println(notes.get(noteUUID));
+		//System.out.println("Notes Key List: " + notes.keySet());
+		//System.out.println("Delete Note: " + noteUUID);
+		//System.out.println(notes.get(noteUUID));
 		if (notes.containsKey(noteUUID)) {
-			System.out.println("Key: " + noteUUID + " matched");
+			//System.out.println("Key: " + noteUUID + " matched");
 			Iterator<String> it = notes.keySet().iterator();
 
 			while (it.hasNext()) {
@@ -54,5 +64,12 @@ public class NoteSessionData extends SessionData {
 
 	public String toString() {
 		return notes.toString();
+	}
+
+
+	@Override
+	protected Map<SessionConfKeys, String> startup() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

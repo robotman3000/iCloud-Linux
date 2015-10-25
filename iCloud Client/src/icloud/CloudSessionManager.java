@@ -5,7 +5,6 @@ import icloud.request.event.RequestMadeEvent;
 import icloud.request.event.RequestRecievedEvent;
 
 import java.net.URL;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -13,29 +12,32 @@ import java.util.UUID;
 import com.google.gson.Gson;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.request.HttpRequestWithBody;
 import common.http.URLBuilder;
-
-import apps.note.NoteSessionData;
 
 
 public class CloudSessionManager {
 
 	private static final CloudSessionManager self = new CloudSessionManager();
 	private CloudSessionManager(){}
-	public static CloudSessionManager getInstance(){ return self; }
+	public synchronized static CloudSessionManager getInstance(){ return self; }
 	
 	private HashMap<UUID, UserSession> sessions = new HashMap<UUID, UserSession>();
 	
-	public void executeRequest(UUID sessionKey, Request theRequest){
+	public synchronized void executeRequest(UUID sessionKey, Request theRequest){
 		
 		JsonBody body = theRequest.toJson();
 		URL url = theRequest.getURL();
-		Map<String, Object> queryStrings = theRequest.getQueryStrings();
+		Map<String, String> queryStrings = theRequest.getQueryStrings();
 		
 		// Use Gson to convert the JsonBody to a string
+		String strBody = new Gson().toJson(body);
 		if(theRequest.isPostReq()){
 			// TODO: Finish this request line
-			Unirest.post(url.toString()).queryString(queryStrings);
+			HttpRequestWithBody request = Unirest.post(url.toString());
+			for(String key : queryStrings.keySet()){
+				request.queryString(key, queryStrings.get(key));
+			}
 		}
 		theRequest.handleCloudEvent(new RequestMadeEvent());
 		// Get response back and save it
@@ -58,11 +60,12 @@ public class CloudSessionManager {
 		theUrl.setQueryStringMap(queryStrings);
 		return theUrl.toString();
 	}
-	protected void initNewSession(HttpResponse<String> authResponse, String buildNum, UUID sessionKey, Credentials authKeys) {
+
+	protected synchronized void initNewSession(HttpResponse<String> authResponse, String buildNum, UUID sessionKey, Credentials authKeys) {
 		sessions.put(sessionKey, new UserSession(buildNum, authKeys, authResponse, sessionKey));
 	}
 	
-	protected UserSession getSession(UUID sessionID) {
+	protected synchronized UserSession getSession(UUID sessionID) {
 		return sessions.get(sessionID);
 	}
 }

@@ -2,7 +2,7 @@ package icloud;
 
 public enum SessionConfKeys {
 
-        // Handle Webservice urls seperately
+        //TODO: Add keys for all the webservice url's
 		buildNumber,
         hasMinimumDeviceForPhotosWeb,
         isExtendedLogin,
@@ -18,4 +18,6 @@ public enum SessionConfKeys {
         dsinfo_dsid,
         dsinfo_languageCode,
         session_clientBuildNumber,
+        noteApp_sync_token,
+        noteApp_baseURL
 }

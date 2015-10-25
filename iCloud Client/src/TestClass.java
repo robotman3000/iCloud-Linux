@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.UUID;
 
+import apps.note.event.NoteEvent;
 import apps.note.handler.NoteEventHandler;
 import apps.note.request.NoteCreateRequest;
 import apps.note.request.NoteDeleteRequest;
@@ -60,10 +61,44 @@ public class TestClass implements RequestEventHandler, NoteEventHandler {
 	private List<NoteRequest> generateNoteRequests() {
 		ArrayList<NoteRequest> list = new ArrayList<NoteRequest>();
 		
-		NoteCreateRequest noteCReq = new NoteCreateRequest(/*The Note or Notes to be created*/);
+		NoteCreateRequest noteCReq = new NoteCreateRequest(/*The Note or Notes to be created*/ /*The session Key*/);
+		noteCReq.addEventHandler(this);
 		list.add(noteCReq);
 		
 		NoteUpdateRequest noteUReq = new NoteUpdateRequest(/*The Note or Notes to be updated*/);
+		noteUReq.addEventHandler(new NoteEventHandler(){
+
+			@Override
+			public void onEvent(CloudEvent evt) {
+				// TODO Auto-generated method stub
+				System.out.println("The Events!");
+				
+			}
+
+			@Override
+			public void onNoteEvent(NoteEvent evt) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void onNoteCreateEvent(NoteEvent evt) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void onNoteDeleteEvent(NoteEvent evt) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void onNoteUpdateEvent(NoteEvent evt) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 		list.add(noteUReq);
 		
 		NoteDeleteRequest noteDReq = new NoteDeleteRequest(/*The Note or Notes to be deleted*/);
@@ -104,6 +139,30 @@ public class TestClass implements RequestEventHandler, NoteEventHandler {
 
 	@Override
 	public void onRequestReceivedEvent(RequestRecievedEvent evt) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onNoteEvent(NoteEvent evt) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onNoteCreateEvent(NoteEvent evt) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onNoteDeleteEvent(NoteEvent evt) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onNoteUpdateEvent(NoteEvent evt) {
 		// TODO Auto-generated method stub
 		
 	}
