@@ -21,18 +21,13 @@ public class UserSession {
 
 	private final Credentials authTokens;
 	private final UUID sessionKey;
-	private final HashMap<SessionConfKeys, String> sessionConfig = new HashMap<SessionConfKeys, String>();
+	private final HashMap<String, String> sessionConfig = new HashMap<String, String>();
 
 	private NoteSessionData nData = null;
 	
-	protected UserSession(String buildNum, Credentials authKeys,
-			HttpResponse<String> authResponse, UUID sessionKey) {
-		authTokens = authKeys;
-		sessionConfig.put(SessionConfKeys.buildNumber, buildNum);
+	protected UserSession(UUID sessionKey, Credentials authTokens){
 		this.sessionKey = sessionKey;
-		parseBody(authResponse.getBody());
-		makeCookies(authResponse.getHeaders());
-
+		this.authTokens = authTokens;
 	}
 
 	private synchronized void makeCookies(Headers headers) {
@@ -73,35 +68,35 @@ public class UserSession {
 
 	private synchronized void parseBody(String body) {
 		SessionBody theData = new Gson().fromJson(body, SessionBody.class);
-		this.sessionConfig.put(SessionConfKeys.dsinfo_appleId,
+		this.sessionConfig.put(CloudConfStoreKeys.dsinfo_appleId,
 				theData.dsInfo.getAppleId());
-		this.sessionConfig.put(SessionConfKeys.dsinfo_appleidAlias,
+		this.sessionConfig.put(CloudConfStoreKeys.dsinfo_appleidAlias,
 				theData.dsInfo.getAppleIdAlias());
-		this.sessionConfig.put(SessionConfKeys.dsinfo_dsid,
+		this.sessionConfig.put(CloudConfStoreKeys.dsinfo_dsid,
 				theData.dsInfo.getDsid());
-		this.sessionConfig.put(SessionConfKeys.dsinfo_firstName,
+		this.sessionConfig.put(CloudConfStoreKeys.dsinfo_firstName,
 				theData.dsInfo.getFirstName());
-		this.sessionConfig.put(SessionConfKeys.dsinfo_fullName,
+		this.sessionConfig.put(CloudConfStoreKeys.dsinfo_fullName,
 				theData.dsInfo.getFullName());
-		this.sessionConfig.put(SessionConfKeys.dsinfo_languageCode,
+		this.sessionConfig.put(CloudConfStoreKeys.dsinfo_languageCode,
 				theData.dsInfo.getLanguageCode());
-		this.sessionConfig.put(SessionConfKeys.dsinfo_lastName,
+		this.sessionConfig.put(CloudConfStoreKeys.dsinfo_lastName,
 				theData.dsInfo.getLastName());
-		this.sessionConfig.put(SessionConfKeys.dsinfo_locale,
+		this.sessionConfig.put(CloudConfStoreKeys.dsinfo_locale,
 				theData.dsInfo.getLocale());
-		this.sessionConfig.put(SessionConfKeys.hasMinimumDeviceForPhotosWeb,
+		this.sessionConfig.put(CloudConfStoreKeys.hasMinimumDeviceForPhotosWeb,
 				theData.hasMinimumDeviceForPhotosWeb().toString());
-		this.sessionConfig.put(SessionConfKeys.isExtendedLogin, theData
+		this.sessionConfig.put(CloudConfStoreKeys.isExtendedLogin, theData
 				.isExtendedLogin().toString());
-		this.sessionConfig.put(SessionConfKeys.requestInfo_country,
+		this.sessionConfig.put(CloudConfStoreKeys.requestInfo_country,
 				theData.requestInfo.getCountry());
-		this.sessionConfig.put(SessionConfKeys.requestInfo_region,
+		this.sessionConfig.put(CloudConfStoreKeys.requestInfo_region,
 				theData.requestInfo.getRegion());
-		this.sessionConfig.put(SessionConfKeys.requestInfo_timeZone,
+		this.sessionConfig.put(CloudConfStoreKeys.requestInfo_timeZone,
 				theData.requestInfo.getTimeZone());
 	}
 
-	protected HashMap<SessionConfKeys, String> getSessionConfig() {
+	protected HashMap<String, String> getSessionConfig() {
 		return sessionConfig;
 	}
 
@@ -122,7 +117,7 @@ public class UserSession {
 	}
 
 	public String getClientBuildNumber() {
-		return sessionConfig.get(SessionConfKeys.session_clientBuildNumber)
+		return sessionConfig.get(CloudConfStoreKeys.session_clientBuildNumber)
 				.toString();
 	}
 

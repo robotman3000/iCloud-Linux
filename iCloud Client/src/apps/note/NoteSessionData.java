@@ -7,14 +7,14 @@ import java.util.Set;
 import java.util.UUID;
 
 import icloud.Credentials;
-import icloud.SessionConfKeys;
+import icloud.CloudConfStoreKeys;
 import icloud.SessionData;
 
 public class NoteSessionData extends SessionData {
 	
 	private Map<String, Note> notes = new HashMap<String, Note>();
 
-	public NoteSessionData(HashMap<SessionConfKeys, String> sessionConfig, Credentials authTokens, UUID sessionKey) {
+	public NoteSessionData(HashMap<CloudConfStoreKeys, String> sessionConfig, Credentials authTokens, UUID sessionKey) {
 		super(sessionConfig, authTokens, sessionKey);
 		// TODO Auto-generated constructor stub
 		
@@ -68,7 +68,7 @@ public class NoteSessionData extends SessionData {
 
 
 	@Override
-	protected Map<SessionConfKeys, String> startup() {
+	protected Map<CloudConfStoreKeys, String> startup() {
 		// TODO Auto-generated method stub
 		return null;
 	}

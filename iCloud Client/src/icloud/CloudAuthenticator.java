@@ -18,7 +18,7 @@ public class CloudAuthenticator {
 	public static final String LOGIN_URL = "https://setup.icloud.com/setup/ws/1/login";
 	public static final String LOGOUT_URL = "https://setup.icloud.com/setup/ws/1/logout";
 	
-	public static UUID authenticate(Credentials authKeys) {
+	protected static UUID authenticate(Credentials authKeys) {
 		String buildNum = getBuildNumber();
 		UUID sessionKey = UUID.randomUUID();
 		HttpResponse<String> authResponse = doSingleStepAuth(authKeys, buildNum, sessionKey);
@@ -52,7 +52,7 @@ public class CloudAuthenticator {
 			Unirest.post(LOGOUT_URL)
 			.queryString("clientBuildNumber", buildNum)
 			.queryString("clientId", sessionID.toString())
-			.queryString("dsid", CloudSessionManager.getInstance().getSession(sessionID).getSessionConfig().get(SessionConfKeys.dsinfo_dsid))
+			.queryString("dsid", CloudSessionManager.getInstance().getSession(sessionID).getSessionConfig().get(CloudConfStoreKeys.dsinfo_dsid))
 			.queryString("token", CloudSessionManager.getInstance().getSession(sessionID).getCredentials().getTokenValue("X-APPLE-WEBAUTH-VALIDATE"))
 			.header("origin", "https://www.icloud.com")
 			.body("{}").asString();
@@ -101,10 +101,10 @@ public class CloudAuthenticator {
 		return buildInfo;
 	}
 
-	public static void deAuthenticate(UUID sessionKey){
+	protected static void deAuthenticate(UUID sessionKey){
 		UserSession session;
 		if ((session = CloudSessionManager.getInstance().getSession(sessionKey)) != null){
-			doDeAuth(session.getCredentials(), session.getSessionConfig().get(SessionConfKeys.buildNumber), sessionKey);
+			doDeAuth(session.getCredentials(), session.getSessionConfig().get(CloudConfStoreKeys.buildNumber), sessionKey);
 		}
 	}
 }

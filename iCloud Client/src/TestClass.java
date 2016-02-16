@@ -33,12 +33,11 @@ public class TestClass implements RequestEventHandler, NoteEventHandler {
 	}
 
 	private void start(String[] args) {
-		Credentials authKeys = new Credentials(args[0], args[1], false);
+		Credentials authKeys = new Credentials(args[0], args[1], false, Credentials.AuthenticationTypes.PASSWORD);
 		System.out.println("Logging In...");
-		UUID sessionKey = CloudAuthenticator.authenticate(authKeys);
+		UUID sessionKey = CloudSessionManager.getInstance().createSession(authKeys);
+		CloudSessionManager.getInstance().authenticateSession(sessionKey);
 		System.out.println("Logged In");
-		// Assume the user is already authenticated and we
-		// have the sessionKey
 		
 		System.out.println("Generating Requests...");
 		requestList.addAll(generateNoteRequests());
@@ -53,7 +52,7 @@ public class TestClass implements RequestEventHandler, NoteEventHandler {
 		}
 		
 		System.out.println("Logging Out...");
-		CloudAuthenticator.deAuthenticate(sessionKey);
+		CloudSessionManager.getInstance().deAuthenticateSession(sessionKey);
 		System.out.println("Logged Out");
 	}
 

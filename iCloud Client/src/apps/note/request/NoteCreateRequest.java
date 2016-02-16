@@ -3,7 +3,7 @@ package apps.note.request;
 import java.util.HashMap;
 import java.util.UUID;
 
-import icloud.SessionConfKeys;
+import icloud.CloudConfStoreKeys;
 import icloud.SessionData;
 import icloud.event.CloudEvent;
 import icloud.json.JsonBody;
@@ -39,7 +39,7 @@ public class NoteCreateRequest extends NoteRequest {
 	}
 
 	@Override
-	protected void setQueryStrings(HashMap<SessionConfKeys, String> hashMap, UUID uuid) {
+	protected void setQueryStrings(HashMap<CloudConfStoreKeys, String> hashMap, UUID uuid) {
 
 	}
 }

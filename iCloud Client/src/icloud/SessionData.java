@@ -8,7 +8,7 @@ public abstract class SessionData {
 
 	protected boolean isPost = false;
 	
-	protected SessionData(HashMap<SessionConfKeys, String> sessionConfig, Credentials authTokens, UUID sessionKey) {
+	protected SessionData(HashMap<CloudConfStoreKeys, String> sessionConfig, Credentials authTokens, UUID sessionKey) {
 		startup();
 	}
 	
@@ -16,5 +16,5 @@ public abstract class SessionData {
 		return isPost;
 	}
 	
-	protected abstract Map<SessionConfKeys, String> startup();
+	protected abstract Map<CloudConfStoreKeys, String> startup();
 }

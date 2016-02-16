@@ -29,7 +29,7 @@ public abstract class Request implements Jsonable, EventHandler {
 			// Doesn't changing my own vars do the exact same thing as editing senders?
 			// My reasoning is that they are the same reference because sender is an instance of "me" (Request)
 			try {
-				sender.requestURL = new URL(session.getSessionConfig().get(SessionConfKeys.noteApp_baseURL).toString() + sender.requestPath);
+				sender.requestURL = new URL(session.getSessionConfig().get(CloudConfStoreKeys.noteApp_baseURL).toString() + sender.requestPath);
 			} catch (MalformedURLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -61,7 +61,7 @@ public abstract class Request implements Jsonable, EventHandler {
 		return isPost;
 	}
 
-	protected abstract void setQueryStrings(HashMap<SessionConfKeys, String> hashMap, UUID uuid);
+	protected abstract void setQueryStrings(HashMap<CloudConfStoreKeys, String> hashMap, UUID uuid);
 	
 	public Map<String, String> getQueryStrings() {
 		return queryStrings;
